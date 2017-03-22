@@ -1,6 +1,6 @@
-{
+﻿{
   "name": "artful/polymer",
-  "description": "Polymer是一个灵活并且可偶组合的PHP框架,基于slim3+doctrine+twig",
+  "description": "Polymer是一个灵活并且可自由组合的PHP框架,基于slim3+doctrine+twig",
   "license": "proprietary",
   "prefer-stable": true,
   "require": {
