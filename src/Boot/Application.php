@@ -138,11 +138,13 @@ final class Application
             $entityFolder = (null !== $entityFolder) ? $entityFolder : $entityFolder = ROOT_PATH . '/entity/Models';
             $configuration = Setup::createAnnotationMetadataConfiguration([
                 $entityFolder,
-            ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', $cache, $dbConfig[$dbName]['useSimpleAnnotationReader']);
+            ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', $cache,
+                $dbConfig[$dbName]['useSimpleAnnotationReader']);
             DoctrineExtConfigLoader::loadFunctionNode($configuration, DoctrineExtConfigLoader::MYSQL);
             DoctrineExtConfigLoader::load();
             try {
-                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->component('eventManager'));
+                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
+                    $this->component('eventManager'));
                 $this->container['database_name'] = $dbName;
                 $this->container['entityManager-' . $dbName] = $entityManager;
             } catch (\InvalidArgumentException $e) {
@@ -162,7 +164,7 @@ final class Application
      */
     public function config($key, $default = null)
     {
-        $configPaths = [ROOT_PATH . '/framework/Config'];
+        $configPaths = [dirname(__DIR__) . '/Config'];
         if (file_exists(ROOT_PATH . '/config') && is_dir(ROOT_PATH . '/config')) {
             $configPaths[] = ROOT_PATH . '/config';
         }
@@ -242,12 +244,14 @@ final class Application
                     throw new \InvalidArgumentException('db_name必须设置');
                 }
                 try {
-                    $listener === 1 ? $this->db($value['db_name'])->getEventManager()->$method($key, new $class_name($data)) : $this->db($value['db_name'])->getEventManager()->$method(new $class_name($data));
+                    $listener === 1 ? $this->db($value['db_name'])->getEventManager()->$method($key,
+                        new $class_name($data)) : $this->db($value['db_name'])->getEventManager()->$method(new $class_name($data));
                 } catch (ORMException $e) {
                     throw $e;
                 }
             } else {
-                $listener === 1 ? $this->component('eventManager')->{$method}($key, new $class_name($data)) : $this->component('eventManager')->{$method}(new $class_name($data));
+                $listener === 1 ? $this->component('eventManager')->{$method}($key,
+                    new $class_name($data)) : $this->component('eventManager')->{$method}(new $class_name($data));
             }
         }
         return $this->component('eventManager');
@@ -267,8 +271,10 @@ final class Application
             $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $componentName)))));
             if (class_exists(PROVIDERS_NAMESPACE . '\\Providers\\' . $className . 'Provider')) {
                 $className = PROVIDERS_NAMESPACE . '\\Providers\\' . $className . 'Provider';
-            } else if (class_exists('Polymer\\Providers\\' . $className . 'Provider')) {
-                $className = 'Polymer\\Providers\\' . $className . 'Provider';
+            } else {
+                if (class_exists('Polymer\\Providers\\' . $className . 'Provider')) {
+                    $className = 'Polymer\\Providers\\' . $className . 'Provider';
+                }
             }
             if (class_exists($className)) {
                 $this->container->register(new $className(), $param);
@@ -361,8 +367,13 @@ final class Application
      * @param mixed $repositoryNamespace Repository的命名空间
      * @return \Doctrine\ORM\EntityRepository | null
      */
-    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
-    {
+    public function repository(
+        $entityName,
+        $dbName = '',
+        $entityFolder = null,
+        $entityNamespace = null,
+        $repositoryNamespace = null
+    ) {
         $repositoryNamespace = (null !== $repositoryNamespace) ? $repositoryNamespace : $repositoryNamespace = 'Entity\\Repositories';
         $entityNamespace = (null !== $entityNamespace) ? $entityNamespace : $entityNamespace = 'Entity\\Models';
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $entityName)))));

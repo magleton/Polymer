@@ -112,10 +112,10 @@ if (PHP_MAJOR_VERSION === 5 && !function_exists('handleException')) {
     /**
      * 自定义的异常处理函数
      * @author <macro_fengye@163.com> macro chen
-     * @param ParseError $e
-     * @throws ParseError
+     * @param Exception $e
+     * @throws Exception
      */
-    function handleException(ParseError $e)
+    function handleException(Exception $e)
     {
         throw $e;
     }

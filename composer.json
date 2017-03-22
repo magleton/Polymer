@@ -50,5 +50,11 @@
     "files": [
       "src\\Lib\\functions_include.php"
     ]
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.phpcomposer.com"
+    }
   }
 }

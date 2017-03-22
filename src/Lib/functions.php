@@ -1,5 +1,5 @@
 <?php
-use \Polymer\Boot\Application;
+use \Polymer\Lib;
 
 if (!function_exists('convert')) {
     /**
@@ -45,20 +45,31 @@ if (!function_exists('getIP')) {
      */
     function getIP()
     {
-        if (isset($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP'])
+        if (isset($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP']) {
             $IP = $_SERVER['HTTP_CLIENT_IP'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'])
-            $IP = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_X_FORWARDED']) && $_SERVER['HTTP_X_FORWARDED'])
-            $IP = $_SERVER['HTTP_X_FORWARDED'];
-        else if (isset($_SERVER['HTTP_FORWARDED_FOR']) && $_SERVER['HTTP_FORWARDED_FOR'])
-            $IP = $_SERVER['HTTP_FORWARDED_FOR'];
-        else if (isset($_SERVER['HTTP_FORWARDED']) && $_SERVER['HTTP_FORWARDED'])
-            $IP = $_SERVER['HTTP_FORWARDED'];
-        else if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'])
-            $IP = $_SERVER['REMOTE_ADDR'];
-        else
-            $IP = '0.0.0.0';
+        } else {
+            if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR']) {
+                $IP = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            } else {
+                if (isset($_SERVER['HTTP_X_FORWARDED']) && $_SERVER['HTTP_X_FORWARDED']) {
+                    $IP = $_SERVER['HTTP_X_FORWARDED'];
+                } else {
+                    if (isset($_SERVER['HTTP_FORWARDED_FOR']) && $_SERVER['HTTP_FORWARDED_FOR']) {
+                        $IP = $_SERVER['HTTP_FORWARDED_FOR'];
+                    } else {
+                        if (isset($_SERVER['HTTP_FORWARDED']) && $_SERVER['HTTP_FORWARDED']) {
+                            $IP = $_SERVER['HTTP_FORWARDED'];
+                        } else {
+                            if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR']) {
+                                $IP = $_SERVER['REMOTE_ADDR'];
+                            } else {
+                                $IP = '0.0.0.0';
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return $IP;
     }
 }
