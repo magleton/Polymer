@@ -37,12 +37,6 @@
     "mysql-workbench-schema-exporter/mysql-workbench-schema-exporter": "^3.0.0",
     "mysql-workbench-schema-exporter/doctrine2-exporter": "^3.0.0"
   },
-  "bin": [
-    "composer/bin/dbunit"
-  ],
-  "config": {
-    "bin-dir": "bin"
-  },
   "autoload": {
     "psr-4": {
       "Polymer\\": "src\\"
