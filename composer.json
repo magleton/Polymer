@@ -1,0 +1,54 @@
+{
+  "name": "artful/polymer",
+  "description": "Polymer是一个PHP框架,基于slim3+doctrine+twig",
+  "license": "proprietary",
+  "prefer-stable": true,
+  "require": {
+    "php": ">=5.6.0",
+    "slim/slim": "3.*",
+    "doctrine/orm": "~2.5",
+    "doctrine/migrations": "~1.5",
+    "monolog/monolog": "~1.18",
+    "hassankhan/config": "~0.10",
+    "symfony/validator": "~3.0",
+    "slim/flash": "~0.2",
+    "slim/csrf": "~0.8",
+    "guzzlehttp/guzzle": "~6.2",
+    "slim/twig-view": "~2.2",
+    "beberlei/DoctrineExtensions": "~1.0",
+    "gedmo/doctrine-extensions": "~2.4",
+    "tuupola/cors-middleware": "~0.5",
+    "tuupola/slim-jwt-auth": "~2.3",
+    "vlucas/phpdotenv": "~2.4",
+    "nesbot/carbon": "~1.22",
+    "peppeocchi/php-cron-scheduler": "~1.4",
+    "runcmf/runtracy": "~0.2",
+    "symfony/serializer": "3.2.4",
+    "mikey179/vfsStream": "~1.6",
+    "mockery/mockery": "~0.9",
+    "ext-pdo": "*",
+    "ext-simplexml": "*",
+    "ext-exif": "*"
+  },
+  "require-dev": {
+    "satooshi/php-coveralls": "~1.0",
+    "phpunit/phpunit": "~5.7",
+    "facebook/webdriver": "~1.0",
+    "mysql-workbench-schema-exporter/mysql-workbench-schema-exporter": "^3.0.0",
+    "mysql-workbench-schema-exporter/doctrine2-exporter": "^3.0.0"
+  },
+  "bin": [
+    "composer/bin/dbunit"
+  ],
+  "config": {
+    "bin-dir": "bin"
+  },
+  "autoload": {
+    "psr-4": {
+      "Polymer\\": "src\\"
+    },
+    "files": [
+      "src\\Lib\\functions_include.php"
+    ]
+  }
+}
