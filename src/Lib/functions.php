@@ -1,6 +1,4 @@
 <?php
-use \Polymer\Lib;
-
 if (!function_exists('convert')) {
     /**
      * 字节转换
