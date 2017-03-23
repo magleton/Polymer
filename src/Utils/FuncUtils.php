@@ -1,7 +1,6 @@
 <?php
 namespace Polymer\Utils;
 
-
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class FuncUtils

@@ -6,12 +6,11 @@ use Doctrine\Common\EventManager;
 
 class CoreUtils
 {
-    const ENTITY = "entityManager";
+    const ENTITY = 'entityManager';
 
-    const REDIS = "redis";
-    const MEMCACHE = "memcache";
+    const REDIS = 'redis';
+    const MEMCACHE = 'memcache';
     const MEMCACHED = 'memcached';
-
 
     /**
      * 根据不同的数据库链接类型，实例化不同的数据库链接对象

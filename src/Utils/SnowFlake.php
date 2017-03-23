@@ -1,13 +1,11 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
+ * User: macro chen <chen_macro@163.com>
  * Date: 2016/10/16
  * Time: 18:40
  */
 
 namespace Polymer\Utils;
-
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Id\AbstractIdGenerator;

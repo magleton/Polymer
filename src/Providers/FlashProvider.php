@@ -1,7 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: macro
+ * User: macro chen <chen_macro@163.com>
  * Date: 16-8-26
  * Time: 上午9:24
  */
@@ -25,7 +24,13 @@ class FlashP implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['flash'] = function (Container $container) {
-            return new Messages();
+            try {
+                return new Messages();
+            } catch (\InvalidArgumentException $e) {
+                return null;
+            } catch (\RuntimeException $e) {
+                return null;
+            }
         };
     }
 }

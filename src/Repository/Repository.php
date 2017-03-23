@@ -1,10 +1,9 @@
 <?php
 /**
- * User: macro chen <macro_fengye@163.com>
+ * User: macro chen <chen_macro@163.com>
  * Date: 16-12-12
  * Time: 上午8:55
  */
-
 namespace Polymer\Repository;
 
 use Doctrine\ORM\EntityManager;
@@ -49,15 +48,15 @@ class Repository extends EntityRepository
      *
      * @param array $data 需要验证的数据
      * @param array $rules 验证数据的规则
+     * @param string $key 存储错误信息的键
      * @throws Exception
      * @return $this
      */
-    public function validate(array $data = [], array $rules = [])
+    public function validate(array $data = [], array $rules = [], $key = 'error')
     {
-        $validator = app()->component('validator')->setProperty('validateRules', $rules);
-        $validator->validate(Constants::MODEL_FIELD, $data);
-        if (app()->component('error_collection')->get('error')) {
-            throw new EntityValidateErrorException('实体验证错误!');
+        $validateRet = app()->component('biz_validator')->verifyField($data, $rules, $key);
+        if (!$validateRet) {
+            throw new EntityValidateErrorException('数据验证错误!');
         }
         return $this;
     }

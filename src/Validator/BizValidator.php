@@ -4,12 +4,10 @@
  * Date: 17-3-7
  * Time: 上午9:57
  */
-
 namespace Polymer\Validator;
 
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 use Polymer\Boot\Application;
-use Polymer\Utils\Constants;
 use Symfony\Component\Validator\Exception\NoSuchMetadataException;
 
 class BizValidator

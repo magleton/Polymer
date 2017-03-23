@@ -4,9 +4,7 @@
  * Date: 2016/11/4
  * Time: 19:36
  */
-
 namespace Polymer\Session;
-
 
 class EncryptedSessionHandler extends \SessionHandler
 {
@@ -39,16 +37,15 @@ class EncryptedSessionHandler extends \SessionHandler
     /**
      * decrypt AES 256
      *
-     * @param data $edata
+     * @param string $data
      * @param string $password
-     * @return decrypted data
+     * @return string
      */
-    private function decrypt($edata, $password)
+    private function decrypt($data, $password)
     {
-        $data = base64_decode($edata);
+        $data = base64_decode($data);
         $salt = substr($data, 0, 16);
         $ct = substr($data, 16);
-
         $rounds = 3; // depends on key length
         $data00 = $password . $salt;
         $hash = array();
@@ -60,7 +57,6 @@ class EncryptedSessionHandler extends \SessionHandler
         }
         $key = substr($result, 0, 32);
         $iv = substr($result, 32, 16);
-
         return openssl_decrypt($ct, 'AES-256-CBC', $key, true, $iv);
     }
 

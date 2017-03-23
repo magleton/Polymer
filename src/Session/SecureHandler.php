@@ -1,5 +1,4 @@
 <?php
-
 /**
  * User: <macro_fengye@163.com> Macro Chen
  * Date: 2016/11/4
@@ -19,18 +18,19 @@ class SecureHandler extends \SessionHandler
 
     /**
      * Constructor
+     * @throws \Exception
      */
     public function __construct()
     {
         if (!extension_loaded('openssl')) {
             throw new \RuntimeException(sprintf(
-                "You need the OpenSSL extension to use %s",
+                'You need the OpenSSL extension to use %s',
                 __CLASS__
             ));
         }
         if (!extension_loaded('mbstring')) {
             throw new \RuntimeException(sprintf(
-                "You need the Multibytes extension to use %s",
+                'You need the Multibytes extension to use %s',
                 __CLASS__
             ));
         }

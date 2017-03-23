@@ -1,11 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: macro
+ * User: macro chen <chen_macro@163.com>
  * Date: 17-1-4
  * Time: 上午10:46
  */
-
 namespace Polymer\Utils;
 
 use Doctrine\Common\Annotations\AnnotationReader;

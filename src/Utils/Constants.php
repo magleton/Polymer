@@ -1,11 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: macro
+ * User: macro chen <chen_macro@163.com>
  * Date: 16-10-19
  * Time: 上午10:10
  */
-
 namespace Polymer\Utils;
 
 

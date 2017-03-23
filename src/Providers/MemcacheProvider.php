@@ -1,11 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
+ * User: macro chen <chen_macro@163.com>
  * Date: 2016/9/1
  * Time: 19:45
  */
-
 namespace Polymer\Providers;
 
 use Pimple\Container;

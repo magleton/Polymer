@@ -1,7 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: macro
+ * User: macro chen <chen_macro@163.com>
  * Date: 16-8-26
  * Time: 上午9:24
  */

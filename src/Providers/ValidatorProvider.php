@@ -4,7 +4,6 @@
  * Date: 17-3-21
  * Time: 下午1:25
  */
-
 namespace Polymer\Providers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
@@ -26,9 +25,6 @@ class ValidatorProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['validator'] = function (Container $container) {
-            //AnnotationRegistry::registerFile(ROOT_PATH . "/vendor/doctrine/orm/lib/Doctrine/ORM/Mapping/Driver/DoctrineAnnotations.php");
-            //AnnotationRegistry::registerAutoloadNamespace("Symfony\Component\Validator\Constraint", ROOT_PATH."/entity/Models");
-            //AnnotationRegistry::registerAutoloadNamespace("Entity\\Models\\", ROOT_PATH . "/entity/Models");
             try {
                 AnnotationRegistry::registerLoader('class_exists');
                 $reader = new AnnotationReader();

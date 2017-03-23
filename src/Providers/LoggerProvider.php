@@ -1,7 +1,6 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: macro
+ * User: macro chen <chen_macro@163.com>
  * Date: 16-8-26
  * Time: 上午9:24
  */
@@ -26,11 +25,15 @@ class LoggerProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['logger'] = function (Container $container) {
-            $settings = $container['application']->config('slim.settings');
-            $logger = new Logger($settings['logger']['name']);
-            $logger->pushProcessor(new UidProcessor());
-            $logger->pushHandler(new StreamHandler($settings['logger']['path'], $settings['logger']['level']));
-            return $logger;
+            try {
+                $settings = $container['application']->config('slim.settings');
+                $logger = new Logger($settings['logger']['name']);
+                $logger->pushProcessor(new UidProcessor());
+                $logger->pushHandler(new StreamHandler($settings['logger']['path'], $settings['logger']['level']));
+                return $logger;
+            } catch (\Exception $e) {
+                return null;
+            }
         };
     }
 }

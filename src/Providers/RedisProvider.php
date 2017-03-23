@@ -1,11 +1,9 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: Administrator
+ * User: macro chen <chen_macro@163.com>
  * Date: 2016/9/1
  * Time: 19:40
  */
-
 namespace Polymer\Providers;
 
 use Pimple\Container;
@@ -28,7 +26,9 @@ class RedisProvider implements ServiceProviderInterface
             $server_name = $container->has('server_name') ? $container->get('server_name') : 'server1';
             $type = 'redis';
             $redis = new \Redis();
-            $redis->connect($cacheConfig[$type][$server_name]['server']['host'], $cacheConfig[$type][$server_name]['server']['port'], $cacheConfig[$type][$server_name]['server']['timeout']);
+            $redis->connect($cacheConfig[$type][$server_name]['server']['host'],
+                $cacheConfig[$type][$server_name]['server']['port'],
+                $cacheConfig[$type][$server_name]['server']['timeout']);
             return $redis;
         };
     }
