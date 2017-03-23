@@ -1,5 +1,5 @@
 <?php
-use Polymer\Lib;
+use Polymer\Boot\Application;
 
 if (!function_exists('app')) {
     /**
