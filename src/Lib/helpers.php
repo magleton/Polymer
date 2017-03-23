@@ -141,37 +141,3 @@ if (!function_exists('debugger')) {
         \Tracy\Debugger::enable($level ? \Tracy\Debugger::PRODUCTION : \Tracy\Debugger::DEVELOPMENT, $logPath);
     }
 }
-
-if (!function_exists('weChatConfig')) {
-    /**
-     * 获取微信的配置信息
-     *
-     * @return array
-     */
-    function weChatConfig()
-    {
-        $request = app()->component('request');
-        if (PHP_SAPI === 'cli') {
-            $appId = $request->getServerParam('argc') >= 2 ? $request->getServerParam('argv')[1] : 0;
-        } else {
-            $appId = $request->getParam('app_id') ?: 0;
-        }
-        $weChatConfig = [];
-        $wxApp = app()->repository('app', 'db1')->find($appId);
-        if (null !== $wxApp) {
-            $weChatConfig = [
-                'debug' => $wxApp->getDebug(),
-                'app_id' => $wxApp->getWxAppId(),
-                'secret' => $wxApp->getWxAppKey(),
-                'token' => $wxApp->getToken(),
-                'oauth' => [
-                    'scopes' => [$wxApp->getScopes()],
-                    'callback' => $wxApp->getCallbackUrl(),
-                ],
-                'aes_key' => $wxApp->getAesKey(),
-                'name' => $wxApp->getWxUserName()
-            ];
-        }
-        return $weChatConfig;
-    }
-}
