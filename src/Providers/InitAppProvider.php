@@ -11,6 +11,8 @@ use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Slim\App;
 use Slim\Http\Body;
+use Slim\Http\Request;
+use Slim\Http\Response;
 
 class InitAppProvider implements ServiceProviderInterface
 {
@@ -24,8 +26,8 @@ class InitAppProvider implements ServiceProviderInterface
      */
     public function register(Container $pimple)
     {
-        $pimple['notAllowedHandler'] = function ($container) {
-            return function ($request, $response, $methods) use ($container) {
+        $pimple['notAllowedHandler'] = function (Container $container) {
+            return function (Request $request, Response $response, $methods) use ($container) {
                 return $container['response']
                     ->withStatus(405)
                     ->withHeader('Allow', implode(', ', $methods))
@@ -33,8 +35,8 @@ class InitAppProvider implements ServiceProviderInterface
                     ->write('Method must be one of: ' . implode(', ', $methods));
             };
         };
-        $pimple['notFoundHandler'] = function ($container) {
-            return function ($request, $response) use ($container) {
+        $pimple['notFoundHandler'] = function (Container $container) {
+            return function (Request $request, Response $response) use ($container) {
                 if ($container['application']->config('customer.is_rest')) {
                     return $container['response']
                         ->withStatus(404)
@@ -55,11 +57,11 @@ class InitAppProvider implements ServiceProviderInterface
                 }
             };
         };
-        $pimple['phpErrorHandler'] = function ($container) {
+        $pimple['phpErrorHandler'] = function (Container $container) {
             return $container['errorHandler'];
         };
-        $pimple['errorHandler'] = function ($container) {
-            return function ($request, $response, $exception) use ($container) {
+        $pimple['errorHandler'] = function (Container $container) {
+            return function (Request $request, Response $response, $exception) use ($container) {
                 $container->register(new LoggerProvider());
                 $container['logger']->error($exception->__toString());
                 if ($container['application']->config('customer.is_rest')) {
@@ -91,7 +93,6 @@ class InitAppProvider implements ServiceProviderInterface
                     ->withHeader('Content-Type', 'text/html')->write($e->getMessage());
             }
         };
-
         $pimple['twig_profile'] = function (Container $container) {
             return new \Twig_Profiler_Profile();
         };
