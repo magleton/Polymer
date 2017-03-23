@@ -262,19 +262,20 @@ final class Application
      *
      * @param $componentName
      * @param array $param
+     * @param null $componentNamespace
      * @return mixed|null
      */
-    public function component($componentName, array $param = [])
+    public function component($componentName, array $param = [], $componentNamespace = null)
     {
         if (!$this->container->has($componentName)) {
             !defined('PROVIDERS_NAMESPACE') && define('PROVIDERS_NAMESPACE', APP_NAME);
             $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $componentName)))));
-            if (class_exists(PROVIDERS_NAMESPACE . '\\Providers\\' . $className . 'Provider')) {
+            if (class_exists('Polymer\\Providers\\' . $className . 'Provider')) {
+                $className = 'Polymer\\Providers\\' . $className . 'Provider';
+            } elseif ($componentNamespace && class_exists($componentNamespace . '\\' . $className . 'Provider')) {
+                $className = $componentNamespace . '\\' . $className . 'Provider';
+            } elseif (class_exists(PROVIDERS_NAMESPACE . '\\Providers\\' . $className . 'Provider')) {
                 $className = PROVIDERS_NAMESPACE . '\\Providers\\' . $className . 'Provider';
-            } else {
-                if (class_exists('Polymer\\Providers\\' . $className . 'Provider')) {
-                    $className = 'Polymer\\Providers\\' . $className . 'Provider';
-                }
             }
             if (class_exists($className)) {
                 $this->container->register(new $className(), $param);
@@ -373,7 +374,8 @@ final class Application
         $entityFolder = null,
         $entityNamespace = null,
         $repositoryNamespace = null
-    ) {
+    )
+    {
         $repositoryNamespace = (null !== $repositoryNamespace) ? $repositoryNamespace : $repositoryNamespace = 'Entity\\Repositories';
         $entityNamespace = (null !== $entityNamespace) ? $entityNamespace : $entityNamespace = 'Entity\\Models';
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $entityName)))));
