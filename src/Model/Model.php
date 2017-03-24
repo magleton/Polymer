@@ -4,11 +4,11 @@
  * Date: 2016/10/26
  * Time: 19:42
  */
-
 namespace Polymer\Model;
 
 use Doctrine\DBAL\Sharding\PoolingShardManager;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityNotFoundException;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\ModelInstanceErrorException;
@@ -74,28 +74,52 @@ class Model
      * 生成数据库表的实体对象
      *
      * @param array $data 自定义数据
-     * @param string $table 名表
-     * @param string $entityFolder 实体文件夹的路径
-     * @return $this
+     * @param array $criteria 获取对象的条件(用于更新数据)
+     * @param bool $returnEObj 是否返回实体对象
+     * @return Object|$this
      * @throws \Exception
      */
-    protected function make(array $data = [], $table = '', $entityFolder = '')
+    protected function make(array $data = [], array $criteria = [], $returnEObj = false)
     {
         try {
             $this->data = $data;
-            $tableName = $table ?: $this->getProperty('table');
-            $entityFolder = $entityFolder ?: $this->getProperty('entityFolder');
-            $this->entityObject = $this->entityObject ?: $this->app->entity($tableName, $entityFolder);
+            $this->entityObject = $this->obtainEObj($criteria);
             foreach ($this->mergeParams($data) as $k => $v) {
                 $setMethod = 'set' . ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $k)))));
                 if (method_exists($this->entityObject, $setMethod)) {
                     $this->entityObject->$setMethod($v);
                 }
             }
-            return $this;
+            return $returnEObj ? $this->entityObject : $this;
         } catch (\Exception $e) {
             throw $e;
         }
+    }
+
+    /**
+     * 获取实体对象
+     *
+     * @throws EntityNotFoundException
+     * @param array $criteria
+     * @return Object
+     */
+    private function obtainEObj(array $criteria = [])
+    {
+        $entityName = $this->getProperty('table');
+        $entityFolder = $this->getProperty('entityFolder');
+        $dbName = $this->getProperty('schema');
+        $entityNamespace = $this->getProperty('entityNamespace');
+        $repositoryNamespace = $this->getProperty('repositoryNamespace');
+        if ($criteria) {
+            $repository = $this->app->repository($entityName, $dbName, $entityFolder, $entityNamespace, $repositoryNamespace);
+            $entityObject = $repository->findOneBy($criteria);
+        } else {
+            $entityObject = $this->app->entity($entityName, $entityNamespace);
+        }
+        if (!$entityObject) {
+            throw new EntityNotFoundException('没有可用实体对象!');
+        }
+        return $entityObject;
     }
 
     /**
