@@ -95,9 +95,7 @@ $common_config = [
         // 'secure' => true,
         'httponly' => true,
         'name' => 'macro_php',
-        'secret' => '',
-        'cipher' => MCRYPT_RIJNDAEL_256,
-        'cipher_mode' => MCRYPT_MODE_CBC,
+        'secret' => ''
     ],
 
     // Session配置
