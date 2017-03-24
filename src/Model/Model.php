@@ -46,11 +46,11 @@ class Model
     protected $em = null;
 
     /**
-     * 自定义数据
+     * 合并的参数数组(包括自定义数据，请求数据)
      *
      * @var array
      */
-    protected $data = [];
+    protected $mergerData = [];
 
     /**
      * 模型构造函数
@@ -82,9 +82,9 @@ class Model
     protected function make(array $data = [], array $criteria = [], $returnEObj = false)
     {
         try {
-            $this->data = $data;
+            $this->mergerData = $this->mergeParams($data);
             $this->entityObject = $this->obtainEObj($criteria);
-            foreach ($this->mergeParams($data) as $k => $v) {
+            foreach ($this->mergerData as $k => $v) {
                 $setMethod = 'set' . ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $k)))));
                 if (method_exists($this->entityObject, $setMethod)) {
                     $this->entityObject->$setMethod($v);
@@ -135,7 +135,7 @@ class Model
         $method = [Constants::MODEL_FIELD => 'verifyField', Constants::MODEL_OBJECT => 'verifyObject'];
         try {
             $validator = $this->app->component('biz_validator');
-            $validateData = $type === Constants::MODEL_OBJECT ? $this->entityObject : $this->mergeParams($this->data);
+            $validateData = $type === Constants::MODEL_OBJECT ? $this->entityObject : $this->mergerData;
             $ret = $validator->$method[$type]($validateData, $rules);
             if (!$ret) {
                 throw new EntityValidateErrorException('数据验证失败!');
