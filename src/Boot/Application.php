@@ -61,7 +61,7 @@ final class Application
             echo \GuzzleHttp\json_encode(['code' => 1000, 'msg' => $e->getMessage(), 'data' => []]);
             return false;
         }
-        if ($this->config('customer.show_use_memory')) {
+        if ($this->config('app.show_use_memory')) {
             echo '分配内存量 : ' . convert(memory_get_usage(true));
             echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
             echo '内存的峰值 : ' . convert(memory_get_peak_usage(true));
@@ -83,7 +83,7 @@ final class Application
             echo \GuzzleHttp\json_encode(['code' => 1000, 'msg' => $e->getMessage(), 'data' => []]);
             return false;
         }
-        if ($this->config('customer.show_use_memory')) {
+        if ($this->config('app.show_use_memory')) {
             echo '分配内存量 : ' . convert(memory_get_usage(true));
             echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
             echo '内存的峰值 : ' . convert(memory_get_peak_usage(true));
@@ -120,7 +120,7 @@ final class Application
      *
      * @param string $dbName
      * @param mixed $entityFolder 实体文件夹的名字
-     * @throws \Doctrine\ORM\ORMException | \InvalidArgumentException
+     * @throws \Doctrine\ORM\ORMException | \InvalidArgumentException | \Exception
      * @return EntityManager
      */
     public function db($dbName = '', $entityFolder = null)
@@ -128,17 +128,10 @@ final class Application
         $dbConfig = $this->config('db.' . APPLICATION_ENV);
         $dbName = $dbName ?: current(array_keys($dbConfig));
         if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->component('entityManager-' . $dbName)) {
-            if (APPLICATION_ENV === 'development') {
-                $cache = new ArrayCache();
-            } else {
-                $cacheName = $this->config('doctrine.metadata_cache.cache_name');
-                $database = $this->config('doctrine.metadata_cache.database');
-                $cache = $this->component($cacheName, ['database' => $database]);
-            }
             $entityFolder = (null !== $entityFolder) ? $entityFolder : $entityFolder = ROOT_PATH . '/entity/Models';
             $configuration = Setup::createAnnotationMetadataConfiguration([
                 $entityFolder,
-            ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', $cache,
+            ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', null,
                 $dbConfig[$dbName]['useSimpleAnnotationReader']);
             DoctrineExtConfigLoader::loadFunctionNode($configuration, DoctrineExtConfigLoader::MYSQL);
             DoctrineExtConfigLoader::load();
@@ -374,8 +367,7 @@ final class Application
         $entityFolder = null,
         $entityNamespace = null,
         $repositoryNamespace = null
-    )
-    {
+    ) {
         $repositoryNamespace = (null !== $repositoryNamespace) ? $repositoryNamespace : $repositoryNamespace = 'Entity\\Repositories';
         $entityNamespace = (null !== $entityNamespace) ? $entityNamespace : $entityNamespace = 'Entity\\Models';
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $entityName)))));
