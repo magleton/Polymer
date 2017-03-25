@@ -30,16 +30,9 @@ class JwtProvider implements ServiceProviderInterface
                 'header' => 'token',
                 'regexp' => '/(.*)/',
                 'secure' => false,
-                'secret' => app()->component('application')->component('session') ? app()->component('application')->component('session')->get('secret') : '62f47d0439a14f8bddb465dff4317fdb',
-                'path' => ['/user', '/loan', '/merchant'],
-                'passthrough' => [
-                    '/user/generateCaptcha',
-                    '/user/sendSMS',
-                    '/user/login',
-                    '/user/register',
-                    '/user/retrievePassword',
-                    '/user/logout'
-                ],
+                'secret' => '62f47d0439a14f8bddb465dff4317fdb',
+                'path' => $container['application']->config('app.jwt_path'),
+                'passthrough' => $container['application']->config('app.passthrough'),
                 'error' => function (Request $request, Response $response, $arguments) {
                     $data['status'] = 'error';
                     $data['message'] = var_export($arguments, true);

@@ -1,13 +1,11 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: macro
+ * User: macro chen <chen_macro@163.com>
  * Date: 16-8-26
  * Time: 下午4:03
  */
 
 namespace Polymer\Providers;
-
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -25,6 +23,6 @@ class JwtDataProvider implements ServiceProviderInterface
      */
     public function register(Container $pimple)
     {
-        return new StdClass;
+        return new \stdClass();
     }
 }

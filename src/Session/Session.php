@@ -6,7 +6,6 @@
  */
 namespace Polymer\Session;
 
-
 final class Session
 {
     /**
@@ -15,7 +14,7 @@ final class Session
      * @var array
      */
     protected $options = [
-        'name' => 'macro_chen',
+        'name' => 'polymer',
         'lifetime' => 7200,
         'path' => null,
         'domain' => null,
@@ -29,7 +28,7 @@ final class Session
      *
      * @param array $options
      */
-    public function __construct($options = [])
+    public function __construct(array $options = [])
     {
         $keys = array_keys($this->options);
         foreach ($keys as $key) {
@@ -44,7 +43,7 @@ final class Session
      */
     public function start()
     {
-        if (session_status() == PHP_SESSION_ACTIVE) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
             return;
         }
         $options = $this->options;
@@ -53,8 +52,8 @@ final class Session
         $path = $options['path'] ?: $current['path'];
         $domain = $options['domain'] ?: $current['domain'];
         $secure = (bool)$options['secure'];
-        $httponly = (bool)$options['httponly'];
-        session_set_cookie_params($lifetime, $path, $domain, $secure, $httponly);
+        $httpOnly = (bool)$options['httponly'];
+        session_set_cookie_params($lifetime, $path, $domain, $secure, $httpOnly);
         session_name($options['name']);
         session_cache_limiter($options['cache_limiter']);
         session_start();
@@ -65,7 +64,7 @@ final class Session
      */
     public function regenerate()
     {
-        if (session_status() == PHP_SESSION_ACTIVE) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
             session_regenerate_id(true);
         }
     }
@@ -76,19 +75,19 @@ final class Session
     public function destroy()
     {
         $_SESSION = [];
-        if (ini_get("session.use_cookies")) {
+        if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
             setcookie(
                 session_name(),
                 '',
                 time() - 42000,
-                $params["path"],
-                $params["domain"],
-                $params["secure"],
-                $params["httponly"]
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
             );
         }
-        if (session_status() == PHP_SESSION_ACTIVE) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
             session_destroy();
         }
     }
@@ -146,7 +145,7 @@ final class Session
      * @return mixed
      * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
      */
-    function __get($name)
+    public function __get($name)
     {
         return $this->get($name);
     }
@@ -159,7 +158,7 @@ final class Session
      * @return void
      * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
      */
-    function __set($name, $value)
+    public function __set($name, $value)
     {
         $this->set($name, $value);
     }
@@ -171,7 +170,7 @@ final class Session
      * @return bool
      * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
      */
-    function __isset($name)
+    public function __isset($name)
     {
         return array_key_exists($name, $_SESSION);
     }
@@ -183,7 +182,7 @@ final class Session
      * @return void
      * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
      */
-    function __unset($name)
+    public function __unset($name)
     {
         $this->delete($name);
     }

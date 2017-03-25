@@ -30,7 +30,7 @@ class SecureHandler extends \SessionHandler
         }
         if (!extension_loaded('mbstring')) {
             throw new \RuntimeException(sprintf(
-                'You need the Multibytes extension to use %s',
+                'You need the MultiBytes extension to use %s',
                 __CLASS__
             ));
         }
@@ -84,7 +84,7 @@ class SecureHandler extends \SessionHandler
     {
         $iv = random_bytes(16); // AES block size in CBC mode
         // Encryption
-        $ciphertext = openssl_encrypt(
+        $cipherText = openssl_encrypt(
             $data,
             'AES-256-CBC',
             mb_substr($key, 0, 32, '8bit'),
@@ -92,13 +92,13 @@ class SecureHandler extends \SessionHandler
             $iv
         );
         // Authentication
-        $hmac = hash_hmac(
+        $hMac = hash_hmac(
             'SHA256',
-            $iv . $ciphertext,
+            $iv . $cipherText,
             mb_substr($key, 32, null, '8bit'),
             true
         );
-        return $hmac . $iv . $ciphertext;
+        return $hMac . $iv . $cipherText;
     }
 
     /**
@@ -106,26 +106,27 @@ class SecureHandler extends \SessionHandler
      *
      * @param string $data
      * @param string $key
+     * @throws \Exception
      * @return string
      */
     protected function decrypt($data, $key)
     {
-        $hmac = mb_substr($data, 0, 32, '8bit');
+        $hMac = mb_substr($data, 0, 32, '8bit');
         $iv = mb_substr($data, 32, 16, '8bit');
-        $ciphertext = mb_substr($data, 48, null, '8bit');
+        $cipherText = mb_substr($data, 48, null, '8bit');
         // Authentication
-        $hmacNew = hash_hmac(
+        $hMacNew = hash_hmac(
             'SHA256',
-            $iv . $ciphertext,
+            $iv . $cipherText,
             mb_substr($key, 32, null, '8bit'),
             true
         );
-        if (!$this->hash_equals($hmac, $hmacNew)) {
+        if (!$this->hash_equals($hMac, $hMacNew)) {
             throw new \RuntimeException('Authentication failed');
         }
         // Decrypt
         return openssl_decrypt(
-            $ciphertext,
+            $cipherText,
             'AES-256-CBC',
             mb_substr($key, 0, 32, '8bit'),
             OPENSSL_RAW_DATA,

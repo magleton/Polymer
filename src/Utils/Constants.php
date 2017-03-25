@@ -6,7 +6,6 @@
  */
 namespace Polymer\Utils;
 
-
 class Constants
 {
     /**

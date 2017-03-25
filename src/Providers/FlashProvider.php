@@ -11,7 +11,7 @@ use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Slim\Flash\Messages;
 
-class FlashP implements ServiceProviderInterface
+class FlashProvider implements ServiceProviderInterface
 {
     /**
      * Registers services on the given container.

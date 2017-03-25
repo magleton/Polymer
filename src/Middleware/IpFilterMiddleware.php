@@ -35,9 +35,13 @@ class IpFilterMiddleware
         $this->patterns = $addresses;
         $this->mode = $mode;
         $this->handler = function (Request $request, Response $response) {
-            $response = $response->withStatus(401);
-            $response->getBody()->write('Access denied');
-            return $response;
+            try {
+                $response = $response->withStatus(401);
+                $response->getBody()->write('Access denied');
+                return $response;
+            } catch (\Exception $e) {
+                return null;
+            }
         };
     }
 

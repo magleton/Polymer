@@ -19,10 +19,9 @@ class Arr
      */
     public static function add($array, $key, $value)
     {
-        if (is_null(static::get($array, $key))) {
+        if (null === static::get($array, $key)) {
             static::set($array, $key, $value);
         }
-
         return $array;
     }
 
@@ -37,12 +36,10 @@ class Arr
     public static function build($array, Closure $callback)
     {
         $results = [];
-
         foreach ($array as $key => $value) {
-            list($innerKey, $innerValue) = call_user_func($callback, $key, $value);
+            list($innerKey, $innerValue) = $callback($key, $value);
             $results[$innerKey] = $innerValue;
         }
-
         return $results;
     }
 
@@ -72,7 +69,6 @@ class Arr
     public static function dot($array, $prepend = '')
     {
         $results = [];
-
         foreach ($array as $key => $value) {
             if (is_array($value)) {
                 $results = array_merge($results, static::dot($value, $prepend . $key . '.'));
@@ -80,7 +76,6 @@ class Arr
                 $results[$prepend . $key] = $value;
             }
         }
-
         return $results;
     }
 
@@ -108,7 +103,6 @@ class Arr
     public static function fetch($array, $key)
     {
         $results = [];
-
         foreach (explode('.', $key) as $segment) {
             $results = [];
             foreach ($array as $value) {
@@ -117,7 +111,6 @@ class Arr
             }
             $array = array_values($results);
         }
-
         return array_values($results);
     }
 
@@ -133,11 +126,10 @@ class Arr
     public static function first($array, $callback, $default = null)
     {
         foreach ($array as $key => $value) {
-            if (call_user_func($callback, $key, $value)) {
+            if ($callback($key, $value)) {
                 return $value;
             }
         }
-
         return $default;
     }
 
@@ -184,7 +176,6 @@ class Arr
     public static function forget(&$array, $keys)
     {
         $original = &$array;
-
         foreach ((array)$keys as $key) {
             $parts = explode('.', $key);
             while (count($parts) > 1) {
@@ -210,21 +201,18 @@ class Arr
      */
     public static function get($array, $key, $default = null)
     {
-        if (is_null($key)) {
+        if (null === $key) {
             return $array;
         }
-
         if (isset($array[$key])) {
             return $array[$key];
         }
-
         foreach (explode('.', $key) as $segment) {
             if (!is_array($array) || !array_key_exists($segment, $array)) {
                 return $default;
             }
             $array = $array[$segment];
         }
-
         return $array;
     }
 
@@ -253,20 +241,18 @@ class Arr
     public static function pluck($array, $value, $key = null)
     {
         $results = [];
-
         foreach ($array as $item) {
             $itemValue = is_object($item) ? $item->{$value} : $item[$value];
             // If the key is "null", we will just append the value to the array and keep
             // looping. Otherwise we will key the array using the value of the key we
             // received from the developer. Then we'll return the final array form.
-            if (is_null($key)) {
+            if (null === $key) {
                 $results[] = $itemValue;
             } else {
                 $itemKey = is_object($item) ? $item->{$key} : $item[$key];
                 $results[$itemKey] = $itemValue;
             }
         }
-
         return $results;
     }
 
@@ -283,7 +269,6 @@ class Arr
     {
         $value = static::get($array, $key, $default);
         static::forget($array, $key);
-
         return $value;
     }
 
@@ -296,16 +281,14 @@ class Arr
      * @param string $key
      * @param mixed $value
      *
-     * @return array
+     * @return mixed
      */
     public static function set(&$array, $key, $value)
     {
-        if (is_null($key)) {
+        if (null === $key) {
             return $array = $value;
         }
-
         $keys = explode('.', $key);
-
         while (count($keys) > 1) {
             $key = array_shift($keys);
             // If the key doesn't exist at this depth, we will just create an empty array
@@ -317,7 +300,6 @@ class Arr
             $array = &$array[$key];
         }
         $array[array_shift($keys)] = $value;
-
         return $array;
     }
 
@@ -332,11 +314,9 @@ class Arr
     public static function sort($array, Closure $callback)
     {
         $results = [];
-
         foreach ($array as $key => $value) {
             $results[$key] = $callback($value);
         }
-
         return $results;
     }
 
@@ -351,13 +331,11 @@ class Arr
     public static function where($array, Closure $callback)
     {
         $filtered = [];
-
         foreach ($array as $key => $value) {
-            if (call_user_func($callback, $key, $value)) {
+            if ($callback($key, $value)) {
                 $filtered[$key] = $value;
             }
         }
-
         return $filtered;
     }
 }

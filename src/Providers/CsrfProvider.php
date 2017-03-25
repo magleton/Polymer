@@ -10,6 +10,7 @@ use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Slim\Http\Request;
 use Slim\Http\Response;
+use Slim\Csrf\Guard;
 
 class CsrfProvider implements ServiceProviderInterface
 {
@@ -25,7 +26,7 @@ class CsrfProvider implements ServiceProviderInterface
     {
         $pimple['csrf'] = function (Container $container) {
             try {
-                $guard = new \Slim\Csrf\Guard();
+                $guard = new Guard();
                 $guard->setFailureCallable(function (Request $request, Response $response, $next) {
                     $request = $request->withAttribute('csrf_status', false);
                     return $next($request, $response);

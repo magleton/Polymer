@@ -34,8 +34,8 @@ class Service
 
     public function __construct(Request $request = null, Application $app = null)
     {
-        $this->request = $request ?: app()->component('request');
         $this->app = $app ?: app();
+        $this->request = $request ?: $this->app->component('request');
     }
 
     /**

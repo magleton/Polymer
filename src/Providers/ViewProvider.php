@@ -24,7 +24,7 @@ class ViewProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['view'] = function (Container $container) {
-            $twig_config = $container['application']->config('twig') ? $container['application']->config('twig') : [];
+            $twig_config = $container['application']->config('twig') ?: [];
             $view = new Twig(TEMPLATE_PATH, $twig_config);
             $view->addExtension(new TwigExtension($container['router'], $container['request']->getUri()));
             $view->addExtension(new \Twig_Extension_Profiler($container['twig_profile']));

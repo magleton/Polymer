@@ -132,7 +132,7 @@ abstract class Attribute extends Collection
      *
      * @param string $method
      * @param array $args
-     *
+     * @throws \Exception
      * @return Attribute
      */
     public function __call($method, $args)
@@ -140,7 +140,6 @@ abstract class Attribute extends Collection
         if (stripos($method, 'with') === 0) {
             $method = substr($method, 4);
         }
-
         return $this->with($method, array_shift($args));
     }
 
@@ -149,7 +148,7 @@ abstract class Attribute extends Collection
      *
      * @param string $property
      * @param mixed $value
-     *
+     * @throws \Exception
      * @return Attribute
      */
     public function __set($property, $value)

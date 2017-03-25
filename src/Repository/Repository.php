@@ -13,7 +13,6 @@ use Exception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\PresenterException;
-use Polymer\Utils\Constants;
 
 class Repository extends EntityRepository
 {
@@ -70,11 +69,12 @@ class Repository extends EntityRepository
      */
     public function present($entity)
     {
-        if (!$this->presenter || !class_exists($this->presenter)) {
+        if (!$this->getProperty('presenter') || !class_exists($this->getProperty('presenter'))) {
             throw new PresenterException('Please set the $presenter property to your presenter path.');
         }
         if (!$this->presenterInstance) {
-            $this->presenterInstance = new $this->presenter($entity);
+            $cls = $this->getProperty('presenter');
+            $this->presenterInstance = new $cls($entity);
         }
         return $this->presenterInstance;
     }

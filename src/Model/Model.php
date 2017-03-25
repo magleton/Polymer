@@ -76,7 +76,7 @@ class Model
      * @param array $data 自定义数据
      * @param array $criteria 获取对象的条件(用于更新数据)
      * @param bool $returnEObj 是否返回实体对象
-     * @return Object|$this
+     * @return mixed
      * @throws \Exception
      */
     protected function make(array $data = [], array $criteria = [], $returnEObj = false)
@@ -111,7 +111,8 @@ class Model
         $entityNamespace = $this->getProperty('entityNamespace');
         $repositoryNamespace = $this->getProperty('repositoryNamespace');
         if ($criteria) {
-            $repository = $this->app->repository($entityName, $dbName, $entityFolder, $entityNamespace, $repositoryNamespace);
+            $repository = $this->app->repository($entityName, $dbName, $entityFolder, $entityNamespace,
+                $repositoryNamespace);
             $entityObject = $repository->findOneBy($criteria);
         } else {
             $entityObject = $this->app->entity($entityName, $entityNamespace);
@@ -222,5 +223,4 @@ class Model
         }
         return null;
     }
-
 }

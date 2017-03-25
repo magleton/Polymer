@@ -26,7 +26,7 @@ if (!function_exists('urlSafeBase64Code')) {
     {
         $searchKws = array('+', '/', '=');
         $replaceKws = array('-', '_', '');
-        if ($operation == 'DECODE') {
+        if ($operation === 'DECODE') {
             $ret = base64_decode(str_replace($replaceKws, $searchKws, $string));
         } else {
             $ret = str_replace($searchKws, $replaceKws, base64_encode($string));
@@ -43,30 +43,19 @@ if (!function_exists('getIP')) {
      */
     function getIP()
     {
+        $IP = '0.0.0.0';
         if (isset($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP']) {
             $IP = $_SERVER['HTTP_CLIENT_IP'];
-        } else {
-            if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR']) {
-                $IP = $_SERVER['HTTP_X_FORWARDED_FOR'];
-            } else {
-                if (isset($_SERVER['HTTP_X_FORWARDED']) && $_SERVER['HTTP_X_FORWARDED']) {
-                    $IP = $_SERVER['HTTP_X_FORWARDED'];
-                } else {
-                    if (isset($_SERVER['HTTP_FORWARDED_FOR']) && $_SERVER['HTTP_FORWARDED_FOR']) {
-                        $IP = $_SERVER['HTTP_FORWARDED_FOR'];
-                    } else {
-                        if (isset($_SERVER['HTTP_FORWARDED']) && $_SERVER['HTTP_FORWARDED']) {
-                            $IP = $_SERVER['HTTP_FORWARDED'];
-                        } else {
-                            if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR']) {
-                                $IP = $_SERVER['REMOTE_ADDR'];
-                            } else {
-                                $IP = '0.0.0.0';
-                            }
-                        }
-                    }
-                }
-            }
+        } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR']) {
+            $IP = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } elseif (isset($_SERVER['HTTP_X_FORWARDED']) && $_SERVER['HTTP_X_FORWARDED']) {
+            $IP = $_SERVER['HTTP_X_FORWARDED'];
+        } elseif (isset($_SERVER['HTTP_FORWARDED_FOR']) && $_SERVER['HTTP_FORWARDED_FOR']) {
+            $IP = $_SERVER['HTTP_FORWARDED_FOR'];
+        } elseif (isset($_SERVER['HTTP_FORWARDED']) && $_SERVER['HTTP_FORWARDED']) {
+            $IP = $_SERVER['HTTP_FORWARDED'];
+        } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR']) {
+            $IP = $_SERVER['REMOTE_ADDR'];
         }
         return $IP;
     }

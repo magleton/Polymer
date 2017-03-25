@@ -1,12 +1,13 @@
 <?php
 /**
+ * User: macro chen <macro_fengye@163.com>
+ *
  * 所有控制器必须集成该类
  *
  * @author macro chen <macro_fengye@163.com>
  */
 namespace Polymer\Controller;
 
-use Polymer\Utils\Constants;
 use Interop\Container\ContainerInterface;
 use Slim\Http\Response;
 
@@ -66,30 +67,4 @@ class Controller
             return \GuzzleHttp\json_encode(['msg' => $e->getMessage()], $encodingOptions);
         }
     }
-
-    /**
-     * console 控制台输出
-     * @param string $log_level
-     * @param $tips
-     * @param $data
-     * @param string $style
-     */
-    protected function consoleDebug($log_level = Constants::LOG, $tips, $data, $style = '')
-    {
-        if (extension_loaded('curl') && $this->app->config('debug.is_open_socket_log_debug')) {
-            $slog = new \Slog();
-            $slog->config($this->app->config('debug.socket_log'), 'config');
-            $log = [
-                'tips' => $tips,
-                'log' => $data
-            ];
-            if ($log_level === Constants::LOG_CSS && !empty($style)) {
-                $slog->$log_level($log, $style);
-            } else {
-                $slog->$log_level($log);
-            }
-        }
-    }
 }
-
-?>
