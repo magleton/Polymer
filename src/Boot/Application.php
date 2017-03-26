@@ -255,10 +255,9 @@ final class Application
      *
      * @param $componentName
      * @param array $param
-     * @param null $componentNamespace
      * @return mixed|null
      */
-    public function component($componentName, array $param = [], $componentNamespace = null)
+    public function component($componentName, array $param = [])
     {
         if (!$this->container->has($componentName)) {
             $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $componentName)))));
