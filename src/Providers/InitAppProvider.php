@@ -38,14 +38,14 @@ class InitAppProvider implements ServiceProviderInterface
 
         $pimple['notFoundHandler'] = function (Container $container) {
             return function (Request $request, Response $response) use ($container) {
-                if ($container['application']->config('app.is_rest')) {
+                if ($container['application']->config('app.is_rest', false)) {
                     return $container['response']
                         ->withStatus(404)
                         ->withHeader('Content-Type', 'application/json')
                         ->withJson(['code' => 1, 'msg' => '404', 'data' => []]);
                 } else {
                     try {
-                        if (defined('TEMPLATE_PATH')) {
+                        if (defined('TEMPLATE_PATH') && file_exists(TEMPLATE_PATH . '404.twig')) {
                             $body = new Body(@fopen(TEMPLATE_PATH . '404.twig', 'rb'));
                             return $container['response']
                                 ->withStatus(404)
@@ -73,14 +73,14 @@ class InitAppProvider implements ServiceProviderInterface
             return function (Request $request, Response $response, $exception) use ($container) {
                 $container->register(new LoggerProvider());
                 $container['logger']->error($exception->__toString());
-                if ($container['application']->config('app.is_rest')) {
+                if ($container['application']->config('app.is_rest', false)) {
                     return $container['response']
                         ->withStatus(500)
                         ->withHeader('Content-Type', 'application/json')
                         ->withJson(['code' => 500, 'msg' => '500 status', 'data' => []]);
                 } else {
                     try {
-                        if (defined('TEMPLATE_PATH')) {
+                        if (defined('TEMPLATE_PATH') && file_exists(TEMPLATE_PATH . 'error.twig')) {
                             $body = new Body(@fopen(TEMPLATE_PATH . 'error.twig', 'rb'));
                             return $container['response']->withStatus(500)
                                 ->withHeader('Content-Type', 'text/html')->withBody($body);
@@ -105,7 +105,7 @@ class InitAppProvider implements ServiceProviderInterface
                     ->withHeader('Content-Type', 'text/html')->write($e->getMessage());
             }
         };
-        
+
         $pimple['twig_profile'] = function (Container $container) {
             return new \Twig_Profiler_Profile();
         };
