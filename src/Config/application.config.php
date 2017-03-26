@@ -64,7 +64,9 @@ $common_config = [
                 ]
             ]
         ],
-    ]
+    ],
+    //服务供给者的命名空间
+    'providersPath' => ['Polymer\\Providers']
 ];
 
 return $common_config;

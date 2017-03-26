@@ -261,28 +261,24 @@ final class Application
     public function component($componentName, array $param = [], $componentNamespace = null)
     {
         if (!$this->container->has($componentName)) {
-            !defined('PROVIDERS_NAMESPACE') && define('PROVIDERS_NAMESPACE', APP_NAME);
             $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $componentName)))));
-            if (class_exists('Polymer\\Providers\\' . $className . 'Provider')) {
-                $className = 'Polymer\\Providers\\' . $className . 'Provider';
-            } elseif ($componentNamespace && class_exists($componentNamespace . '\\' . $className . 'Provider')) {
-                $className = $componentNamespace . '\\' . $className . 'Provider';
-            } elseif (class_exists(PROVIDERS_NAMESPACE . '\\Providers\\' . $className . 'Provider')) {
-                $className = PROVIDERS_NAMESPACE . '\\Providers\\' . $className . 'Provider';
-            }
-            if (class_exists($className)) {
-                $this->container->register(new $className(), $param);
-            } else {
+            $providersPath = array_merge($this->config('providersPath'), $this->config('app.providersPath') ?: []);
+            foreach ($providersPath as $namespace) {
+                $className = $namespace . '\\' . $className . 'Provider';
+                if (class_exists($className)) {
+                    $this->container->register(new $className(), $param);
+                    break;
+                }
                 return null;
             }
         }
         try {
-            $cacheObj = $this->container->get($componentName);
+            $retObj = $this->container->get($componentName);
             if ($componentName === Constants::REDIS) {
                 $database = (isset($param['database']) && $param['database']) ? $param['database'] : 0;
-                $cacheObj->select($database);
+                $retObj->select($database);
             }
-            return $cacheObj;
+            return $retObj;
         } catch (ContainerValueNotFoundException $e) {
             return null;
         } catch (ContainerException $e) {
