@@ -260,14 +260,18 @@ final class Application
     public function component($componentName, array $param = [])
     {
         if (!$this->container->has($componentName)) {
-            $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $componentName)))));
+            $tmpClassName = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $componentName)))));
             $providersPath = array_merge($this->config('providersPath'), $this->config('app.providersPath') ?: []);
+            $isClassExist = 0;
             foreach ($providersPath as $namespace) {
-                $className = $namespace . '\\' . $className . 'Provider';
+                $className = $namespace . '\\' . $tmpClassName . 'Provider';
                 if (class_exists($className)) {
                     $this->container->register(new $className(), $param);
+                    $isClassExist = 1;
                     break;
                 }
+            }
+            if (!$isClassExist) {
                 return null;
             }
         }
