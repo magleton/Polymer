@@ -13,6 +13,13 @@ use Doctrine\ORM\Id\AbstractIdGenerator;
 class SnowFlake extends AbstractIdGenerator
 {
     /**
+     * 用于SnowFlake产生ID
+     *
+     * @var string
+     */
+    protected $initialEpoch = '1476614506000';
+
+    /**
      * Generates an identifier for an entity.
      *
      * @param EntityManager|EntityManager $em
@@ -37,7 +44,7 @@ class SnowFlake extends AbstractIdGenerator
         /**
          * Subtract custom epoch from current time
          */
-        $curr_timestamp -= app()->config('app.initial_epoch');
+        $curr_timestamp -= app()->config('app.initial_epoch') ?: $this->initialEpoch;
         /**
          * Create a initial base for ID
          */
@@ -103,6 +110,7 @@ class SnowFlake extends AbstractIdGenerator
      */
     public function getTimeFromID($id)
     {
-        return bindec(substr(decbin($id), 0, 41)) - pow(2, 40) + 1 + app()->config('customer.initial_epoch');
+        $initialEpoch = app()->config('customer.initial_epoch') ?: $this->initialEpoch;
+        return bindec(substr(decbin($id), 0, 41)) - pow(2, 40) + 1 + $initialEpoch;
     }
 }
