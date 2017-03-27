@@ -6,6 +6,7 @@
  */
 namespace Polymer\Model;
 
+use Doctrine\Common\Cache\Cache;
 use Doctrine\DBAL\Sharding\PoolingShardManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
@@ -63,7 +64,13 @@ class Model
             $this->app = app();
             $schema = isset($params['schema']) ? $params['schema'] : $this->getProperty('schema');
             if ($schema) {
+                $cache = $this->getProperty('cache') ?: null;
                 $this->em = $this->app->db($schema);
+                if ($cache instanceof Cache) {
+                    $this->em->getConfiguration()->setMetadataCacheImpl($cache);
+                    $this->em->getConfiguration()->setQueryCacheImpl($cache);
+                    $this->em->getConfiguration()->setResultCacheImpl($cache);
+                }
             }
         } catch (\Exception $e) {
             throw new ModelInstanceErrorException('模型实例化错误' . $e->getMessage());
