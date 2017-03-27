@@ -7,6 +7,7 @@
 
 namespace Polymer\Utils;
 
+use Doctrine\DBAL\Sharding\PoolingShardConnection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Id\AbstractIdGenerator;
 use Doctrine\ORM\Mapping\Entity;
@@ -83,6 +84,7 @@ class SnowFlake extends AbstractIdGenerator
     /**
      * Identify the database and get the ID.
      * Only MySQL.
+     * @throws \Exception
      * @return \Exception|int|\PDOException
      */
     private function getServerShardId()
@@ -101,13 +103,21 @@ class SnowFlake extends AbstractIdGenerator
 
     /**
      * Get server-id from mysql cluster or replication server.
+     *
+     * @throws \Exception
      * @return mixed
      */
     private function getMySqlServerId()
     {
-        /*$result = $em->getConnection()->query('SELECT @@server_id as server_id LIMIT 1')->fetch();
-        return $result['server_id'];*/
-        return $this->em->getConnection()->getActiveShardId();
+        if ($this->em->getConnection() instanceof PoolingShardConnection) {
+            return $this->em->getConnection()->getActiveShardId();
+        }
+        try {
+            $result = $this->em->getConnection()->query('SELECT @@server_id as server_id LIMIT 1')->fetch();
+            return $result['server_id'];
+        } catch (\Exception $e) {
+            throw  $e;
+        }
     }
 
     /**
