@@ -21,6 +21,7 @@ class DoctrineExtConfigLoader
 
     /**
      * 导出自定义的函数
+     *
      * @param Configuration $configuration
      * @param string $database
      * @throws \Exception
