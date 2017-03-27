@@ -9,6 +9,7 @@ namespace Polymer\Utils;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Id\AbstractIdGenerator;
+use Doctrine\ORM\Mapping\Entity;
 
 class SnowFlake extends AbstractIdGenerator
 {
@@ -20,6 +21,13 @@ class SnowFlake extends AbstractIdGenerator
     protected $initialEpoch = '1476614506000';
 
     /**
+     * EntityManager
+     *
+     * @var EntityManager
+     */
+    protected $em = null;
+
+    /**
      * Generates an identifier for an entity.
      *
      * @param EntityManager|EntityManager $em
@@ -28,12 +36,14 @@ class SnowFlake extends AbstractIdGenerator
      */
     public function generate(EntityManager $em, $entity)
     {
+        $this->em = $em;
         return $this->generateID();
     }
 
     /**
      * Generate the 64bit unique ID.
-     * @return number BIGINT
+     *
+     * @return mixed
      */
     public function generateID()
     {
@@ -77,17 +87,15 @@ class SnowFlake extends AbstractIdGenerator
      */
     private function getServerShardId()
     {
-        $em = app()->db(app()->component('database_name'));
         try {
-            $database_name = $em->getConnection()->getDatabasePlatform()->getName();
+            $database_name = $this->em->getConnection()->getDatabasePlatform()->getName();
         } catch (\PDOException $e) {
             return $e;
         }
-        switch ($database_name) {
-            case 'mysql':
-                return (int)$this->getMySqlServerId();
-            default:
-                return (int)1;
+        if ('mysql' === $database_name) {
+            return (int)$this->getMySqlServerId();
+        } else {
+            return (int)1;
         }
     }
 
@@ -97,10 +105,9 @@ class SnowFlake extends AbstractIdGenerator
      */
     private function getMySqlServerId()
     {
-        $em = app()->db(app()->component('database_name'));
         /*$result = $em->getConnection()->query('SELECT @@server_id as server_id LIMIT 1')->fetch();
         return $result['server_id'];*/
-        return $em->getConnection()->getActiveShardId();
+        return $this->em->getConnection()->getActiveShardId();
     }
 
     /**
