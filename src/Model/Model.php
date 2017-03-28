@@ -140,6 +140,7 @@ class Model
      */
     protected function validate(array $rules = [], $type = Constants::MODEL_OBJECT)
     {
+        $rules = $rules ?: $this->getProperty('rules');
         if ($rules) {
             $method = [Constants::MODEL_FIELD => 'verifyField', Constants::MODEL_OBJECT => 'verifyObject'];
             try {
