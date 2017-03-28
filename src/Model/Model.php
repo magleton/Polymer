@@ -140,18 +140,21 @@ class Model
      */
     protected function validate(array $rules = [], $type = Constants::MODEL_OBJECT)
     {
-        $method = [Constants::MODEL_FIELD => 'verifyField', Constants::MODEL_OBJECT => 'verifyObject'];
-        try {
-            $validator = $this->app->component('biz_validator');
-            $validateData = $type === Constants::MODEL_OBJECT ? $this->entityObject : $this->mergerData;
-            $ret = $validator->$method[$type]($validateData, $rules);
-            if (!$ret) {
-                throw new EntityValidateErrorException('数据验证失败!');
+        if ($rules) {
+            $method = [Constants::MODEL_FIELD => 'verifyField', Constants::MODEL_OBJECT => 'verifyObject'];
+            try {
+                $validator = $this->app->component('biz_validator');
+                $validateData = $type === Constants::MODEL_OBJECT ? $this->entityObject : $this->mergerData;
+                $ret = $validator->{$method[$type]}($validateData, $rules);
+                if (!$ret) {
+                    throw new EntityValidateErrorException('数据验证失败!');
+                }
+                return $this->entityObject;
+            } catch (\Exception $e) {
+                throw $e;
             }
-            return $this->entityObject;
-        } catch (\Exception $e) {
-            throw $e;
         }
+        return $this->entityObject;
     }
 
     /**
