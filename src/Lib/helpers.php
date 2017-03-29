@@ -98,11 +98,12 @@ if (!function_exists('handleError')) {
 if (PHP_MAJOR_VERSION === 7 && !function_exists('handleException')) {
     /**
      * 自定义的异常处理函数
+     *
      * @author <macro_fengye@163.com> macro chen
-     * @param ParseError $e
+     * @param mixed $e
      * @throws ParseError
      */
-    function handleException(ParseError $e)
+    function handleException($e)
     {
         throw $e;
     }
@@ -111,6 +112,7 @@ if (PHP_MAJOR_VERSION === 7 && !function_exists('handleException')) {
 if (PHP_MAJOR_VERSION === 5 && !function_exists('handleException')) {
     /**
      * 自定义的异常处理函数
+     *
      * @author <macro_fengye@163.com> macro chen
      * @param Exception $e
      * @throws Exception
