@@ -5,7 +5,7 @@
  * Time: 17:49
  */
 
-use Blog\Services\TestService;
+use Polymer\Tests\App;
 
 class TestServiceTest extends \Polymer\Testing\TestCase
 {

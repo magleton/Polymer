@@ -39,7 +39,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Polymer\\": "src\\"
+      "Polymer\\": "src\\",
+      "Polymer\\Tests\\": "tests\\"
     },
     "files": [
       "src\\Lib\\functions_include.php"
