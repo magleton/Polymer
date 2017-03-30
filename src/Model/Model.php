@@ -106,7 +106,7 @@ class Model
     /**
      * 获取实体对象
      *
-     * @throws EntityNotFoundException
+     * @throws EntityNotFoundException | \Exception
      * @param array $criteria
      * @return Object
      */
@@ -114,12 +114,11 @@ class Model
     {
         $entityName = $this->getProperty('table');
         $entityFolder = $this->getProperty('entityFolder');
-        $dbName = $this->getProperty('schema');
+        $schema = $this->getProperty('schema');
         $entityNamespace = $this->getProperty('entityNamespace');
         $repositoryNamespace = $this->getProperty('repositoryNamespace');
         if ($criteria) {
-            $repository = $this->app->repository($entityName, $dbName, $entityFolder, $entityNamespace,
-                $repositoryNamespace);
+            $repository = $this->app->repository($entityName, $schema, $entityFolder, $entityNamespace, $repositoryNamespace);
             $entityObject = $repository->findOneBy($criteria);
         } else {
             $entityObject = $this->app->entity($entityName, $entityNamespace);
