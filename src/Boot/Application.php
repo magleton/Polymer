@@ -12,7 +12,6 @@ use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\InitAppProvider;
 use Polymer\Utils\Constants;
-use Doctrine\Common\Cache\ArrayCache;
 use Polymer\Utils\DoctrineExtConfigLoader;
 use Slim\Container;
 use Doctrine\ORM\EntityManager;
@@ -49,7 +48,7 @@ final class Application
      * 启动WEB应用
      *
      * @author macro chen <macro_fengye@163.com>
-     * @return boolean
+     * @return mixed
      */
     public function start()
     {
@@ -58,8 +57,7 @@ final class Application
             $this->component('routerFile');
             $this->component('app')->run();
         } catch (\Exception $e) {
-            echo \GuzzleHttp\json_encode(['code' => 1000, 'msg' => $e->getMessage(), 'data' => []]);
-            return false;
+            return \GuzzleHttp\json_encode(['code' => 1000, 'msg' => $e->getMessage(), 'data' => []]);
         }
         if ($this->config('app.show_use_memory')) {
             echo '分配内存量 : ' . convert(memory_get_usage(true));
@@ -73,15 +71,14 @@ final class Application
      * 启动控制台，包括单元测试及其他的控制台程序(定时任务等...)
      *
      * @author macro chen <macro_fengye@163.com>
-     * @return boolean
+     * @return mixed
      */
     public function startConsole()
     {
         try {
             $this->initEnvironment();
         } catch (\Exception $e) {
-            echo \GuzzleHttp\json_encode(['code' => 1000, 'msg' => $e->getMessage(), 'data' => []]);
-            return false;
+            return \GuzzleHttp\json_encode(['code' => 1000, 'msg' => $e->getMessage(), 'data' => []]);
         }
         if ($this->config('app.show_use_memory')) {
             echo '分配内存量 : ' . convert(memory_get_usage(true));
@@ -158,10 +155,10 @@ final class Application
     public function config($key, $default = null)
     {
         $configPaths = [dirname(__DIR__) . '/Config'];
-        if (file_exists(ROOT_PATH . '/config') && is_dir(ROOT_PATH . '/config')) {
+        if (defined('ROOT_PATH') && file_exists(ROOT_PATH . '/config') && is_dir(ROOT_PATH . '/config')) {
             $configPaths[] = ROOT_PATH . '/config';
         }
-        if (file_exists(APP_PATH . '/Config') && is_dir(APP_PATH . '/Config')) {
+        if (defined('APP_PATH') && file_exists(APP_PATH . '/Config') && is_dir(APP_PATH . '/Config')) {
             $configPaths[] = APP_PATH . '/Config';
         }
         try {
@@ -181,14 +178,14 @@ final class Application
      *
      * @author macro chen <macro_fengye@163.com>
      * @param array $params
-     * @throws \InvalidArgumentException | ORMException
+     * @throws \Exception
      * @return EventManager
      */
     public function addEvent(array $params = [])
     {
         try {
             return $this->addEventOrSubscribe($params, 1);
-        } catch (\InvalidArgumentException $e) {
+        } catch (\Exception $e) {
             throw $e;
         }
     }
@@ -217,37 +214,21 @@ final class Application
      * @param array $params
      * @param int $listener 0 添加事件订阅器 1 添加事件监听器
      * @return mixed|null
-     * @throws ORMException | \InvalidArgumentException
+     * @throws ORMException | \InvalidArgumentException | \Exception
      */
     private function addEventOrSubscribe(array $params, $listener)
     {
         $method = $listener ? 'addEventListener' : 'addEventSubscriber';
-        $reflect = null;
+        $eventManager = $this->component('eventManager');
         foreach ($params as $key => $value) {
             if (!isset($value['class_name'])) {
                 throw new \InvalidArgumentException('class_name必须设置');
             }
-            $class_name = $value['class_name'];
+            $className = $value['class_name'];
             $data = isset($value['data']) ? $value['data'] : [];
-            if ($reflect === null) {
-                $reflect = new \ReflectionClass(Events::class);
-            }
-            if ($reflect->getConstant($key)) {
-                if (!isset($value['db_name'])) {
-                    throw new \InvalidArgumentException('db_name必须设置');
-                }
-                try {
-                    $listener === 1 ? $this->db($value['db_name'])->getEventManager()->$method($key,
-                        new $class_name($data)) : $this->db($value['db_name'])->getEventManager()->$method(new $class_name($data));
-                } catch (ORMException $e) {
-                    throw $e;
-                }
-            } else {
-                $listener === 1 ? $this->component('eventManager')->{$method}($key,
-                    new $class_name($data)) : $this->component('eventManager')->{$method}(new $class_name($data));
-            }
+            $listener === 1 ? $eventManager->{$method}($key, new $className($data)) : $eventManager->{$method}(new $className($data));
         }
-        return $this->component('eventManager');
+        return $eventManager;
     }
 
     /**
@@ -313,7 +294,6 @@ final class Application
         return static::$instance = $application;
     }
 
-
     /**
      * 获取业务模型实例
      *
@@ -358,15 +338,11 @@ final class Application
      * @param null $entityFolder 实体文件的路径
      * @param mixed $entityNamespace 实体的命名空间
      * @param mixed $repositoryNamespace Repository的命名空间
+     * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | null
      */
-    public function repository(
-        $entityName,
-        $dbName = '',
-        $entityFolder = null,
-        $entityNamespace = null,
-        $repositoryNamespace = null
-    ) {
+    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
+    {
         $repositoryNamespace = (null !== $repositoryNamespace) ? $repositoryNamespace : $repositoryNamespace = 'Entity\\Repositories';
         $entityNamespace = (null !== $entityNamespace) ? $entityNamespace : $entityNamespace = 'Entity\\Models';
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $entityName)))));
