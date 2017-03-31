@@ -28,14 +28,13 @@ class Service
     /**
      * Service constructor.
      *
-     * @param Request|null $request
-     * @param Application|null $app
+     * @param array $params
      */
 
-    public function __construct(Request $request = null, Application $app = null)
+    public function __construct(array $params = [])
     {
-        $this->app = $app ?: app();
-        $this->request = $request ?: $this->app->component('request');
+        $this->app = isset($params['app']) ? $params['app'] : app();
+        $this->request = isset($params['request']) ? $params['request'] : $this->app->component('request');
     }
 
     /**
