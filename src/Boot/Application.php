@@ -225,8 +225,8 @@ final class Application
                 throw new \InvalidArgumentException('class_name必须设置');
             }
             $className = $value['class_name'];
-            $data = isset($value['data']) ? $value['data'] : [];
-            $listener === 1 ? $eventManager->{$method}($key, new $className($data)) : $eventManager->{$method}(new $className($data));
+            $params = isset($value['params']) ? $value['params'] : [];
+            $listener === 1 ? $eventManager->{$method}($key, new $className($params)) : $eventManager->{$method}(new $className($params));
         }
         return $eventManager;
     }
