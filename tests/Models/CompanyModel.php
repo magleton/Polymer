@@ -10,6 +10,7 @@ namespace Polymer\Tests\Models;
 use Doctrine\ORM\Events;
 use Polymer\Model\Model;
 use Polymer\Tests\Listener\TestListener;
+use Polymer\Utils\Constants;
 
 class CompanyModel extends Model
 {
@@ -24,7 +25,18 @@ class CompanyModel extends Model
      *
      * @var array
      */
-    protected $rules = [];
+    protected $rules = [
+        'name' => [
+            'Length' => [
+                'min' => 20,
+                'max' => 50,
+                'minMessage' => 'Your first name must be at least {{ limit }} characters long',
+                'maxMessage' => 'Your first name cannot be longer than {{ limit }} characters',
+                'groups' => ['registration'],
+            ],
+            'NotBlank' => ['groups' => ['add'], 'message' => 'aaaaa']
+        ]
+    ];
 
     /**
      * 数据库配置
@@ -63,8 +75,8 @@ class CompanyModel extends Model
     public function save(array $data = [])
     {
         try {
-            $this->app->addEvent([Events::prePersist => ['schema' => 'db1', 'class_name' => TestListener::class]]);
-            $obj = $this->make($data, [], true);
+            $this->app->addEvent([Events::prePersist => ['class_name' => TestListener::class]]);
+            $obj = $this->make($data)->validate($this->rules, Constants::MODEL_OBJECT, ['add']);
             $this->em->persist($obj);
             $this->em->flush();
             return $obj->getId();
@@ -84,7 +96,12 @@ class CompanyModel extends Model
     public function update(array $data = [])
     {
         try {
-            $this->app->addEvent([Events::preUpdate => ['class_name' => TestListener::class, 'data' => ['address' => 'aaaaa']]]);
+            $this->app->addEvent([
+                Events::preUpdate => [
+                    'class_name' => TestListener::class,
+                    'data' => ['address' => 'aaaaa']
+                ]
+            ]);
             $obj = $this->make($data, ['id' => 5], true);
             $this->em->persist($obj);
             $this->em->flush();

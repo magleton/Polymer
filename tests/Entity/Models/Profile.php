@@ -57,9 +57,9 @@ class Profile
     private $updated;
 
     /**
-     * @var \Entity\Models\User
+     * @var \Polymer\Tests\Entity\Models\User
      *
-     * @ORM\ManyToOne(targetEntity="Entity\Models\User")
+     * @ORM\ManyToOne(targetEntity="Polymer\Tests\Entity\Models\User")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=true)
      * })

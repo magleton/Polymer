@@ -64,9 +64,9 @@ class User
     private $updated;
 
     /**
-     * @var \Entity\Models\Company
+     * @var \Polymer\Tests\Entity\Models\Company
      *
-     * @ORM\ManyToOne(targetEntity="Entity\Models\Company")
+     * @ORM\ManyToOne(targetEntity="Polymer\Tests\Entity\Models\Company")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="company_id", referencedColumnName="id", nullable=true)
      * })

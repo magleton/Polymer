@@ -118,7 +118,8 @@ class Model
         $entityNamespace = $this->getProperty('entityNamespace');
         $repositoryNamespace = $this->getProperty('repositoryNamespace');
         if ($criteria) {
-            $repository = $this->app->repository($entityName, $schema, $entityFolder, $entityNamespace, $repositoryNamespace);
+            $repository = $this->app->repository($entityName, $schema, $entityFolder, $entityNamespace,
+                $repositoryNamespace);
             $entityObject = $repository->findOneBy($criteria);
         } else {
             $entityObject = $this->app->entity($entityName, $entityNamespace);
@@ -134,10 +135,11 @@ class Model
      *
      * @param array $rules 验证规则
      * @param int $type 验证类型
+     * @param array $groups 验证组
      * @return bool
      * @throws \Exception
      */
-    protected function validate(array $rules = [], $type = Constants::MODEL_OBJECT)
+    protected function validate(array $rules = [], $type = Constants::MODEL_OBJECT, array $groups = null)
     {
         $rules = $rules ?: $this->getProperty('rules');
         if ($rules) {
@@ -145,7 +147,7 @@ class Model
             try {
                 $validator = $this->app->component('biz_validator');
                 $validateData = $type === Constants::MODEL_OBJECT ? $this->entityObject : $this->mergerData;
-                $ret = $validator->{$method[$type]}($validateData, $rules);
+                $ret = $validator->{$method[$type]}($validateData, $rules, $groups);
                 if (!$ret) {
                     throw new EntityValidateErrorException('数据验证失败!');
                 }

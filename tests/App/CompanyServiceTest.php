@@ -8,13 +8,14 @@
 namespace Polymer\Tests\App;
 
 use Polymer\Testing\TestCase;
+use Polymer\Tests\Services\CompanyService;
 
 class CompanyServiceTest extends TestCase
 {
     /**
      * 模型对象
      *
-     * @var null
+     * @var CompanyService
      */
     protected $service = null;
 

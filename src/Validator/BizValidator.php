@@ -40,16 +40,17 @@ class BizValidator
      *
      * @param array $data 验证数据
      * @param array $rules 验证规则
+     * @param array $groups 验证组
      * @param string $key 错误信息的key，用于获取错误信息
      * @return boolean
      */
-    public function verifyField(array $data = [], array $rules = [], $key = 'error')
+    public function verifyField(array $data = [], array $rules = [], array $groups = null, $key = 'error')
     {
         $returnData = [];
         foreach ($data as $property => $val) {
             if (isset($rules[$property])) {
                 $constraints = $this->propertyConstraints($property, $rules);
-                $errors = $this->validator->validate($val, $constraints);
+                $errors = $this->validator->validate($val, $constraints, $groups);
                 if (count($errors)) {
                     foreach ($errors as $error) {
                         $returnData[$property] = $error->getMessage();
@@ -69,11 +70,12 @@ class BizValidator
      *
      * @param Object $validateObject 要验证的对象
      * @param array $rules 验证规则
+     * @param array $groups 验证组
      * @param string $key 错误信息的key,用于获取错误信息
      * @throws NoSuchMetadataException
      * @return boolean
      */
-    public function verifyObject($validateObject, array $rules = [], $key = 'error')
+    public function verifyObject($validateObject, array $rules = [], array $groups = null, $key = 'error')
     {
         try {
             $classMetadata = $this->validator->getMetadataFor($validateObject);
@@ -86,7 +88,7 @@ class BizValidator
                     }
                 }
             }
-            $errors = $this->validator->validate($validateObject);
+            $errors = $this->validator->validate($validateObject, null, $groups);
             if (count($errors)) {
                 foreach ($errors as $error) {
                     $returnData[$error->getPropertyPath()] = $error->getMessage();

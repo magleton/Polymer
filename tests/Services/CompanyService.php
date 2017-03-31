@@ -19,7 +19,7 @@ class CompanyService extends Service
     public function save()
     {
         $data = [
-            'name' => 'test',
+            'name' => '',
             'address' => 'chengdu',
             'phone' => '13800138000',
             'created' => time(),
