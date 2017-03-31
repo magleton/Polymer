@@ -10,6 +10,7 @@ namespace Polymer\Tests\Models;
 use Doctrine\ORM\Events;
 use Polymer\Model\Model;
 use Polymer\Tests\Listener\TestListener;
+use Polymer\Tests\Validators\AddressValidator;
 use Polymer\Utils\Constants;
 
 class CompanyModel extends Model
@@ -28,13 +29,19 @@ class CompanyModel extends Model
     protected $rules = [
         'name' => [
             'Length' => [
-                'min' => 20,
+                'min' => 1,
                 'max' => 50,
                 'minMessage' => 'Your first name must be at least {{ limit }} characters long',
                 'maxMessage' => 'Your first name cannot be longer than {{ limit }} characters',
                 'groups' => ['registration'],
             ],
             'NotBlank' => ['groups' => ['add'], 'message' => 'aaaaa']
+        ],
+        'address' => [
+            'Callback' => [
+                'callback' => [AddressValidator::class, 'validate'],
+                'groups' => ['add']
+            ]
         ]
     ];
 
@@ -81,6 +88,7 @@ class CompanyModel extends Model
             $this->em->flush();
             return $obj->getId();
         } catch (\Exception $e) {
+            print_r($this->app->component('error_collection')->all());
             throw $e;
         }
     }
