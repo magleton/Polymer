@@ -16,18 +16,18 @@ class CompanyServiceTest extends TestCase
      *
      * @var null
      */
-    protected $model = null;
+    protected $service = null;
 
     protected function setUp()
     {
         parent::setUp();
-        $this->model = $this->app->model('company', [], 'Polymer\\Tests\\Models');
+        $this->service = $this->app->service('company', ['request' => null, 'app' => null], 'Polymer\\Tests\\Services');
     }
 
     protected function tearDown()
     {
         parent::tearDown();
-        $this->model = null;
+        $this->service = null;
     }
 
     /**
@@ -35,19 +35,11 @@ class CompanyServiceTest extends TestCase
      */
     public function testSave()
     {
-        $data = [
-            'name' => 'test',
-            'address' => 'chengdu',
-            'phone' => '13800138000',
-            'created' => time(),
-            'updated' => time()
-        ];
-        $this->assertGreaterThan(1, $this->model->save($data));
+        $this->assertGreaterThan(1, $this->service->save());
     }
 
     public function testUpdate()
     {
-        $data = ['name' => 'update'];
-        $this->assertEquals(15, $this->model->update($data));
+        $this->assertEquals(15, $this->service->update());
     }
 }

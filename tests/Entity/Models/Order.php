@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Order
  *
- * @ORM\Table(name="order")
+ * @ORM\Table(name="`order`")
  * @ORM\Entity(repositoryClass="Polymer\Tests\Entity\Repositories\OrderRepository")
  */
 class Order
@@ -63,6 +63,12 @@ class Order
      */
     private $updated;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="`desc`", type="string", length=120, precision=0, scale=0, nullable=true, unique=false)
+     */
+    private $desc;
 
     /**
      * Get id
@@ -216,6 +222,22 @@ class Order
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDesc()
+    {
+        return $this->desc;
+    }
+
+    /**
+     * @param string $desc
+     */
+    public function setDesc($desc)
+    {
+        $this->desc = $desc;
     }
 }
 
