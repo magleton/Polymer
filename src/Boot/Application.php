@@ -365,11 +365,11 @@ final class Application
      * 获取服务组件
      *
      * @param string $serviceName
-     * @param mixed $serviceNamespace
      * @param array|null $params
+     * @param mixed $serviceNamespace
      * @return null | Object
      */
-    public function service($serviceName, $serviceNamespace = null, array $params = null)
+    public function service($serviceName, array $params = null, $serviceNamespace = null)
     {
         $serviceNamespace = (null !== $serviceNamespace) ? $serviceNamespace : $serviceNamespace = APP_NAME . '\\Services';
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $serviceName)))));
