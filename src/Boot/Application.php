@@ -48,6 +48,7 @@ final class Application
      * 启动WEB应用
      *
      * @author macro chen <macro_fengye@163.com>
+     * @throws \Exception
      * @return mixed
      */
     public function start()
@@ -57,7 +58,7 @@ final class Application
             $this->component('routerFile');
             $this->component('app')->run();
         } catch (\Exception $e) {
-            return \GuzzleHttp\json_encode(['code' => 1000, 'msg' => $e->getMessage(), 'data' => []]);
+            throw $e;
         }
         if ($this->config('app.show_use_memory')) {
             echo '分配内存量 : ' . convert(memory_get_usage(true));
@@ -71,6 +72,7 @@ final class Application
      * 启动控制台，包括单元测试及其他的控制台程序(定时任务等...)
      *
      * @author macro chen <macro_fengye@163.com>
+     * @throws \Exception
      * @return mixed
      */
     public function startConsole()
@@ -78,7 +80,7 @@ final class Application
         try {
             $this->initEnvironment();
         } catch (\Exception $e) {
-            return \GuzzleHttp\json_encode(['code' => 1000, 'msg' => $e->getMessage(), 'data' => []]);
+            throw $e;
         }
         if ($this->config('app.show_use_memory')) {
             echo '分配内存量 : ' . convert(memory_get_usage(true));
