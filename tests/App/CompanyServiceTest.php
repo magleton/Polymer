@@ -8,7 +8,13 @@
 namespace Polymer\Tests\App;
 
 use Polymer\Testing\TestCase;
+use Polymer\Tests\Entity\Models\Company;
 use Polymer\Tests\Services\CompanyService;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class CompanyServiceTest extends TestCase
 {
@@ -42,5 +48,11 @@ class CompanyServiceTest extends TestCase
     public function testUpdate()
     {
         $this->assertEquals(15, $this->service->update());
+    }
+
+    public function testGetData()
+    {
+        $array =  $this->service->getData();
+        $this->assertInternalType('array', $array);
     }
 }

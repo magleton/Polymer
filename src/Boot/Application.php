@@ -11,11 +11,11 @@ use Doctrine\ORM\ORMException;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\InitAppProvider;
+use Polymer\Repository\Repository;
 use Polymer\Utils\Constants;
 use Polymer\Utils\DoctrineExtConfigLoader;
 use Slim\Container;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Events;
 use Doctrine\Common\EventManager;
 use Doctrine\ORM\Tools\Setup;
 use Interop\Container\Exception\ContainerException;
@@ -341,7 +341,7 @@ final class Application
      * @param mixed $entityNamespace 实体的命名空间
      * @param mixed $repositoryNamespace Repository的命名空间
      * @throws \Exception
-     * @return \Doctrine\ORM\EntityRepository | null
+     * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
     public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {

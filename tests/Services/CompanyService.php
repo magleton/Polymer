@@ -39,4 +39,16 @@ class CompanyService extends Service
         $data = ['name' => 'updateupdateupdateupdate'];
         return $model->update($data);
     }
+
+    /**
+     * 测试获取数据
+     *
+     * @return null|object
+     */
+    public function getData()
+    {
+        $repositoryObj = $this->app->repository('company', 'db1', APP_PATH . '/Entity/', 'Polymer\Tests\Entity\Models', 'Polymer\Tests\Entity\Repositories');
+        $entity = $repositoryObj->findOneBy(['id' => 2]);
+        return $repositoryObj->toArray($entity);
+    }
 }
