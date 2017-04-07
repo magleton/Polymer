@@ -135,7 +135,8 @@ final class Application
             ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', null,
                 $dbConfig[$dbName]['useSimpleAnnotationReader']);
             try {
-                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->component('eventManager'));
+                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
+                    $this->component('eventManager'));
                 $this->container['entityManager-' . $dbName] = $entityManager;
             } catch (\InvalidArgumentException $e) {
                 throw $e;
@@ -227,7 +228,8 @@ final class Application
             }
             $className = $value['class_name'];
             $data = isset($value['params']) ? $value['params'] : [];
-            $listener === 1 ? $eventManager->{$method}($key, new $className($data)) : $eventManager->{$method}(new $className($data));
+            $listener === 1 ? $eventManager->{$method}($key,
+                new $className($data)) : $eventManager->{$method}(new $className($data));
         }
         return $eventManager;
     }
@@ -312,7 +314,7 @@ final class Application
         if (class_exists($className)) {
             return new $className($parameters);
         }
-        throw new ModelClassNotExistException($className.'不存在');
+        throw new ModelClassNotExistException($className . '不存在');
     }
 
     /**
@@ -344,8 +346,13 @@ final class Application
      * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = 'Entity\\Models', $repositoryNamespace = 'Entity\\Repositories')
-    {
+    public function repository(
+        $entityName,
+        $dbName = '',
+        $entityFolder = null,
+        $entityNamespace = 'Entity\\Models',
+        $repositoryNamespace = 'Entity\\Repositories'
+    ) {
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $entityName)))));
         $repositoryClassName = $repositoryNamespace . '\\' . ucfirst($className) . 'Repository';
         if (class_exists($repositoryClassName)) {
@@ -357,7 +364,7 @@ final class Application
                 throw $e;
             } catch (\InvalidArgumentException $e) {
                 throw $e;
-            }catch (\Exception $e){
+            } catch (\Exception $e) {
                 throw $e;
             }
         }
@@ -380,5 +387,21 @@ final class Application
             return new $className($params);
         }
         return null;
+    }
+
+    /**
+     * 向Container里面设置值
+     *
+     * @param $key
+     * @param $value
+     * @throws \Exception
+     */
+    public function offSetValueToContainer($key, $value)
+    {
+        try {
+            !$this->container->has($key) && $this->container->offsetSet($key, $value);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 }

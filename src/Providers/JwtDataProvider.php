@@ -23,6 +23,8 @@ class JwtDataProvider implements ServiceProviderInterface
      */
     public function register(Container $pimple)
     {
-        return new \stdClass();
+        $pimple['jwtData'] = function (Container $container) {
+            return new \stdClass();
+        };
     }
 }
