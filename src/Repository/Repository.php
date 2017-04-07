@@ -109,41 +109,4 @@ class Repository extends EntityRepository
         }
         return null;
     }
-
-    /**
-     * is utilized for reading data from inaccessible members.
-     *
-     * @param $name string
-     * @return mixed
-     * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
-     */
-    public function __get($name)
-    {
-        return isset($this->$name) ? $this->$name : null;
-    }
-
-    /**
-     * run when writing data to inaccessible members.
-     *
-     * @param $name string
-     * @param $value mixed
-     * @return $this
-     * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
-     */
-    public function __set($name, $value)
-    {
-        $this->$name = $value;
-    }
-
-    /**
-     * is triggered by calling isset() or empty() on inaccessible members.
-     *
-     * @param $name string
-     * @return bool
-     * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
-     */
-    public function __isset($name)
-    {
-        return isset($this->$name);
-    }
 }
