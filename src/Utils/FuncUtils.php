@@ -1,6 +1,10 @@
 <?php
 namespace Polymer\Utils;
 
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class FuncUtils
@@ -40,5 +44,20 @@ class FuncUtils
     public static function validate($object, ExecutionContextInterface $context, $payload)
     {
         $context->buildViolation('This name sounds totally fake!')->atPath('firstName')->addViolation();
+    }
+
+    /**
+     * 将实体对象转换为数组
+     *
+     * @param mixed $entity 实体对象
+     * @param null $format 转换成的格式  json xml
+     * @return array|object|\Symfony\Component\Serializer\Normalizer\scalar
+     */
+    public static function entityToArray($entity, $format = null)
+    {
+        $encoders = array(new XmlEncoder(), new JsonEncoder());
+        $normalizers = array(new ObjectNormalizer());
+        $serializer = new Serializer($normalizers, $encoders);
+        return $serializer->normalize($entity, $format);
     }
 }

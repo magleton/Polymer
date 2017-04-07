@@ -8,6 +8,7 @@
 namespace Polymer\Tests\Services;
 
 use Polymer\Service\Service;
+use Polymer\Utils\FuncUtils;
 
 class CompanyService extends Service
 {
@@ -49,6 +50,6 @@ class CompanyService extends Service
     {
         $repositoryObj = $this->app->repository('company', 'db1', APP_PATH . '/Entity/', 'Polymer\Tests\Entity\Models', 'Polymer\Tests\Entity\Repositories');
         $entity = $repositoryObj->findOneBy(['id' => 2]);
-        return $repositoryObj->toArray($entity);
+        return FuncUtils::entityToArray($entity);
     }
 }

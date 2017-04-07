@@ -11,7 +11,6 @@ use Doctrine\ORM\Events;
 use Polymer\Model\Model;
 use Polymer\Tests\Listener\TestListener;
 use Polymer\Tests\Validators\AddressValidator;
-use Polymer\Utils\Constants;
 
 class CompanyModel extends Model
 {
@@ -83,7 +82,7 @@ class CompanyModel extends Model
     {
         try {
             $this->app->addEvent([Events::prePersist => ['class_name' => TestListener::class]]);
-            $obj = $this->make($data)->validate($this->rules, Constants::MODEL_OBJECT, ['add']);
+            $obj = $this->make($data)->validate($this->rules, ['add']);
             $this->em->persist($obj);
             $this->em->flush();
             return $obj->getId();
