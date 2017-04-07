@@ -46,20 +46,20 @@ class BizValidator
      */
     public function verifyField(array $data = [], array $rules = [], array $groups = null, $key = 'error')
     {
-        $returnData = [];
+        $errorData = [];
         foreach ($data as $property => $val) {
             if (isset($rules[$property])) {
                 $constraints = $this->propertyConstraints($property, $rules);
                 $errors = $this->validator->validate($val, $constraints, $groups);
                 if (count($errors)) {
                     foreach ($errors as $error) {
-                        $returnData[$property] = $error->getMessage();
+                        $errorData[$property] = $error->getMessage();
                     }
                 }
             }
         }
-        if ($returnData) {
-            $this->app->component('error_collection')->set($key, $returnData);
+        if ($errorData) {
+            $this->app->component('error_collection')->set($key, $errorData);
             return false;
         }
         return true;
@@ -91,9 +91,9 @@ class BizValidator
             $errors = $this->validator->validate($validateObject, null, $groups);
             if (count($errors)) {
                 foreach ($errors as $error) {
-                    $returnData[$error->getPropertyPath()] = $error->getMessage();
+                    $errorData[$error->getPropertyPath()] = $error->getMessage();
                 }
-                $this->app->component('error_collection')->set($key, $returnData);
+                $this->app->component('error_collection')->set($key, $errorData);
                 return false;
             }
             return true;

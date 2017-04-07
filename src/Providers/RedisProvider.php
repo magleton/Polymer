@@ -23,14 +23,13 @@ class RedisProvider implements ServiceProviderInterface
     {
         $pimple['redis'] = function (Container $container) {
             $cacheConfig = $container['application']->config('cache');
-            $server_name = $container->has('server_name') ? $container->get('server_name') : 'server1';
+            $serverName = $container->has('server_name') ? $container->get('server_name') : 'server1';
             $type = 'redis';
             $redis = new \Redis();
-            $redis->connect($cacheConfig[$type][$server_name]['server']['host'],
-                $cacheConfig[$type][$server_name]['server']['port'],
-                $cacheConfig[$type][$server_name]['server']['timeout']);
+            $redis->connect($cacheConfig[$type][$serverName]['server']['host'],
+                $cacheConfig[$type][$serverName]['server']['port'],
+                $cacheConfig[$type][$serverName]['server']['timeout']);
             return $redis;
         };
     }
-
 }

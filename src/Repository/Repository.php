@@ -57,9 +57,11 @@ class Repository extends EntityRepository
      */
     public function validate(array $data = [], array $rules = [], $key = 'error')
     {
-        $validateRet = app()->component('biz_validator')->verifyField($data, $rules, $key);
-        if (!$validateRet) {
-            throw new EntityValidateErrorException('数据验证错误!');
+        if($rules) {
+            $validateRet = $this->app->component('biz_validator')->verifyField($data, $rules, $key);
+            if (!$validateRet) {
+                throw new EntityValidateErrorException('数据验证错误!');
+            }
         }
         return $this;
     }

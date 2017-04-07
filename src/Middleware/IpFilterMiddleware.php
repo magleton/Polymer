@@ -8,8 +8,8 @@
 namespace Polymer\Middleware;
 
 use Polymer\Utils\Constants;
-use \Psr\Http\Message\RequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
+use Slim\Http\Request;
+use Slim\Http\Response;
 
 class IpFilterMiddleware
 {
@@ -20,6 +20,7 @@ class IpFilterMiddleware
 
     /**
      * IpFilterMiddleware constructor.
+     *
      * @param array $addresses
      * @param int $mode
      */

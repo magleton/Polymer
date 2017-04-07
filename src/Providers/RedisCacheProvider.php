@@ -22,15 +22,15 @@ class RedisCacheProvider implements ServiceProviderInterface
      */
     public function register(Container $pimple)
     {
-        $pimple['redisCacheDriver'] = function (Container $container) {
-            $redisCacheDriver = new RedisCache();
-            $namespace = $container->has('namespace') ? $container->get('namespace') : 'redisCacheDriver';
+        $pimple['redisCache'] = function (Container $container) {
+            $redisCache = new RedisCache();
+            $namespace = $container->has('namespace') ? $container->get('namespace') : 'redisCache';
             $database = $container->has('database') ? $container->get('database') : 0;
             //设置缓存的命名空间
             $type = 'redis';
-            $redisCacheDriver->setNamespace($namespace);
-            $redisCacheDriver->setRedis($container['application']->component($type, ['database' => $database]));
-            return $redisCacheDriver;
+            $redisCache->setNamespace($namespace);
+            $redisCache->setRedis($container['application']->component($type, ['database' => $database]));
+            return $redisCache;
         };
     }
 }

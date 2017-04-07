@@ -4,6 +4,7 @@ use Polymer\Boot\Application;
 if (!function_exists('app')) {
     /**
      * 获取应用实例
+     *
      * @author <macro_fengye@163.com> macro chen
      * @param null $make 是否返回对象实例
      * @param array $parameters
@@ -21,6 +22,7 @@ if (!function_exists('app')) {
 if (!function_exists('logger')) {
     /**
      * 记录日志，便于调试
+     *
      * @author <macro_fengye@163.com> macro chen
      * @param $message
      * @param array $content
@@ -78,6 +80,7 @@ if (!function_exists('handleShutdown')) {
 if (!function_exists('handleError')) {
     /**
      * 自定义的错误处理函数
+     *
      * @author <macro_fengye@163.com> macro chen
      * @param $level
      * @param $message
@@ -101,7 +104,7 @@ if (PHP_MAJOR_VERSION === 7 && !function_exists('handleException')) {
      *
      * @author <macro_fengye@163.com> macro chen
      * @param mixed $e
-     * @throws ParseError
+     * @throws Exception
      */
     function handleException($e)
     {

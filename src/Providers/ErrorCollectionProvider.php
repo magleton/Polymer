@@ -13,9 +13,17 @@ use Polymer\Support\Collection;
 
 class ErrorCollectionProvider implements ServiceProviderInterface
 {
+    /**
+     * Registers services on the given container.
+     *
+     * This method should only be used to configure services and parameters.
+     * It should not get services.
+     *
+     * @param Container $pimple A container instance
+     */
     public function register(Container $pimple)
     {
-        $pimple['error_collection'] = function ($container) {
+        $pimple['error_collection'] = function (Container $container) {
             return new Collection();
         };
     }

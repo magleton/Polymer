@@ -28,10 +28,12 @@ class Controller
     /**
      * Controller constructor.
      * @param ContainerInterface $ci
+     * @throws \Psr\Container\ContainerExceptionInterface
      */
+
     public function __construct(ContainerInterface $ci)
     {
-        $this->app = $ci->application;
+        $this->app = $ci->get('application');
     }
 
     /**

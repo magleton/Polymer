@@ -10,7 +10,6 @@ namespace Polymer\Utils;
 use Doctrine\DBAL\Sharding\PoolingShardConnection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Id\AbstractIdGenerator;
-use Doctrine\ORM\Mapping\Entity;
 
 class SnowFlake extends AbstractIdGenerator
 {
@@ -19,7 +18,7 @@ class SnowFlake extends AbstractIdGenerator
      *
      * @var string
      */
-    protected $initialEpoch = '1476614506000';
+    protected $initialEpoch = 1476614506000;
 
     /**
      * EntityManager
@@ -43,7 +42,7 @@ class SnowFlake extends AbstractIdGenerator
 
     /**
      * Generate the 64bit unique ID.
-     *
+     * @throws \Exception
      * @return mixed
      */
     public function generateID()
@@ -90,11 +89,11 @@ class SnowFlake extends AbstractIdGenerator
     private function getServerShardId()
     {
         try {
-            $database_name = $this->em->getConnection()->getDatabasePlatform()->getName();
+            $databaseType = $this->em->getConnection()->getDatabasePlatform()->getName();
         } catch (\PDOException $e) {
             return $e;
         }
-        if ('mysql' === $database_name) {
+        if ('mysql' === $databaseType) {
             return (int)$this->getMySqlServerId();
         } else {
             return (int)1;

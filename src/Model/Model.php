@@ -47,13 +47,6 @@ class Model
     protected $em = null;
 
     /**
-     * 合并的参数数组(包括自定义数据，请求数据)
-     *
-     * @var array
-     */
-    protected $mergerData = [];
-
-    /**
      * 模型构造函数
      * @param array $params
      * @throws ModelInstanceErrorException
@@ -89,9 +82,8 @@ class Model
     protected function make(array $data = [], array $criteria = [], $returnEObj = false)
     {
         try {
-            $this->mergerData = $this->mergeParams($data);
             $this->entityObject = $this->obtainEObj($criteria);
-            foreach ($this->mergerData as $k => $v) {
+            foreach ($this->mergeParams($data) as $k => $v) {
                 $setMethod = 'set' . ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $k)))));
                 if (method_exists($this->entityObject, $setMethod)) {
                     $this->entityObject->$setMethod($v);
@@ -118,8 +110,7 @@ class Model
         $entityNamespace = $this->getProperty('entityNamespace');
         $repositoryNamespace = $this->getProperty('repositoryNamespace');
         if ($criteria) {
-            $repository = $this->app->repository($entityName, $schema, $entityFolder, $entityNamespace,
-                $repositoryNamespace);
+            $repository = $this->app->repository($entityName, $schema, $entityFolder, $entityNamespace, $repositoryNamespace);
             $entityObject = $repository->findOneBy($criteria);
         } else {
             $entityObject = $this->app->entity($entityName, $entityNamespace);
@@ -134,20 +125,17 @@ class Model
      * 验证数据或者对象
      *
      * @param array $rules 验证规则
-     * @param int $type 验证类型
      * @param array $groups 验证组
      * @return bool
      * @throws \Exception
      */
-    protected function validate(array $rules = [], $type = Constants::MODEL_OBJECT, array $groups = null)
+    protected function validate(array $rules = [], array $groups = null)
     {
         $rules = $rules ?: $this->getProperty('rules');
         if ($rules) {
-            $method = [Constants::MODEL_FIELD => 'verifyField', Constants::MODEL_OBJECT => 'verifyObject'];
             try {
                 $validator = $this->app->component('biz_validator');
-                $validateData = $type === Constants::MODEL_OBJECT ? $this->entityObject : $this->mergerData;
-                $ret = $validator->{$method[$type]}($validateData, $rules, $groups);
+                $ret = $validator->verifyObject($this->entityObject, $rules, $groups);
                 if (!$ret) {
                     throw new EntityValidateErrorException('数据验证失败!');
                 }

@@ -22,7 +22,7 @@ class FuncUtils
         mt_srand((float)microtime() * 1000000);
         shuffle($arr[$type]);
         for ($i = 0; $i < $len; $i++) {
-            $word .= $arr[$type][mt_rand(0, $cnt)];
+            $word .= $arr[$type][random_int(0, $cnt)];
         }
         if (strlen($word) > $len) {
             $word = substr($word, 0, $len);

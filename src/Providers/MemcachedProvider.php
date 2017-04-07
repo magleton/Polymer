@@ -24,17 +24,16 @@ class MemcachedProvider implements ServiceProviderInterface
     {
         $pimple['memcached'] = function (Container $container) {
             $cacheConfig = $container['application']->config('cache');
-            $server_name = 'server1';
+            $serverName = 'server1';
             $type = 'memcached';
             if ($container['application']->component('server_name')) {
-                $server_name = $container['application']->component('server_name');
+                $serverName = $container['application']->component('server_name');
             }
             $memcached = new \Memcached();
-            foreach ($cacheConfig[$type][$server_name]['servers'] as $key => $server) {
+            foreach ($cacheConfig[$type][$serverName]['servers'] as $key => $server) {
                 $memcached->addServer($server['host'], $server['port'], $server['timeout']);
             }
             return $memcached;
         };
     }
-
 }

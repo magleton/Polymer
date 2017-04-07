@@ -7,9 +7,12 @@
 
 namespace Polymer\Boot;
 
+use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\ORMException;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
+use Polymer\Exceptions\ModelClassNotExistException;
+use Polymer\Exceptions\ModelInstanceErrorException;
 use Polymer\Providers\InitAppProvider;
 use Polymer\Repository\Repository;
 use Polymer\Utils\Constants;
@@ -24,7 +27,7 @@ use Slim\Exception\ContainerValueNotFoundException;
 final class Application
 {
     /**
-     * 整个应用的实例
+     * 应用实例
      *
      * @var $this
      */
@@ -92,7 +95,7 @@ final class Application
 
 
     /**
-     * 初始化应用的环境
+     * 初始化应用环境
      *
      * @author macro chen <macro_fengye@163.com>
      */
@@ -118,29 +121,24 @@ final class Application
      * 实例化数据库链接对象
      *
      * @param string $dbName
-     * @param mixed $entityFolder 实体文件夹的名字
+     * @param string $entityFolder 实体文件夹的名字
      * @throws \Doctrine\ORM\ORMException | \InvalidArgumentException | \Exception
      * @return EntityManager
      */
-    public function db($dbName = '', $entityFolder = null)
+    public function db($dbName = '', $entityFolder = ROOT_PATH . '/entity/Models')
     {
         $dbConfig = $this->config('db.' . APPLICATION_ENV);
         $dbName = $dbName ?: current(array_keys($dbConfig));
         if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->component('entityManager-' . $dbName)) {
-            $entityFolder = (null !== $entityFolder) ? $entityFolder : $entityFolder = ROOT_PATH . '/entity/Models';
             $configuration = Setup::createAnnotationMetadataConfiguration([
                 $entityFolder,
             ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', null,
                 $dbConfig[$dbName]['useSimpleAnnotationReader']);
-            DoctrineExtConfigLoader::loadFunctionNode($configuration, DoctrineExtConfigLoader::MYSQL);
-            DoctrineExtConfigLoader::load();
             try {
-                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
-                    $this->component('eventManager'));
-                $this->container['database_name'] = $dbName;
+                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->component('eventManager'));
                 $this->container['entityManager-' . $dbName] = $entityManager;
             } catch (\InvalidArgumentException $e) {
-                return null;
+                throw $e;
             }
         }
         return $this->container['entityManager-' . $dbName];
@@ -152,6 +150,8 @@ final class Application
      * @author macro chen <macro_fengye@163.com>
      * @param string $key
      * @param mixed | array $default
+     * @throws EmptyDirectoryException
+     * @throws \Exception
      * @return mixed
      */
     public function config($key, $default = null)
@@ -169,9 +169,9 @@ final class Application
             }
             return $this->configObject->get($key, $default);
         } catch (EmptyDirectoryException $e) {
-            return null;
+            throw $e;
         } catch (\Exception $e) {
-            return $default;
+            throw $e;
         }
     }
 
@@ -237,6 +237,7 @@ final class Application
      *
      * @param $componentName
      * @param array $param
+     * @throws \Exception
      * @return mixed|null
      */
     public function component($componentName, array $param = [])
@@ -265,14 +266,14 @@ final class Application
             }
             return $retObj;
         } catch (ContainerValueNotFoundException $e) {
-            return null;
+            throw $e;
         } catch (ContainerException $e) {
-            return null;
+            throw $e;
         }
     }
 
     /**
-     * 获取全局可用的应用实例
+     * 获取全局应用实例
      *
      * @return static
      */
@@ -301,6 +302,7 @@ final class Application
      * @param string $modelName 模型的名字
      * @param array $parameters 实例化时需要的参数
      * @param string $modelNamespace 模型命名空间
+     * @throws ModelClassNotExistException
      * @return mixed
      */
     public function model($modelName, array $parameters = [], $modelNamespace = APP_NAME . '\\Models')
@@ -310,13 +312,15 @@ final class Application
         if (class_exists($className)) {
             return new $className($parameters);
         }
-        return null;
+        throw new ModelClassNotExistException($className.'不存在');
     }
 
     /**
      * 获取实体模型实例
+     *
      * @param $tableName
      * @param string $entityNamespace 实体的命名空间
+     * @throws EntityNotFoundException
      * @return bool
      */
     public function entity($tableName, $entityNamespace = 'Entity\\Models')
@@ -326,7 +330,7 @@ final class Application
         if (class_exists($className)) {
             return new $className;
         }
-        return null;
+        throw new EntityNotFoundException($className . '类不存在');
     }
 
     /**
@@ -350,12 +354,14 @@ final class Application
                 $dbName = $dbName ?: current(array_keys($dbConfig));
                 return $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . ucfirst($className));
             } catch (ORMException $e) {
-                return null;
+                throw $e;
             } catch (\InvalidArgumentException $e) {
-                return null;
+                throw $e;
+            }catch (\Exception $e){
+                throw $e;
             }
         }
-        return null;
+        throw new EntityNotFoundException($repositoryClassName . '类不存在');
     }
 
     /**

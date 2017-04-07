@@ -28,10 +28,10 @@ class MemcachedCacheProvider implements ServiceProviderInterface
             if ($container['application']->component('namespace')) {
                 $namespace = $container['application']->component('namespace');
             }
-            $memcachedCacheDriver = new MemcachedCache();
-            $memcachedCacheDriver->setNamespace($namespace);
-            $memcachedCacheDriver->setMemcached($container['application']->component('memcached'));
-            return $memcachedCacheDriver;
+            $memcachedCache = new MemcachedCache();
+            $memcachedCache->setNamespace($namespace);
+            $memcachedCache->setMemcached($container['application']->component('memcached'));
+            return $memcachedCache;
         };
     }
 }
