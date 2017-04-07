@@ -1,4 +1,9 @@
 <?php
+/**
+ * User: macro chen <chen_macro@163.com>
+ * Date: 2016/10/16
+ * Time: 18:40
+ */
 namespace Polymer\Utils;
 
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
