@@ -192,7 +192,6 @@ final class Application
         }
     }
 
-
     /**
      * 添加自定义订阅器
      *
@@ -227,8 +226,8 @@ final class Application
                 throw new \InvalidArgumentException('class_name必须设置');
             }
             $className = $value['class_name'];
-            $params = isset($value['params']) ? $value['params'] : [];
-            $listener === 1 ? $eventManager->{$method}($key, new $className($params)) : $eventManager->{$method}(new $className($params));
+            $data = isset($value['params']) ? $value['params'] : [];
+            $listener === 1 ? $eventManager->{$method}($key, new $className($data)) : $eventManager->{$method}(new $className($data));
         }
         return $eventManager;
     }
@@ -245,23 +244,23 @@ final class Application
         if (!$this->container->has($componentName)) {
             $tmpClassName = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $componentName)))));
             $providersPath = array_merge($this->config('providersPath'), $this->config('app.providersPath') ?: []);
-            $isClassExist = 0;
+            $classExist = 0;
             foreach ($providersPath as $namespace) {
                 $className = $namespace . '\\' . $tmpClassName . 'Provider';
                 if (class_exists($className)) {
                     $this->container->register(new $className(), $param);
-                    $isClassExist = 1;
+                    $classExist = 1;
                     break;
                 }
             }
-            if (!$isClassExist) {
+            if (!$classExist) {
                 return null;
             }
         }
         try {
             $retObj = $this->container->get($componentName);
             if ($componentName === Constants::REDIS) {
-                $database = (isset($param['database']) && $param['database']) ? $param['database'] : 0;
+                $database = (isset($param['database']) && is_numeric($param['database'])) ? $param['database'] : 0;
                 $retObj->select($database);
             }
             return $retObj;
@@ -301,12 +300,11 @@ final class Application
      *
      * @param string $modelName 模型的名字
      * @param array $parameters 实例化时需要的参数
-     * @param mixed $modelNamespace 模型命名空间
+     * @param string $modelNamespace 模型命名空间
      * @return mixed
      */
-    public function model($modelName, array $parameters = [], $modelNamespace = null)
+    public function model($modelName, array $parameters = [], $modelNamespace = APP_NAME . '\\Models')
     {
-        $modelNamespace = (null !== $modelNamespace) ? $modelNamespace : $modelNamespace = APP_NAME . '\\Models';
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $modelName)))));
         $className = $modelNamespace . '\\' . ucfirst($className) . 'Model';
         if (class_exists($className)) {
@@ -318,12 +316,11 @@ final class Application
     /**
      * 获取实体模型实例
      * @param $tableName
-     * @param mixed $entityNamespace 实体的命名空间
+     * @param string $entityNamespace 实体的命名空间
      * @return bool
      */
-    public function entity($tableName, $entityNamespace = null)
+    public function entity($tableName, $entityNamespace = 'Entity\\Models')
     {
-        $entityNamespace = (null !== $entityNamespace) ? $entityNamespace : $entityNamespace = 'Entity\\Models';
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $tableName)))));
         $className = $entityNamespace . '\\' . ucfirst($className);
         if (class_exists($className)) {
@@ -338,15 +335,13 @@ final class Application
      * @param string $entityName 实体的名字
      * @param string $dbName 数据库的名字
      * @param null $entityFolder 实体文件的路径
-     * @param mixed $entityNamespace 实体的命名空间
-     * @param mixed $repositoryNamespace Repository的命名空间
+     * @param string $entityNamespace 实体的命名空间
+     * @param string $repositoryNamespace Repository的命名空间
      * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
+    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = 'Entity\\Models', $repositoryNamespace = 'Entity\\Repositories')
     {
-        $repositoryNamespace = (null !== $repositoryNamespace) ? $repositoryNamespace : $repositoryNamespace = 'Entity\\Repositories';
-        $entityNamespace = (null !== $entityNamespace) ? $entityNamespace : $entityNamespace = 'Entity\\Models';
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $entityName)))));
         $repositoryClassName = $repositoryNamespace . '\\' . ucfirst($className) . 'Repository';
         if (class_exists($repositoryClassName)) {
@@ -368,12 +363,11 @@ final class Application
      *
      * @param string $serviceName
      * @param array $params
-     * @param mixed $serviceNamespace
+     * @param string $serviceNamespace
      * @return null | Object
      */
-    public function service($serviceName, array $params = [], $serviceNamespace = null)
+    public function service($serviceName, array $params = [], $serviceNamespace = APP_NAME . '\\Services')
     {
-        $serviceNamespace = (null !== $serviceNamespace) ? $serviceNamespace : $serviceNamespace = APP_NAME . '\\Services';
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $serviceName)))));
         $className = $serviceNamespace . '\\' . ucfirst($className) . 'Service';
         if (class_exists($className)) {
