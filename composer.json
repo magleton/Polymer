@@ -26,6 +26,7 @@
     "symfony/serializer": "~3.0",
     "symfony/property-access": "~3.0",
     "symfony/property-info": "~3.1",
+    "symfony/expression-language": "~3.2",
     "mikey179/vfsStream": "~1.6",
     "mockery/mockery": "~0.9",
     "ext-pdo": "*",
