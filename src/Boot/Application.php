@@ -98,6 +98,7 @@ final class Application
      * 初始化应用环境
      *
      * @author macro chen <macro_fengye@163.com>
+     * @throws \Exception
      */
     private function initEnvironment()
     {
@@ -108,13 +109,17 @@ final class Application
             ini_set('display_errors', 'on');
             error_reporting(E_ALL);
         }
-        set_error_handler('handleError');
-        set_exception_handler('handleException');
-        register_shutdown_function('handleShutdown');
-        $this->container = new Container($this->config('slim'));
-        $this->container->register(new InitAppProvider());
-        $this->container['application'] = $this;
-        static::setInstance($this);
+        try {
+            set_error_handler('handleError');
+            set_exception_handler('handleException');
+            register_shutdown_function('handleShutdown');
+            $this->container = new Container($this->config('slim'));
+            $this->container->register(new InitAppProvider());
+            $this->container['application'] = $this;
+            static::setInstance($this);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -127,22 +132,26 @@ final class Application
      */
     public function db($dbName = '', $entityFolder = ROOT_PATH . '/entity/Models')
     {
-        $dbConfig = $this->config('db.' . APPLICATION_ENV);
-        $dbName = $dbName ?: current(array_keys($dbConfig));
-        if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->component('entityManager-' . $dbName)) {
-            $configuration = Setup::createAnnotationMetadataConfiguration([
-                $entityFolder,
-            ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', null,
-                $dbConfig[$dbName]['useSimpleAnnotationReader']);
-            try {
-                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
-                    $this->component('eventManager'));
-                $this->container['entityManager-' . $dbName] = $entityManager;
-            } catch (\InvalidArgumentException $e) {
-                throw $e;
+        try {
+            $dbConfig = $this->config('db.' . APPLICATION_ENV);
+            $dbName = $dbName ?: current(array_keys($dbConfig));
+            if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->component('entityManager-' . $dbName)) {
+                $configuration = Setup::createAnnotationMetadataConfiguration([
+                    $entityFolder,
+                ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', null,
+                    $dbConfig[$dbName]['useSimpleAnnotationReader']);
+                try {
+                    $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
+                        $this->component('eventManager'));
+                    $this->container['entityManager-' . $dbName] = $entityManager;
+                } catch (\InvalidArgumentException $e) {
+                    throw $e;
+                }
             }
+            return $this->container['entityManager-' . $dbName];
+        } catch (\Exception $e) {
+            throw $e;
         }
-        return $this->container['entityManager-' . $dbName];
     }
 
     /**
@@ -346,13 +355,7 @@ final class Application
      * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository(
-        $entityName,
-        $dbName = '',
-        $entityFolder = null,
-        $entityNamespace = 'Entity\\Models',
-        $repositoryNamespace = 'Entity\\Repositories'
-    ) {
+    public function repository( $entityName, $dbName = '', $entityFolder = null, $entityNamespace = 'Entity\\Models', $repositoryNamespace = 'Entity\\Repositories') {
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $entityName)))));
         $repositoryClassName = $repositoryNamespace . '\\' . ucfirst($className) . 'Repository';
         if (class_exists($repositoryClassName)) {

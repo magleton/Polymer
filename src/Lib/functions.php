@@ -74,11 +74,11 @@ if (!function_exists('checkFromIPValidity')) {
      */
     function checkFromIPValidity($fromIp = '', array $allowIps = array())
     {
-        $fromIp = $fromIp ? $fromIp : getIp();
+        $fromIp = $fromIp ?: getIP();
         $res = false;
         if ($allowIps) {
             foreach ($allowIps as $allowIp) {
-                if (!strncmp($fromIp, $allowIp, strlen($allowIp))) {
+                if (0 === strpos($fromIp, $allowIp)) {
                     $res = true;
                     break;
                 }
@@ -107,7 +107,7 @@ if (!function_exists('verifyPwdComplexity')) {
             if (preg_match('@[a-zA-Z]+@', $password)) {
                 $complexity |= 2;
             }
-            if (preg_match('@[0-9]+@', $password)) {
+            if (preg_match('@[\d]+@', $password)) {
                 $complexity |= 4;
             }
             if (preg_match('@[A-Z]+@', $password)) {
@@ -131,5 +131,65 @@ if (!function_exists('filterInvisibleCharacter')) {
     function filterInvisibleCharacter($str)
     {
         return preg_replace('/[^[:print:]]/', '', $str);
+    }
+}
+
+if (!function_exists('authCode')) {
+    /**
+     * 加解密数据
+     *
+     * @param $string
+     * @param string $operation
+     * @param string $key
+     * @param int $expiry
+     * @return string
+     */
+    function authCode($string, $operation = 'DECODE', $key = '', $expiry = 0)
+    {
+        $cKeyLength = 4;
+        $key = md5($key ?: 'polymerKey');
+        $keyA = md5(substr($key, 0, 16));
+        $keyB = md5(substr($key, 16, 16));
+        $keyC = '';
+        if ($cKeyLength) {
+            if ($operation === 'DECODE') {
+                $keyC = substr($string, 0, $cKeyLength);
+            } else {
+                $keyC = substr(md5(microtime()), -$cKeyLength);
+            }
+        }
+        $cryptKey = $keyA . md5($keyA . $keyC);
+        $keyLength = strlen($cryptKey);
+        $string = $operation === 'DECODE' ? base64_decode(substr($string, $cKeyLength)) : sprintf('%010d',$expiry ? $expiry + time() : 0) . substr(md5($string . $keyB), 0, 16) . $string;
+        $string_length = strlen($string);
+        $result = '';
+        $box = range(0, 255);
+        $rndKey = array();
+        for ($i = 0; $i <= 255; $i++) {
+            $rndKey[$i] = ord($cryptKey[$i % $keyLength]);
+        }
+        for ($j = $i = 0; $i < 256; $i++) {
+            $j = ($j + $box[$i] + $rndKey[$i]) % 256;
+            $tmp = $box[$i];
+            $box[$i] = $box[$j];
+            $box[$j] = $tmp;
+        }
+        for ($a = $j = $i = 0; $i < $string_length; $i++) {
+            $a = ($a + 1) % 256;
+            $j = ($j + $box[$a]) % 256;
+            $tmp = $box[$a];
+            $box[$a] = $box[$j];
+            $box[$j] = $tmp;
+            $result .= chr(ord($string[$i]) ^ ($box[($box[$a] + $box[$j]) % 256]));
+        }
+        if ($operation === 'DECODE') {
+            if ((substr($result, 0, 10) == 0 || substr($result, 0, 10) - time() > 0) && 0 === strcmp(substr($result, 10, 16), substr(md5(substr($result, 26) . $keyB), 0, 16))) {
+                return substr($result, 26);
+            } else {
+                return '';
+            }
+        } else {
+            return $keyC . str_replace('=', '', base64_encode($result));
+        }
     }
 }
