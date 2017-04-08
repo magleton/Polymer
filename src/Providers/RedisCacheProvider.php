@@ -23,14 +23,16 @@ class RedisCacheProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['redisCache'] = function (Container $container) {
-            $redisCache = new RedisCache();
-            $namespace = $container->has('namespace') ? $container->get('namespace') : 'redisCache';
-            $database = $container->has('database') ? $container->get('database') : 0;
-            //设置缓存的命名空间
-            $type = 'redis';
-            $redisCache->setNamespace($namespace);
-            $redisCache->setRedis($container['application']->component($type, ['database' => $database]));
-            return $redisCache;
+            try {
+                $redisCache = new RedisCache();
+                $namespace = $container->offsetExists('redis_namespace') ? $container->offsetGet('redis_namespace') : 'redisCache';
+                $database = $container->offsetExists('redis_database') ? $container->offsetGet('redis_database') : 0;
+                $redisCache->setNamespace($namespace);
+                $redisCache->setRedis($container['application']->component('redis', ['database' => $database]));
+                return $redisCache;
+            } catch (\Exception $e) {
+                throw $e;
+            }
         };
     }
 }

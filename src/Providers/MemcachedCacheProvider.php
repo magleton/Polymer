@@ -24,14 +24,15 @@ class MemcachedCacheProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['memcachedCache'] = function (Container $container) {
-            $namespace = 'memcachedCache';
-            if ($container['application']->component('namespace')) {
-                $namespace = $container['application']->component('namespace');
+            try {
+                $namespace = $container->offsetExists('memcached_namespace') ? $container->offsetGet('memcached_namespace') : 'memcachedCache';
+                $memcachedCache = new MemcachedCache();
+                $memcachedCache->setNamespace($namespace);
+                $memcachedCache->setMemcached($container['application']->component('memcached'));
+                return $memcachedCache;
+            } catch (\Exception $e) {
+                throw $e;
             }
-            $memcachedCache = new MemcachedCache();
-            $memcachedCache->setNamespace($namespace);
-            $memcachedCache->setMemcached($container['application']->component('memcached'));
-            return $memcachedCache;
         };
     }
 }
