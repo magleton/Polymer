@@ -27,7 +27,9 @@ class RouterFileProvider implements ServiceProviderInterface
                     @unlink($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')));
                 }
                 $router_file_contents = '<?php ' . "\n" . '$app = $container[\'application\']->component(\'app\');';
-                $router_file_contents .= "\n" . '$app->add(new \RunTracy\Middlewares\TracyMiddleware($app))';
+                if (class_exists('\RunTracy\Middlewares\TracyMiddleware')) {
+                    $router_file_contents .= "\n" . '$app->add(new \RunTracy\Middlewares\TracyMiddleware($app))';
+                }
                 if ($container['application']->config('middleware')) {
                     foreach ($container['application']->config('middleware') as $key => $middleware) {
                         if (function_exists($middleware) && is_callable($middleware)) {
