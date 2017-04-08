@@ -46,7 +46,6 @@ class TestServiceTest extends \Polymer\Testing\TestCase
     public function testAuthCode(){
         $str = 'this is a test string';
         $encryptStr = authCode($str,'ENCODE');
-        print_r([$encryptStr,authCode($encryptStr)]);
         $this->assertEquals($str,authCode($encryptStr));
     }
 }
