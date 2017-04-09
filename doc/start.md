@@ -120,8 +120,9 @@ Polymer是一个基于Slim、Doctrine、Twig的MVC框架!设计上只是将其�
     $app->map(['GET', 'POST'], '/', APP_NAME . '\\Controller\\Home:index')->setName(APP_NAME . '.home.index');
 将其保存在app\CMS\Routers里面!
 
-8、在浏览器里输入服务器配置的虚拟域名,例如:http://polymer.cms.com,将显示如下内容:
-{'data':'data'}
+8、在浏览器里输入服务器配置的虚拟域名,例如:http://polymer.cms.com, 将显示如下内容:
+    
+    {'data':'data'}
 
 
 9、[参考PoCMS项目](https://github.com/macrofengye/PoCMS),该项目是基于Polymer框架开发!
