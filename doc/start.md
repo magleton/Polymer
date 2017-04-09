@@ -124,6 +124,9 @@ Polymer是一个基于Slim、Doctrine、Twig的MVC框架!设计上只是将其�
 {'data':'data'}
 
 
+9、[参考PoCMS项目](https://github.com/macrofengye/PoCMS),该项目是基于Polymer框架开发!
+
+
 
 
 
