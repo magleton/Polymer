@@ -9,7 +9,7 @@ Polymer是一个基于Slim、Doctrine、Twig的MVC框架!设计上只是将其�
 
 [Twig参考文档](https://twig.sensiolabs.org/doc/2.x/)
 
-[PoCMS是基于Polymer的项目](https://github.com/macrofengye/PoCMS)
+[PoCMS项目](https://github.com/macrofengye/PoCMS)
 
 ## 安装
 
