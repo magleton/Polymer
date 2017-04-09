@@ -1,4 +1,4 @@
-#简介
+## 简介
 
 Polymer是一个基于Slim、Doctrine、Twig的MVC框架!设计上只是将其定位于一个'胶水型'的框架,
 其本身并没有对Doctrine、Slim、Twig进行任何的封装!只是将这三者进行了整合!
@@ -9,7 +9,7 @@ Polymer是一个基于Slim、Doctrine、Twig的MVC框架!设计上只是将其�
 
 [Twig参考文档](https://twig.sensiolabs.org/doc/2.x/)
 
-##安装
+## 安装
 
 1、使用Composer进行安装,在项目路径下新建composer.json,内容如下:
 
