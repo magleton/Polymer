@@ -22,7 +22,7 @@ class RouterFileProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['routerFile'] = function (Container $container) {
-            if (APPLICATION_ENV === 'development' || !file_exists(APP_PATH . '/Routers/router.lock')) {
+            if (!file_exists(APP_PATH . '/Routers/router.lock') || $container['application']->config('app.generate_router',false)) {
                 if (file_exists($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')))) {
                     @unlink($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')));
                 }
