@@ -333,7 +333,7 @@ final class Application
             try {
                 $dbConfig = $this->config('db.' . APPLICATION_ENV);
                 $dbName = $dbName ?: current(array_keys($dbConfig));
-                return $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . ucfirst($entityName));
+                return $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . Inflector::classify($entityName));
             } catch (\Exception $e) {
                 throw $e;
             }
