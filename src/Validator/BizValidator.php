@@ -44,6 +44,7 @@ class BizValidator
      * @param array $rules 验证规则
      * @param array $groups 验证组
      * @param string $key 错误信息的key，用于获取错误信息
+     * @throws \Exception
      * @return boolean
      */
     public function verifyField(array $data = [], array $rules = [], array $groups = null, $key = 'error')
@@ -74,7 +75,7 @@ class BizValidator
      * @param array $rules 验证规则
      * @param array $groups 验证组
      * @param string $key 错误信息的key,用于获取错误信息
-     * @throws NoSuchMetadataException
+     * @throws NoSuchMetadataException | \Exception
      * @return boolean
      */
     public function verifyObject($validateObject, array $rules = [], array $groups = null, $key = 'error')
