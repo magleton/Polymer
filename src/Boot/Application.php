@@ -52,7 +52,6 @@ final class Application
      *
      * @author macro chen <macro_fengye@163.com>
      * @throws \Exception
-     * @return mixed
      */
     public function start()
     {
@@ -63,12 +62,6 @@ final class Application
         } catch (\Exception $e) {
             throw $e;
         }
-        if ($this->config('app.show_use_memory')) {
-            echo '分配内存量 : ' . convert(memory_get_usage(true));
-            echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-            echo '内存的峰值 : ' . convert(memory_get_peak_usage(true));
-        }
-        return true;
     }
 
     /**
@@ -76,7 +69,6 @@ final class Application
      *
      * @author macro chen <macro_fengye@163.com>
      * @throws \Exception
-     * @return mixed
      */
     public function startConsole()
     {
@@ -85,14 +77,7 @@ final class Application
         } catch (\Exception $e) {
             throw $e;
         }
-        if ($this->config('app.show_use_memory')) {
-            echo '分配内存量 : ' . convert(memory_get_usage(true));
-            echo '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-            echo '内存的峰值 : ' . convert(memory_get_peak_usage(true));
-        }
-        return true;
     }
-
 
     /**
      * 初始化应用环境
@@ -102,13 +87,6 @@ final class Application
      */
     private function initEnvironment()
     {
-        if (APPLICATION_ENV === 'production') {
-            ini_set('display_errors', 'off');
-            error_reporting(0);
-        } else {
-            ini_set('display_errors', 'on');
-            error_reporting(E_ALL);
-        }
         try {
             set_error_handler('handleError');
             set_exception_handler('handleException');
@@ -355,7 +333,8 @@ final class Application
      * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository( $entityName, $dbName = '', $entityFolder = null, $entityNamespace = 'Entity\\Models', $repositoryNamespace = 'Entity\\Repositories') {
+    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = 'Entity\\Models', $repositoryNamespace = 'Entity\\Repositories')
+    {
         $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $entityName)))));
         $repositoryClassName = $repositoryNamespace . '\\' . ucfirst($className) . 'Repository';
         if (class_exists($repositoryClassName)) {
