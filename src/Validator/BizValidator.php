@@ -28,6 +28,8 @@ class BizValidator
 
     /**
      * Validator constructor.
+     *
+     * @throws \Exception
      */
     public function __construct()
     {
