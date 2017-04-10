@@ -7,16 +7,15 @@
 
 namespace Polymer\Boot;
 
+use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\ORMException;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Exceptions\ModelClassNotExistException;
-use Polymer\Exceptions\ModelInstanceErrorException;
 use Polymer\Providers\InitAppProvider;
 use Polymer\Repository\Repository;
 use Polymer\Utils\Constants;
-use Polymer\Utils\DoctrineExtConfigLoader;
 use Slim\Container;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Common\EventManager;
@@ -104,27 +103,23 @@ final class Application
      * 实例化数据库链接对象
      *
      * @param string $dbName
-     * @param string $entityFolder 实体文件夹的名字
+     * @param mixed $entityFolder 实体文件夹的名字
      * @throws \Doctrine\ORM\ORMException | \InvalidArgumentException | \Exception
      * @return EntityManager
      */
-    public function db($dbName = '', $entityFolder = ROOT_PATH . '/entity/Models')
+    public function db($dbName = '', $entityFolder = null)
     {
         try {
             $dbConfig = $this->config('db.' . APPLICATION_ENV);
             $dbName = $dbName ?: current(array_keys($dbConfig));
             if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->component('entityManager-' . $dbName)) {
+                $entityFolder = $entityFolder ?: ROOT_PATH . '/entity/Models';
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
                 ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', null,
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
-                try {
-                    $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
-                        $this->component('eventManager'));
-                    $this->container['entityManager-' . $dbName] = $entityManager;
-                } catch (\InvalidArgumentException $e) {
-                    throw $e;
-                }
+                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->component('eventManager'));
+                $this->container['entityManager-' . $dbName] = $entityManager;
             }
             return $this->container['entityManager-' . $dbName];
         } catch (\Exception $e) {
@@ -144,20 +139,18 @@ final class Application
      */
     public function config($key, $default = null)
     {
-        $configPaths = [dirname(__DIR__) . '/Config'];
-        if (defined('ROOT_PATH') && file_exists(ROOT_PATH . '/config') && is_dir(ROOT_PATH . '/config')) {
-            $configPaths[] = ROOT_PATH . '/config';
-        }
-        if (defined('APP_PATH') && file_exists(APP_PATH . '/Config') && is_dir(APP_PATH . '/Config')) {
-            $configPaths[] = APP_PATH . '/Config';
-        }
         try {
+            $configPaths = [dirname(__DIR__) . '/Config'];
+            if (defined('ROOT_PATH') && file_exists(ROOT_PATH . '/config') && is_dir(ROOT_PATH . '/config')) {
+                $configPaths[] = ROOT_PATH . '/config';
+            }
+            if (defined('APP_PATH') && file_exists(APP_PATH . '/Config') && is_dir(APP_PATH . '/Config')) {
+                $configPaths[] = APP_PATH . '/Config';
+            }
             if (null === $this->configObject) {
                 $this->configObject = new Config($configPaths);
             }
             return $this->configObject->get($key, $default);
-        } catch (EmptyDirectoryException $e) {
-            throw $e;
         } catch (\Exception $e) {
             throw $e;
         }
@@ -207,7 +200,7 @@ final class Application
      */
     private function addEventOrSubscribe(array $params, $listener)
     {
-        $method = $listener ? 'addEventListener' : 'addEventSubscriber';
+        $methods = ['addEventListener', 'addEventSubscriber'];
         $eventManager = $this->component('eventManager');
         foreach ($params as $key => $value) {
             if (!isset($value['class_name'])) {
@@ -215,8 +208,7 @@ final class Application
             }
             $className = $value['class_name'];
             $data = isset($value['params']) ? $value['params'] : [];
-            $listener === 1 ? $eventManager->{$method}($key,
-                new $className($data)) : $eventManager->{$method}(new $className($data));
+            $listener === 1 ? $eventManager->{$methods[$listener]}($key, new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
         }
         return $eventManager;
     }
@@ -232,11 +224,10 @@ final class Application
     public function component($componentName, array $param = [])
     {
         if (!$this->container->has($componentName)) {
-            $tmpClassName = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $componentName)))));
             $providersPath = array_merge($this->config('providersPath'), $this->config('app.providersPath') ?: []);
             $classExist = 0;
             foreach ($providersPath as $namespace) {
-                $className = $namespace . '\\' . $tmpClassName . 'Provider';
+                $className = $namespace . '\\' . Inflector::classify($componentName) . 'Provider';
                 if (class_exists($className)) {
                     $this->container->register(new $className(), $param);
                     $classExist = 1;
@@ -248,12 +239,12 @@ final class Application
             }
         }
         try {
-            $retObj = $this->container->get($componentName);
+            $componentObj = $this->container->get($componentName);
             if ($componentName === Constants::REDIS) {
                 $database = (isset($param['database']) && is_numeric($param['database'])) ? $param['database'] : 0;
-                $retObj->select($database);
+                $componentObj->select($database);
             }
-            return $retObj;
+            return $componentObj;
         } catch (ContainerValueNotFoundException $e) {
             throw $e;
         } catch (ContainerException $e) {
@@ -294,32 +285,32 @@ final class Application
      * @throws ModelClassNotExistException
      * @return mixed
      */
-    public function model($modelName, array $parameters = [], $modelNamespace = APP_NAME . '\\Models')
+    public function model($modelName, array $parameters = [], $modelNamespace = null)
     {
-        $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $modelName)))));
-        $className = $modelNamespace . '\\' . ucfirst($className) . 'Model';
-        if (class_exists($className)) {
-            return new $className($parameters);
+        $modelNamespace = $modelNamespace ?: APP_NAME . '\\Models';
+        $modelName = $modelNamespace . '\\' . Inflector::classify($modelName) . 'Model';
+        if (class_exists($modelName)) {
+            return new $modelName($parameters);
         }
-        throw new ModelClassNotExistException($className . '不存在');
+        throw new ModelClassNotExistException($modelName . '不存在');
     }
 
     /**
      * 获取实体模型实例
      *
-     * @param $tableName
+     * @param $entityName
      * @param string $entityNamespace 实体的命名空间
      * @throws EntityNotFoundException
      * @return bool
      */
-    public function entity($tableName, $entityNamespace = 'Entity\\Models')
+    public function entity($entityName, $entityNamespace = null)
     {
-        $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $tableName)))));
-        $className = $entityNamespace . '\\' . ucfirst($className);
-        if (class_exists($className)) {
-            return new $className;
+        $entityNamespace = $entityNamespace ?: 'Entity\\Models';
+        $entityName = $entityNamespace . '\\' . Inflector::classify($entityName);
+        if (class_exists($entityName)) {
+            return new $entityName;
         }
-        throw new EntityNotFoundException($className . '类不存在');
+        throw new EntityNotFoundException($entityName . '类不存在');
     }
 
     /**
@@ -333,19 +324,16 @@ final class Application
      * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = 'Entity\\Models', $repositoryNamespace = 'Entity\\Repositories')
+    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {
-        $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $entityName)))));
-        $repositoryClassName = $repositoryNamespace . '\\' . ucfirst($className) . 'Repository';
+        $entityNamespace = $entityNamespace ?: 'Entity\\Models';
+        $repositoryNamespace = $repositoryNamespace ?: 'Entity\\Repositories';
+        $repositoryClassName = $repositoryNamespace . '\\' . Inflector::classify($entityName) . 'Repository';
         if (class_exists($repositoryClassName)) {
             try {
                 $dbConfig = $this->config('db.' . APPLICATION_ENV);
                 $dbName = $dbName ?: current(array_keys($dbConfig));
-                return $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . ucfirst($className));
-            } catch (ORMException $e) {
-                throw $e;
-            } catch (\InvalidArgumentException $e) {
-                throw $e;
+                return $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . ucfirst($entityName));
             } catch (\Exception $e) {
                 throw $e;
             }
@@ -361,10 +349,10 @@ final class Application
      * @param string $serviceNamespace
      * @return null | Object
      */
-    public function service($serviceName, array $params = [], $serviceNamespace = APP_NAME . '\\Services')
+    public function service($serviceName, array $params = [], $serviceNamespace = null)
     {
-        $className = ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $serviceName)))));
-        $className = $serviceNamespace . '\\' . ucfirst($className) . 'Service';
+        $serviceNamespace = $serviceNamespace ?: APP_NAME . '\\Services';
+        $className = $serviceNamespace . '\\' . Inflector::classify($serviceName) . 'Service';
         if (class_exists($className)) {
             return new $className($params);
         }
