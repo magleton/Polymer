@@ -59,12 +59,12 @@ if (!function_exists('handleShutdown')) {
     function handleShutdown()
     {
         $error = error_get_last();
-        if ($error["type"] === E_ERROR) {
+        if ($error['type'] === E_ERROR) {
             if (app()->config('logger')) {
-                $msg = 'Type : ' . $error["type"] . '\nMessage : ' . $error["message"] . '\nFile : ' . $error["file"] . '\nLine : ' . $error["line"];
+                $msg = 'Type : ' . $error['type'] . '\nMessage : ' . $error['message'] . '\nFile : ' . $error['file'] . '\nLine : ' . $error['line'];
                 app()->config('logger')->error($msg);
             } else {
-                $msg = 'Type : ' . $error["type"] . ' , Message : ' . $error["message"] . ' , File : ' . $error["file"] . ' , Line : ' . $error["line"];
+                $msg = 'Type : ' . $error['type'] . ' , Message : ' . $error['message'] . ' , File : ' . $error['file'] . ' , Line : ' . $error['line'];
                 logger('Fatal Error : ', [$msg], APP_PATH . '/log/fatal_error.log', Monolog\Logger::ERROR);
                 if (defined('TEMPLATE_PATH') && file_exists(TEMPLATE_PATH . 'error.twig')) {
                     echo @file_get_contents(TEMPLATE_PATH . 'error.twig');
@@ -136,12 +136,10 @@ if (!function_exists('debugger')) {
      */
     function debugger($level = 0, $dbName = null, $logPath = APP_PATH . '/log')
     {
-        if ($dbName) {
-            $em = app()->db($dbName);
-            $doctrineConfig = $em->getConfiguration();
-            $doctrineConfig->setSQLLogger(new \Doctrine\DBAL\Logging\DebugStack());
-            app()->component('app')->getContainer()->offsetSet('doctrineConfig', $doctrineConfig);
-        }
+        $em = app()->db($dbName);
+        $doctrineConfig = $em->getConfiguration();
+        $doctrineConfig->setSQLLogger(new \Doctrine\DBAL\Logging\DebugStack());
+        app()->component('app')->getContainer()->offsetSet('doctrineConfig', $doctrineConfig);
         \RunTracy\Helpers\Profiler\Profiler::enable(true);
         \Tracy\Debugger::enable($level ? \Tracy\Debugger::PRODUCTION : \Tracy\Debugger::DEVELOPMENT, $logPath);
     }
