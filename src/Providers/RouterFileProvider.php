@@ -22,13 +22,13 @@ class RouterFileProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['routerFile'] = function (Container $container) {
-            if (!file_exists(APP_PATH . '/Routers/router.lock') || $container['application']->config('app.generate_router',false)) {
+            if (!file_exists(APP_PATH . '/Routers/router.lock') || $container['application']->config('app.generate_router', false)) {
                 if (file_exists($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')))) {
                     @unlink($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')));
                 }
-                $router_file_contents = '<?php ' . "\n" . '$app = $container[\'application\']->component(\'app\');';
+                $router_file_contents = '<?php ' . "\n" . '$app = $container[\'application\']->component(\'app\')';
                 if (class_exists('\RunTracy\Middlewares\TracyMiddleware')) {
-                    $router_file_contents .= "\n" . '$app->add(new \RunTracy\Middlewares\TracyMiddleware($app))';
+                    $router_file_contents .= "\n" . '->add(new \RunTracy\Middlewares\TracyMiddleware($app))';
                 }
                 if ($container['application']->config('middleware')) {
                     foreach ($container['application']->config('middleware') as $key => $middleware) {
