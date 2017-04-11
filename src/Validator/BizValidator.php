@@ -74,11 +74,10 @@ class BizValidator
      * @param Object $validateObject 要验证的对象
      * @param array $rules 验证规则
      * @param array $groups 验证组
-     * @param string $key 错误信息的key,用于获取错误信息
      * @throws NoSuchMetadataException | \Exception
      * @return boolean
      */
-    public function verifyObject($validateObject, array $rules = [], array $groups = null, $key = 'error')
+    public function verifyObject($validateObject, array $rules = [], array $groups = null)
     {
         try {
             $classMetadata = $this->validator->getMetadataFor($validateObject);
@@ -91,15 +90,7 @@ class BizValidator
                     }
                 }
             }
-            $errors = $this->validator->validate($validateObject, null, $groups);
-            if (count($errors)) {
-                foreach ($errors as $error) {
-                    $errorData[$error->getPropertyPath()] = $error->getMessage();
-                }
-                $this->app->component('error_collection')->set($key, $errorData);
-                return false;
-            }
-            return true;
+            return $this->validator->validate($validateObject, null, $groups);
         } catch (NoSuchMetadataException $e) {
             throw $e;
         }

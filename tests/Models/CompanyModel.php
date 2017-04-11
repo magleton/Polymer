@@ -34,7 +34,7 @@ class CompanyModel extends Model
                 'maxMessage' => 'Your first name cannot be longer than {{ limit }} characters',
                 'groups' => ['registration'],
             ],
-            'NotBlank' => ['groups' => ['add'], 'message' => 'aaaaa']
+            'NotBlank' => ['groups' => ['add'], 'message' => '该字段不能为空']
         ],
         'address' => [
             'Callback' => [
@@ -76,7 +76,14 @@ class CompanyModel extends Model
      *
      * @var array
      */
-    protected $excludeField = ['name', 'id'];
+    protected $excludeField = ['id'];
+
+    /**
+     * 映射字段
+     *
+     * @var array
+     */
+    protected $mappingField = ['KK_NAME' => 'name'];
 
     /**
      * 保存数据

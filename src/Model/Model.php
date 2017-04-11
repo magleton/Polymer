@@ -125,7 +125,8 @@ class Model
         $entityNamespace = $this->getProperty('entityNamespace');
         $repositoryNamespace = $this->getProperty('repositoryNamespace');
         if ($criteria) {
-            $repository = $this->app->repository($entityName, $schema, $entityFolder, $entityNamespace, $repositoryNamespace);
+            $repository = $this->app->repository($entityName, $schema, $entityFolder, $entityNamespace,
+                $repositoryNamespace);
             $entityObject = $repository->findOneBy($criteria);
         } else {
             $entityObject = $this->app->entity($entityName, $entityNamespace);
@@ -150,8 +151,13 @@ class Model
         if ($rules) {
             try {
                 $validator = $this->app->component('biz_validator');
-                $ret = $validator->verifyObject($this->entityObject, $rules, $groups);
-                if (!$ret) {
+                $validateResult = $validator->verifyObject($this->entityObject, $rules, $groups);
+                if (count($validateResult)) {
+                    foreach ($validateResult as $error) {
+                        $tmpMappingField = array_flip($this->mappingField);
+                        $errorData[$tmpMappingField[$error->getPropertyPath()]] = $error->getMessage();
+                    }
+                    $this->app->component('error_collection')->set($this->getProperty('table'), $errorData);
                     throw new EntityValidateErrorException('数据验证失败!');
                 }
                 return $this->entityObject;
