@@ -7,6 +7,9 @@
 
 namespace Polymer\Boot;
 
+use Doctrine\Common\Cache\ApcuCache;
+use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Inflector\Inflector;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\ORMException;
@@ -47,6 +50,13 @@ final class Application
      * @var Config $configObject
      */
     private $configObject = null;
+
+    /**
+     * 配置文件缓存
+     *
+     * @var Cache
+     */
+    private $configCache = null;
 
     /**
      * 启动WEB应用
@@ -92,6 +102,7 @@ final class Application
             set_error_handler('handleError');
             set_exception_handler('handleException');
             register_shutdown_function('handleShutdown');
+            extension_loaded('apcu') ? $this->configCache = new ApcuCache() : $this->configCache = new ArrayCache();
             $this->container = new Container($this->config('slim'));
             $this->container->register(new InitAppProvider());
             $this->container['application'] = $this;
@@ -142,6 +153,9 @@ final class Application
     public function config($key, $default = null)
     {
         try {
+            if ($this->configCache->fetch('configCache')) {
+                return $this->configCache->fetch('configCache')->get($key, $default);
+            }
             $configPaths = [dirname(__DIR__) . '/Config'];
             if (defined('ROOT_PATH') && file_exists(ROOT_PATH . '/config') && is_dir(ROOT_PATH . '/config')) {
                 $configPaths[] = ROOT_PATH . '/config';
@@ -151,6 +165,7 @@ final class Application
             }
             if (null === $this->configObject) {
                 $this->configObject = new Config($configPaths);
+                $this->configCache->save('configCache', $this->configObject);
             }
             return $this->configObject->get($key, $default);
         } catch (\Exception $e) {
@@ -202,7 +217,7 @@ final class Application
      */
     private function addEventOrSubscribe(array $params, $listener)
     {
-        $methods = ['addEventListener', 'addEventSubscriber'];
+        $methods = ['addEventSubscriber', 'addEventListener'];
         $eventManager = $this->component('eventManager');
         foreach ($params as $key => $value) {
             if (!isset($value['class_name'])) {
@@ -237,7 +252,7 @@ final class Application
                 }
             }
             if (!$classExist) {
-                throw new ComponentException(Inflector::classify($componentName) . 'Provider' . '不存在');
+                return null;
             }
         }
         try {
