@@ -41,6 +41,13 @@ class Model
     protected $entityObject = null;
 
     /**
+     * 需要映射的字段
+     *
+     * @var array
+     */
+    protected $mappingField = [];
+
+    /**
      * 需要排除掉的字段
      *
      * @var array
