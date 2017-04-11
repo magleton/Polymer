@@ -12,7 +12,9 @@ use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\ORMException;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
+use Polymer\Exceptions\ComponentException;
 use Polymer\Exceptions\ModelClassNotExistException;
+use Polymer\Exceptions\ServiceException;
 use Polymer\Providers\InitAppProvider;
 use Polymer\Repository\Repository;
 use Polymer\Utils\Constants;
@@ -235,7 +237,7 @@ final class Application
                 }
             }
             if (!$classExist) {
-                return null;
+                throw new ComponentException(Inflector::classify($componentName) . 'Provider' . '不存在');
             }
         }
         try {
@@ -347,6 +349,7 @@ final class Application
      * @param string $serviceName
      * @param array $params
      * @param string $serviceNamespace
+     * @throws ServiceException
      * @return null | Object
      */
     public function service($serviceName, array $params = [], $serviceNamespace = null)
@@ -356,7 +359,7 @@ final class Application
         if (class_exists($className)) {
             return new $className($params);
         }
-        return null;
+        throw new ServiceException($className . '类不存在');
     }
 
     /**
