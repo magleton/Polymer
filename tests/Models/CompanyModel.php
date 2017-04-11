@@ -72,6 +72,13 @@ class CompanyModel extends Model
     protected $repositoryNamespace = 'Polymer\Tests\Entity\Repositories';
 
     /**
+     * 需要排除的字段
+     *
+     * @var array
+     */
+    protected $excludeField = ['name', 'id'];
+
+    /**
      * 保存数据
      *
      * @param array $data

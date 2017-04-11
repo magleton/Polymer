@@ -7,6 +7,7 @@
 namespace Polymer\Model;
 
 use Doctrine\Common\Cache\Cache;
+use Doctrine\Common\Inflector\Inflector;
 use Doctrine\DBAL\Sharding\PoolingShardManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
@@ -38,6 +39,13 @@ class Model
      * @var null
      */
     protected $entityObject = null;
+
+    /**
+     * 需要排除掉的字段
+     *
+     * @var array
+     */
+    protected $excludeField = [];
 
     /**
      * EntityManager实例
@@ -84,7 +92,7 @@ class Model
         try {
             $this->entityObject = $this->obtainEObj($criteria);
             foreach ($this->mergeParams($data) as $k => $v) {
-                $setMethod = 'set' . ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $k)))));
+                $setMethod = 'set' . Inflector::classify($k);
                 if (method_exists($this->entityObject, $setMethod)) {
                     $this->entityObject->$setMethod($v);
                 }
@@ -151,13 +159,15 @@ class Model
      * 合并请求参数数据与自定义参数数据
      *
      * @param array $data 需要验证的数据
-     * @param array $mappingField 映射字段
      * @return array
      * @throws \Exception
      */
-    protected function mergeParams(array $data = [], array $mappingField = [])
+    protected function mergeParams(array $data = [])
     {
+        $excludeField = $this->getProperty('excludeField');
+        $mappingField = $this->getProperty('mappingField');
         $data = array_merge($this->app->component('request')->getParams(), $data);
+        $excludeField && $data = array_diff_key($data, array_flip($excludeField));
         if ($mappingField) {
             $combineData = [];
             foreach ($data as $key => $value) {
