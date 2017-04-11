@@ -155,7 +155,8 @@ class Model
                 if (count($validateResult)) {
                     foreach ($validateResult as $error) {
                         $tmpMappingField = array_flip($this->mappingField);
-                        $errorData[$tmpMappingField[$error->getPropertyPath()]] = $error->getMessage();
+                        $propertyName = isset($tmpMappingField[$error->getPropertyPath()]) ? $tmpMappingField[$error->getPropertyPath()] : $error->getPropertyPath();
+                        $errorData[$propertyName] = $error->getMessage();
                     }
                     $this->app->component('error_collection')->set($this->getProperty('table'), $errorData);
                     throw new EntityValidateErrorException('数据验证失败!');
