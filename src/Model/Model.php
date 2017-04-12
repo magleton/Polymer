@@ -61,7 +61,12 @@ class Model
      */
     protected $em = null;
 
-    protected $data = [];
+    /**
+     * 保存自定义数据,供验证出错时显示提示信息用
+     *
+     * @var array
+     */
+    private $customerData = [];
 
     /**
      * 模型构造函数
@@ -100,7 +105,7 @@ class Model
     {
         try {
             $this->entityObject = $this->obtainEObj($criteria);
-            $this->data = $data;
+            $this->customerData = $data;
             foreach ($this->mergeParams($data) as $k => $v) {
                 $setMethod = 'set' . Inflector::classify($k);
                 if (method_exists($this->entityObject, $setMethod)) {
@@ -159,7 +164,7 @@ class Model
                     foreach ($validateResult as $error) {
                         $tmpMappingField = array_flip($this->mappingField);
                         $propertyName = $error->getPropertyPath();
-                        if (isset($tmpMappingField[$propertyName]) && array_key_exists($tmpMappingField[$propertyName], array_merge($this->app->component('request')->getParams(), $this->data))) {
+                        if (isset($tmpMappingField[$propertyName]) && array_key_exists($tmpMappingField[$propertyName], array_merge($this->app->component('request')->getParams(), $this->customerData))) {
                             $propertyName = $tmpMappingField[$propertyName];
                         }
                         $errorData[$propertyName] = $error->getMessage();
