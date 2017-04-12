@@ -61,6 +61,8 @@ class Model
      */
     protected $em = null;
 
+    protected $data = [];
+
     /**
      * 模型构造函数
      * @param array $params
@@ -98,6 +100,7 @@ class Model
     {
         try {
             $this->entityObject = $this->obtainEObj($criteria);
+            $this->data = $data;
             foreach ($this->mergeParams($data) as $k => $v) {
                 $setMethod = 'set' . Inflector::classify($k);
                 if (method_exists($this->entityObject, $setMethod)) {
@@ -155,7 +158,10 @@ class Model
                 if (count($validateResult)) {
                     foreach ($validateResult as $error) {
                         $tmpMappingField = array_flip($this->mappingField);
-                        $propertyName = isset($tmpMappingField[$error->getPropertyPath()]) ? $tmpMappingField[$error->getPropertyPath()] : $error->getPropertyPath();
+                        $propertyName = $error->getPropertyPath();
+                        if (isset($tmpMappingField[$propertyName]) && array_key_exists($tmpMappingField[$propertyName], array_merge($this->app->component('request')->getParams(), $this->data))) {
+                            $propertyName = $tmpMappingField[$propertyName];
+                        }
                         $errorData[$propertyName] = $error->getMessage();
                     }
                     $this->app->component('error_collection')->set($this->getProperty('table'), $errorData);
