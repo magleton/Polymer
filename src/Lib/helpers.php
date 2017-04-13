@@ -136,10 +136,12 @@ if (!function_exists('debugger')) {
      */
     function debugger($devMode = 0, $dbName = null, $logPath = APP_PATH . '/log')
     {
-        $doctrineConfig = app()->db($dbName)->getConfiguration();
-        $doctrineConfig->setSQLLogger(new \Doctrine\DBAL\Logging\DebugStack());
-        app()->offSetValueToContainer('doctrineConfig', $doctrineConfig);
-        \RunTracy\Helpers\Profiler\Profiler::enable(true);
-        \Tracy\Debugger::enable($devMode ? \Tracy\Debugger::PRODUCTION : \Tracy\Debugger::DEVELOPMENT, $logPath);
+        if (class_exists(\RunTracy\Helpers\Profiler\Profiler::class)) {
+            $doctrineConfig = app()->db($dbName)->getConfiguration();
+            $doctrineConfig->setSQLLogger(new \Doctrine\DBAL\Logging\DebugStack());
+            app()->offSetValueToContainer('doctrineConfig', $doctrineConfig);
+            \RunTracy\Helpers\Profiler\Profiler::enable(true);
+            \Tracy\Debugger::enable($devMode ? \Tracy\Debugger::PRODUCTION : \Tracy\Debugger::DEVELOPMENT, $logPath);
+        }
     }
 }
