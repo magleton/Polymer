@@ -26,24 +26,24 @@ class RouterFileProvider implements ServiceProviderInterface
                 if (file_exists($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')))) {
                     @unlink($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')));
                 }
-                $router_file_contents = '<?php ' . "\n" . '$app = $container[\'application\']->component(\'app\')';
+                $router_file_contents = '<?php ' . "\n" . '$app = $container[\'application\']->component(\'app\');';
                 if (class_exists('\RunTracy\Middlewares\TracyMiddleware')) {
-                    $router_file_contents .= "\n" . '->add(new \RunTracy\Middlewares\TracyMiddleware($app))';
+                    $router_file_contents .= "\n" . '$app->add(new \RunTracy\Middlewares\TracyMiddleware($app));';
                 }
                 if ($container['application']->config('middleware')) {
                     foreach ($container['application']->config('middleware') as $key => $middleware) {
                         if (function_exists($middleware) && is_callable($middleware)) {
-                            $router_file_contents .= '->add("' . $middleware . '")';
+                            $router_file_contents .= "\n" . '$app->add("' . $middleware . '");';
                         } elseif ($container['application']->component($middleware)) {
-                            $router_file_contents .= '->add($container[\'application\']->component("' . $middleware . '"))';
+                            $router_file_contents .= "\n" . '$app->add($container[\'application\']->component("' . $middleware . '"));';
                         } elseif ($container['application']->component($key)) {
-                            $router_file_contents .= '->add($container[\'application\']->component("' . $key . '"))';
+                            $router_file_contents .= "\n" . '$app->add($container[\'application\']->component("' . $key . '"));';
                         } elseif (class_exists($middleware)) {
-                            $router_file_contents .= '->add("' . $middleware . '")';
+                            $router_file_contents .= "\n" . '$app->add("' . $middleware . '");';
                         }
                     }
                 }
-                $router_file_contents .= ';' . "\n";
+                $router_file_contents .= "\n";
                 foreach (glob(APP_PATH . 'Routers/*_router.php') as $key => $file_name) {
                     $contents = file_get_contents($file_name);
                     preg_match_all('/app->[\s\S]*/', $contents, $matches);
