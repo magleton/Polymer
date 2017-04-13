@@ -11,13 +11,9 @@ use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Inflector\Inflector;
-use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\ORMException;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
-use Polymer\Exceptions\ComponentException;
-use Polymer\Exceptions\ModelClassNotExistException;
-use Polymer\Exceptions\ServiceException;
 use Polymer\Providers\InitAppProvider;
 use Polymer\Repository\Repository;
 use Polymer\Utils\Constants;
@@ -299,7 +295,6 @@ final class Application
      * @param string $modelName 模型的名字
      * @param array $parameters 实例化时需要的参数
      * @param string $modelNamespace 模型命名空间
-     * @throws ModelClassNotExistException
      * @return mixed
      */
     public function model($modelName, array $parameters = [], $modelNamespace = null)
@@ -309,7 +304,7 @@ final class Application
         if (class_exists($modelName)) {
             return new $modelName($parameters);
         }
-        throw new ModelClassNotExistException($modelName . '不存在');
+        return null;
     }
 
     /**
@@ -317,7 +312,6 @@ final class Application
      *
      * @param $entityName
      * @param string $entityNamespace 实体的命名空间
-     * @throws EntityNotFoundException
      * @return bool
      */
     public function entity($entityName, $entityNamespace = null)
@@ -327,7 +321,7 @@ final class Application
         if (class_exists($entityName)) {
             return new $entityName;
         }
-        throw new EntityNotFoundException($entityName . '类不存在');
+        return null;
     }
 
     /**
@@ -355,7 +349,7 @@ final class Application
                 throw $e;
             }
         }
-        throw new EntityNotFoundException($repositoryClassName . '类不存在');
+        return null;
     }
 
     /**
@@ -364,7 +358,6 @@ final class Application
      * @param string $serviceName
      * @param array $params
      * @param string $serviceNamespace
-     * @throws ServiceException
      * @return null | Object
      */
     public function service($serviceName, array $params = [], $serviceNamespace = null)
@@ -374,7 +367,7 @@ final class Application
         if (class_exists($className)) {
             return new $className($params);
         }
-        throw new ServiceException($className . '类不存在');
+        return null;
     }
 
     /**
