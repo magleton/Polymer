@@ -18,8 +18,6 @@
     "doctrine/migrations": "~1.5",
     "monolog/monolog": "~1.18",
     "hassankhan/config": "~0.10",
-    "guzzlehttp/guzzle": "~6.2",
-    "vlucas/phpdotenv": "~2.4",
     "peppeocchi/php-cron-scheduler": "~1.4",
     "symfony/validator": "~3.0",
     "symfony/serializer": "~3.0",
@@ -31,6 +29,8 @@
     "ext-exif": "*"
   },
   "require-dev": {
+    "guzzlehttp/guzzle": "~6.2",
+    "vlucas/phpdotenv": "~2.4",
     "runcmf/runtracy": "~0.2",
     "mikey179/vfsStream": "~1.6",
     "mockery/mockery": "~0.9",
