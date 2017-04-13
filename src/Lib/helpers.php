@@ -30,7 +30,7 @@ if (!function_exists('logger')) {
      * @param string $log_name
      * @param int $level
      */
-    function logger($message, array $content, $file = '', $log_name = "LOG", $level = \Monolog\Logger::WARNING)
+    function logger($message, array $content, $file = '', $log_name = 'LOG', $level = \Monolog\Logger::WARNING)
     {
         $levels = [
             100 => 'debug',
@@ -69,7 +69,7 @@ if (!function_exists('handleShutdown')) {
                 if (defined('TEMPLATE_PATH') && file_exists(TEMPLATE_PATH . 'error.twig')) {
                     echo @file_get_contents(TEMPLATE_PATH . 'error.twig');
                 } else {
-                    echo \GuzzleHttp\json_encode(['code' => 2000, 'msg' => 'Error', 'data' => []]);
+                    echo json_encode(['code' => 2000, 'msg' => 'Error', 'data' => []]);
                 }
             }
         }

@@ -66,7 +66,7 @@ class Controller
         try {
             return $this->app->component('response')->withJson($data, $status, $encodingOptions);
         } catch (\Exception $e) {
-            return \GuzzleHttp\json_encode(['msg' => $e->getMessage()], $encodingOptions);
+            return json_encode(['msg' => $e->getMessage()], $encodingOptions);
         }
     }
 }
