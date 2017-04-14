@@ -149,7 +149,7 @@ final class Application
     public function config($key, $default = null)
     {
         try {
-            if ($this->configCache->fetch('configCache')) {
+            if ($this->configCache->fetch('configCache') && $this->configCache->fetch('configCache')->get($key)) {
                 return $this->configCache->fetch('configCache')->get($key, $default);
             }
             $configPaths = [dirname(__DIR__) . '/Config'];
