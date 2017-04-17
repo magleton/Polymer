@@ -14,7 +14,6 @@ use Doctrine\ORM\EntityNotFoundException;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\ModelInstanceErrorException;
-use Polymer\Utils\Constants;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 
 class Model
