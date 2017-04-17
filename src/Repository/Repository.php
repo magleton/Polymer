@@ -31,6 +31,13 @@ class Repository extends EntityRepository
     protected $app = null;
 
     /**
+     * 验证规则
+     *
+     * @var array
+     */
+    protected $rules = [];
+
+    /**
      * Initializes a new <tt>EntityRepository</tt>.
      *
      * @param EntityManager $em The EntityManager to use.
@@ -47,17 +54,18 @@ class Repository extends EntityRepository
      *
      * @param array $data 需要验证的数据
      * @param array $rules 验证数据的规则
+     * @param array $groups 验证组
      * @param string $key 存储错误信息的键
      * @throws Exception
      * @return $this
      */
-    public function validate(array $data = [], array $rules = [], $key = 'error')
+    public function validate(array $data = [], array $rules = [], array $groups = [], $key = 'error')
     {
-        if($rules) {
-            $validateRet = $this->app->component('biz_validator')->verifyField($data, $rules, $key);
-            if (!$validateRet) {
-                throw new EntityValidateErrorException('数据验证错误!');
-            }
+        try {
+            $rules = $rules ?: $this->getProperty('rules');
+            $this->app->component('biz_validator')->validateField($data, $rules, $groups, $key);
+        } catch (Exception $e) {
+            throw $e;
         }
         return $this;
     }

@@ -26,6 +26,13 @@ class Service
     protected $app;
 
     /**
+     * 验证规则
+     *
+     * @var array
+     */
+    protected $rules = [];
+
+    /**
      * Service constructor.
      *
      * @param array $params
@@ -35,6 +42,27 @@ class Service
     {
         $this->app = isset($params['app']) ? $params['app'] : app();
         $this->request = isset($params['request']) ? $params['request'] : $this->app->component('request');
+    }
+
+    /**
+     * 验证字段的值
+     *
+     * @param array $data 需要验证的数据
+     * @param array $rules 验证数据的规则
+     * @param array $groups 验证组
+     * @param string $key 存储错误信息的键
+     * @throws \Exception
+     * @return $this
+     */
+    protected function validate(array $data = [], array $rules = [], array $groups = [], $key = 'error')
+    {
+        try {
+            $rules = $rules ?: $this->getProperty('rules');
+            $this->app->component('biz_validator')->validateField($data, $rules, $key);
+        } catch (\Exception $e) {
+            throw $e;
+        }
+        return $this;
     }
 
     /**

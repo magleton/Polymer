@@ -46,7 +46,7 @@ class BizValidator
      * @param array $groups 验证组
      * @param string $key 错误信息的key，用于获取错误信息
      * @throws \Exception
-     * @return boolean
+     * @return null
      */
     public function validateField(array $data = [], array $rules = [], array $groups = null, $key = 'error')
     {
@@ -66,7 +66,6 @@ class BizValidator
             $this->app->component('error_collection')->set($key, $errorData);
             throw new FieldValidateErrorException('数据验证失败');
         }
-        return true;
     }
 
     /**
