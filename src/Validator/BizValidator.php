@@ -6,6 +6,7 @@
  */
 namespace Polymer\Validator;
 
+use Polymer\Exceptions\FieldValidateErrorException;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 use Polymer\Boot\Application;
 use Symfony\Component\Validator\Exception\NoSuchMetadataException;
@@ -47,7 +48,7 @@ class BizValidator
      * @throws \Exception
      * @return boolean
      */
-    public function verifyField(array $data = [], array $rules = [], array $groups = null, $key = 'error')
+    public function validateField(array $data = [], array $rules = [], array $groups = null, $key = 'error')
     {
         $errorData = [];
         foreach ($data as $property => $val) {
@@ -63,7 +64,7 @@ class BizValidator
         }
         if ($errorData) {
             $this->app->component('error_collection')->set($key, $errorData);
-            return false;
+            throw new FieldValidateErrorException('数据验证失败');
         }
         return true;
     }
@@ -77,7 +78,7 @@ class BizValidator
      * @throws NoSuchMetadataException | \Exception
      * @return boolean
      */
-    public function verifyObject($validateObject, array $rules = [], array $groups = null)
+    public function validateObject($validateObject, array $rules = [], array $groups = null)
     {
         try {
             $classMetadata = $this->validator->getMetadataFor($validateObject);
