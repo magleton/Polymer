@@ -27,6 +27,7 @@ class Controller
 
     /**
      * Controller constructor.
+     *
      * @param ContainerInterface $ci
      * @throws \Psr\Container\ContainerExceptionInterface
      */
@@ -42,6 +43,8 @@ class Controller
      * @author macro chen <macro_fengye@163.com>
      * @param string $template 模板文件
      * @param array $data 传递到模板的数据
+     * @throws \Exception
+     * @return mixed
      */
     protected function render($template, array $data = [])
     {
