@@ -8,6 +8,8 @@ namespace Polymer\Providers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Cache\ApcuCache;
+use Doctrine\Common\Cache\ArrayCache;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 use Symfony\Component\Validator\Validation;
@@ -29,7 +31,12 @@ class ValidatorProvider implements ServiceProviderInterface
                 AnnotationRegistry::registerLoader('class_exists');
                 $reader = new AnnotationReader();
                 AnnotationReader::addGlobalIgnoredName('dummy');
-                return Validation::createValidatorBuilder()->enableAnnotationMapping($reader)->getValidator();
+                if (extension_loaded('apcu')) {
+                    $cache = new ApcuCache();
+                } else {
+                    $cache = new ArrayCache();
+                }
+                return Validation::createValidatorBuilder()->setMetadataCache($cache)->enableAnnotationMapping($reader)->getValidator();
             } catch (\Exception $e) {
                 return null;
             }
