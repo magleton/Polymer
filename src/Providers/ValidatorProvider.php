@@ -12,6 +12,7 @@ use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Symfony\Component\Validator\Mapping\Cache\DoctrineCache;
 use Symfony\Component\Validator\Validation;
 
 class ValidatorProvider implements ServiceProviderInterface
@@ -36,7 +37,7 @@ class ValidatorProvider implements ServiceProviderInterface
                 } else {
                     $cache = new ArrayCache();
                 }
-                return Validation::createValidatorBuilder()->setMetadataCache($cache)->enableAnnotationMapping($reader)->getValidator();
+                return Validation::createValidatorBuilder()->setMetadataCache(new DoctrineCache($cache))->enableAnnotationMapping($reader)->getValidator();
             } catch (\Exception $e) {
                 return null;
             }
