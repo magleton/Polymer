@@ -159,7 +159,7 @@ class Model
         if ($rules) {
             try {
                 $validator = $this->app->component('biz_validator');
-                $validateResult = $validator->verifyObject($this->entityObject, $rules, $groups);
+                $validateResult = $validator->validateObject($this->entityObject, $rules, $groups);
                 if (count($validateResult)) {
                     foreach ($validateResult as $error) {
                         $tmpMappingField = array_flip($this->mappingField);
