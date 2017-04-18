@@ -58,7 +58,7 @@ class Service
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
-            $this->app->component('biz_validator')->validateField($data, $rules, $key);
+            $this->app->component('biz_validator')->validateField($data, $rules, $groups, $key);
         } catch (\Exception $e) {
             throw $e;
         }
