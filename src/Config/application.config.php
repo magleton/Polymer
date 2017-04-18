@@ -66,7 +66,13 @@ $common_config = [
         ],
     ],
     //服务供给者的命名空间
-    'providersPath' => ['Polymer\\Providers']
+    'providersPath' => ['Polymer\\Providers'],
+
+    //Session的处理类
+    'session_handler' => [
+        'cls' => \Polymer\Session\SecureHandler::class,
+        'params' => ''
+    ]
 ];
 
 return $common_config;
