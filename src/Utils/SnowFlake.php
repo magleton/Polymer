@@ -32,6 +32,7 @@ class SnowFlake extends AbstractIdGenerator
      *
      * @param EntityManager|EntityManager $em
      * @param \Doctrine\ORM\Mapping\Entity $entity
+     * @throws \Exception
      * @return mixed
      */
     public function generate(EntityManager $em, $entity)
@@ -54,7 +55,7 @@ class SnowFlake extends AbstractIdGenerator
         /**
          * Subtract custom epoch from current time
          */
-        $curr_timestamp -= app()->config('app.initial_epoch') ?: $this->initialEpoch;
+        $curr_timestamp -= app()->config('app.initial_epoch', $this->initialEpoch);
         /**
          * Create a initial base for ID
          */
@@ -95,9 +96,8 @@ class SnowFlake extends AbstractIdGenerator
         }
         if ('mysql' === $databaseType) {
             return (int)$this->getMySqlServerId();
-        } else {
-            return (int)1;
         }
+        return (int)1;
     }
 
     /**
@@ -122,11 +122,12 @@ class SnowFlake extends AbstractIdGenerator
     /**
      * Return time from 64bit ID.
      * @param $id
+     * @throws \Exception
      * @return number
      */
     public function getTimeFromID($id)
     {
-        $initialEpoch = app()->config('customer.initial_epoch') ?: $this->initialEpoch;
+        $initialEpoch = app()->config('app.initial_epoch', $this->initialEpoch);
         return bindec(substr(decbin($id), 0, 41)) - pow(2, 40) + 1 + $initialEpoch;
     }
 }
