@@ -32,7 +32,7 @@ class JwtProvider implements ServiceProviderInterface
                 'secure' => false,
                 'secret' => '62f47d0439a14f8bddb465dff4317fdb',
                 'path' => $container['application']->config('app.jwt_path'),
-                'passthrough' => $container['application']->config('app.passthrough'),
+                'passthrough' => $container['application']->config('app.pass_through'),
                 'error' => function (Request $request, Response $response, $arguments) {
                     $data['status'] = 'error';
                     $data['message'] = var_export($arguments, true);
