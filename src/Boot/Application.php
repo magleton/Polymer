@@ -127,7 +127,8 @@ final class Application
                     $entityFolder,
                 ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', null,
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
-                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->component('eventManager'));
+                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
+                    $this->component('eventManager'));
                 $this->container['entityManager-' . $dbName] = $entityManager;
             }
             return $this->container['entityManager-' . $dbName];
@@ -221,7 +222,8 @@ final class Application
             }
             $className = $value['class_name'];
             $data = isset($value['params']) ? $value['params'] : [];
-            $listener === 1 ? $eventManager->{$methods[$listener]}($key, new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
+            $listener === 1 ? $eventManager->{$methods[$listener]}($key,
+                new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
         }
         return $eventManager;
     }
@@ -335,8 +337,13 @@ final class Application
      * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
-    {
+    public function repository(
+        $entityName,
+        $dbName = '',
+        $entityFolder = null,
+        $entityNamespace = null,
+        $repositoryNamespace = null
+    ) {
         $entityNamespace = $entityNamespace ?: 'Entity\\Models';
         $repositoryNamespace = $repositoryNamespace ?: 'Entity\\Repositories';
         $repositoryClassName = $repositoryNamespace . '\\' . Inflector::classify($entityName) . 'Repository';
@@ -344,7 +351,8 @@ final class Application
             try {
                 $dbConfig = $this->config('db.' . APPLICATION_ENV);
                 $dbName = $dbName ?: current(array_keys($dbConfig));
-                return $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . Inflector::classify($entityName));
+                return $this->db($dbName,
+                    $entityFolder)->getRepository($entityNamespace . '\\' . Inflector::classify($entityName));
             } catch (\Exception $e) {
                 throw $e;
             }
@@ -366,6 +374,24 @@ final class Application
         $className = $serviceNamespace . '\\' . Inflector::classify($serviceName) . 'Service';
         if (class_exists($className)) {
             return new $className($params);
+        }
+        return null;
+    }
+
+    /**
+     * 获取中间件
+     *
+     * @param string $middleName
+     * @param array $params
+     * @param string $middleNamespace
+     * @return null | string
+     */
+    public function middleware($middleName, array $params = [], $middleNamespace = null)
+    {
+        $middleNamespace = $middleNamespace ?: APP_NAME . '\\Middleware';
+        $className = $middleNamespace . '\\' . Inflector::classify($middleName) . 'Middleware';
+        if (class_exists($className)) {
+            return $className;
         }
         return null;
     }

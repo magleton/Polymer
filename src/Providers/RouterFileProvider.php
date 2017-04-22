@@ -32,14 +32,20 @@ class RouterFileProvider implements ServiceProviderInterface
                 }
                 if ($container['application']->config('middleware')) {
                     foreach ($container['application']->config('middleware') as $key => $middleware) {
-                        if (function_exists($middleware) && is_callable($middleware)) {
-                            $router_file_contents .= "\n" . '$app->add("' . $middleware . '");';
-                        } elseif ($container['application']->component($middleware)) {
-                            $router_file_contents .= "\n" . '$app->add($container[\'application\']->component("' . $middleware . '"));';
-                        } elseif ($container['application']->component($key)) {
-                            $router_file_contents .= "\n" . '$app->add($container[\'application\']->component("' . $key . '"));';
-                        } elseif (class_exists($middleware)) {
-                            $router_file_contents .= "\n" . '$app->add("' . $middleware . '");';
+                        if (is_numeric($key)) {
+                            if (function_exists($middleware) && is_callable($middleware)) {
+                                $router_file_contents .= "\n" . '$app->add("' . $middleware . '");';
+                            } elseif ($container['application']->middleware($middleware)) {
+                                $router_file_contents .= "\n" . '$app->add(new ' . $container['application']->middleware($middleware) . '());';
+                            }
+                        } elseif (is_string($key)) {
+                            $className = $container['application']->middleware($key);
+                            $params = '';
+                            foreach ((array)$middleware as $kk => $vv) {
+                                $params .= is_array($vv) ? ',' . var_export($vv, true) : (is_string($vv) ? ',"' . $vv . '"' : ',' . $vv);
+                            }
+                            $params = ltrim($params, ',');
+                            $router_file_contents .= "\n" . '$app->add(new ' . $className . '(' . $params . '));';
                         }
                     }
                 }
