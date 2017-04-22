@@ -379,24 +379,6 @@ final class Application
     }
 
     /**
-     * 获取中间件
-     *
-     * @param string $middleName
-     * @param array $params
-     * @param string $middleNamespace
-     * @return null | string
-     */
-    public function middleware($middleName, array $params = [], $middleNamespace = null)
-    {
-        $middleNamespace = $middleNamespace ?: APP_NAME . '\\Middleware';
-        $className = $middleNamespace . '\\' . Inflector::classify($middleName) . 'Middleware';
-        if (class_exists($className)) {
-            return $className;
-        }
-        return null;
-    }
-
-    /**
      * 向Container里面设置值
      *
      * @param $key
