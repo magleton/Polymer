@@ -27,12 +27,12 @@ class JwtProvider implements ServiceProviderInterface
     {
         $pimple['jwt'] = function (Container $container) {
             return new JwtAuthentication([
-                'header' => 'token',
-                'regexp' => '/(.*)/',
-                'secure' => false,
-                'secret' => '62f47d0439a14f8bddb465dff4317fdb',
-                'path' => $container['application']->config('app.jwt_path'),
-                'passthrough' => $container['application']->config('app.passthrough'),
+                'header' => $container['application']->config('app.jwt.token', 'token'),
+                'regexp' => $container['application']->config('app.jwt.regexp', '/(.*)/'),
+                'secure' => $container['application']->config('app.jwt.secure', false),
+                'secret' => $container['application']->config('app.jwt.secret', '62f47d0439a14f8bddb465dff4317fdb'),
+                'path' => $container['application']->config('app.jwt.jwt_path'),
+                'passthrough' => $container['application']->config('app.jwt.pass_through'),
                 'error' => function (Request $request, Response $response, $arguments) {
                     $data['status'] = 'error';
                     $data['message'] = var_export($arguments, true);
