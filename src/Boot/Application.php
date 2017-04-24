@@ -121,7 +121,8 @@ final class Application
         try {
             $dbConfig = $this->config('db.' . APPLICATION_ENV);
             $dbName = $dbName ?: current(array_keys($dbConfig));
-            if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->component('entityManager-' . $dbName)) {
+            $cacheKey = 'entityManager' . $this->config('app.db_cache_key', str_replace(DIRECTORY_SEPARATOR, '.', APP_PATH));
+            if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->component('entityManager-' . $cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . '/entity/Models';
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
@@ -129,9 +130,9 @@ final class Application
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
                 $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
                     $this->component('eventManager'));
-                $this->container['entityManager-' . $dbName] = $entityManager;
+                $this->container['entityManager-' . $cacheKey] = $entityManager;
             }
-            return $this->container['entityManager-' . $dbName];
+            return $this->container['entityManager-' . $cacheKey];
         } catch (\Exception $e) {
             throw $e;
         }
@@ -343,7 +344,8 @@ final class Application
         $entityFolder = null,
         $entityNamespace = null,
         $repositoryNamespace = null
-    ) {
+    )
+    {
         $entityNamespace = $entityNamespace ?: 'Entity\\Models';
         $repositoryNamespace = $repositoryNamespace ?: 'Entity\\Repositories';
         $repositoryClassName = $repositoryNamespace . '\\' . Inflector::classify($entityName) . 'Repository';
