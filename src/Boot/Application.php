@@ -121,7 +121,7 @@ final class Application
         try {
             $dbConfig = $this->config('db.' . APPLICATION_ENV);
             $dbName = $dbName ?: current(array_keys($dbConfig));
-            $cacheKey = 'entityManager' . $this->config('app.db_cache_key', str_replace(DIRECTORY_SEPARATOR, '.', APP_PATH));
+            $cacheKey = 'entityManager' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace(DIRECTORY_SEPARATOR, '.', APP_PATH));
             if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->component('entityManager-' . $cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . '/entity/Models';
                 $configuration = Setup::createAnnotationMetadataConfiguration([
