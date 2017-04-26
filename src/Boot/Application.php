@@ -98,7 +98,7 @@ final class Application
             set_error_handler('handleError');
             set_exception_handler('handleException');
             register_shutdown_function('handleShutdown');
-            extension_loaded('apcu') ? $this->configCache = new ApcuCache() : $this->configCache = new ArrayCache();
+            $this->configCache = new ArrayCache();
             $this->container = new Container($this->config('slim'));
             $this->container->register(new InitAppProvider());
             $this->container['application'] = $this;
@@ -122,7 +122,7 @@ final class Application
             $dbConfig = $this->config('db.' . APPLICATION_ENV);
             $dbName = $dbName ?: current(array_keys($dbConfig));
             $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
-            if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->component($cacheKey)) {
+            if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->container->offsetExists($cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . '/entity/Models';
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
@@ -130,9 +130,9 @@ final class Application
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
                 $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
                     $this->component('eventManager'));
-                $this->container[$cacheKey] = $entityManager;
+                $this->container->offsetSet($cacheKey, $entityManager);
             }
-            return $this->container[$cacheKey];
+            return $this->container->offsetGet($cacheKey);
         } catch (\Exception $e) {
             throw $e;
         }
