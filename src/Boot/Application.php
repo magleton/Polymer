@@ -123,9 +123,10 @@ final class Application
             $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
             if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->container->offsetExists($cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . '/entity/Models';
+                $cache = APPLICATION_ENV === 'production' ? null : new ArrayCache();
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
-                ], APPLICATION_ENV === 'production', ROOT_PATH . '/entity/Proxies/', null,
+                ], APPLICATION_ENV === 'production', ROOT_PATH . '/entity/Proxies/', $cache,
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
                 $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
                     $this->component('eventManager'));
