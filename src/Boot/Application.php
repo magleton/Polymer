@@ -7,7 +7,6 @@
 
 namespace Polymer\Boot;
 
-use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\Inflector\Inflector;
@@ -126,7 +125,7 @@ final class Application
                 $entityFolder = $entityFolder ?: ROOT_PATH . '/entity/Models';
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
-                ], APPLICATION_ENV === 'development', ROOT_PATH . '/entity/Proxies/', null,
+                ], APPLICATION_ENV === 'production', ROOT_PATH . '/entity/Proxies/', null,
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
                 $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
                     $this->component('eventManager'));
