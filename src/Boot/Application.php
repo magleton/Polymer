@@ -130,8 +130,7 @@ final class Application
                     $entityFolder,
                 ], APPLICATION_ENV === 'production', ROOT_PATH . '/entity/Proxies/', $cache,
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
-                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
-                    $this->component('eventManager'));
+                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->component('eventManager'));
                 $this->container->offsetSet($cacheKey, $entityManager);
             }
             return $this->container->offsetGet($cacheKey);
