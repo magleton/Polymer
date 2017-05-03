@@ -99,7 +99,9 @@ final class Application
             register_shutdown_function('handleShutdown');
             $this->configCache = new ArrayCache();
             $this->container = new Container($this->config('slim'));
-            $this->container->register(new InitAppProvider());
+            $initAppFile = ROOT_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitAppProvider.php';
+            $initAppClass = file_exists($initAppFile) ? $initAppClass = APP_NAME . '\Providers\InitAppProvider' : InitAppProvider::class;
+            $this->container->register(new $initAppClass());
             $this->container['application'] = $this;
             static::setInstance($this);
         } catch (\Exception $e) {
@@ -223,8 +225,7 @@ final class Application
             }
             $className = $value['class_name'];
             $data = isset($value['params']) ? $value['params'] : [];
-            $listener === 1 ? $eventManager->{$methods[$listener]}($key,
-                new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
+            $listener === 1 ? $eventManager->{$methods[$listener]}($key, new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
         }
         return $eventManager;
     }
@@ -240,7 +241,7 @@ final class Application
     public function component($componentName, array $param = [])
     {
         if (!$this->container->has($componentName)) {
-            $providersPath = array_merge($this->config('providersPath'), $this->config('app.providersPath') ?: []);
+            $providersPath = array_merge($this->config('app.providersPath') ?: [], $this->config('providersPath'));
             $classExist = 0;
             foreach ($providersPath as $namespace) {
                 $className = $namespace . '\\' . Inflector::classify($componentName) . 'Provider';
@@ -338,13 +339,7 @@ final class Application
      * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository(
-        $entityName,
-        $dbName = '',
-        $entityFolder = null,
-        $entityNamespace = null,
-        $repositoryNamespace = null
-    )
+    public function repository( $entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {
         $entityNamespace = $entityNamespace ?: 'Entity\\Models';
         $repositoryNamespace = $repositoryNamespace ?: 'Entity\\Repositories';
