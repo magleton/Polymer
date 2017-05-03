@@ -26,12 +26,11 @@ class RedisProvider implements ServiceProviderInterface
                 $serverName = $container->offsetExists('redis_server') ? $container->offsetGet('redis_server') : 'server1';
                 $serversConfig = $container['application']->config('cache.redis.' . $serverName);
                 $redis = new \Redis();
-                $redis->connect($serversConfig['server']['host'],
-                    $serversConfig['server']['port'],
-                    $serversConfig['server']['timeout']);
+                $redis->connect($serversConfig['server']['host'], $serversConfig['server']['port'], $serversConfig['server']['timeout']);
+                (isset($serversConfig['server']['password']) && $serversConfig['server']['password']) && $redis->auth($serversConfig['server']['password']);
                 return $redis;
             } catch (\Exception $e) {
-                throw $e;
+                return null;
             }
         };
     }
