@@ -25,6 +25,7 @@ class FlashProvider implements ServiceProviderInterface
     {
         $pimple['flash'] = function (Container $container) {
             try {
+                $container['application']->component('session');
                 return new Messages();
             } catch (\InvalidArgumentException $e) {
                 return null;

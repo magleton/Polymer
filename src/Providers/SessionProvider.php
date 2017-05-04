@@ -25,11 +25,14 @@ class SessionProvider implements ServiceProviderInterface
         $pimple['session'] = function (Container $container) {
             ini_set('session.save_handler', 'files');
             $sessionHandler = $container['application']->config('session_handler.cls');
-            $handler = new $sessionHandler($container['application']->config('session_handler.params'));
-            session_set_save_handler($handler, true);
-            $session = new Session();
-            $session->start();
-            return $session;
+            if (class_exists($sessionHandler)) {
+                $handler = new $sessionHandler($container['application']->config('session_handler.params'));
+                session_set_save_handler($handler, true);
+                $session = new Session();
+                $session->start();
+                return $session;
+            }
+            return null;
         };
     }
 }
