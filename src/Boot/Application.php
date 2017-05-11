@@ -63,8 +63,8 @@ final class Application
     {
         try {
             $this->initEnvironment();
-            $this->provider('routerFile');
-            $this->provider('app')->run();
+            $this->component('routerFile');
+            $this->component('app')->run();
         } catch (\Exception $e) {
             throw $e;
         }
@@ -130,7 +130,7 @@ final class Application
                     $entityFolder,
                 ], APPLICATION_ENV === 'production', ROOT_PATH . '/entity/Proxies/', $cache,
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
-                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->provider('eventManager'));
+                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->component('eventManager'));
                 $this->container->offsetSet($cacheKey, $entityManager);
             }
             return $this->container->offsetGet($cacheKey);
@@ -217,7 +217,7 @@ final class Application
     private function addEventOrSubscribe(array $params, $listener)
     {
         $methods = ['addEventSubscriber', 'addEventListener'];
-        $eventManager = $this->provider('eventManager');
+        $eventManager = $this->component('eventManager');
         foreach ($params as $key => $value) {
             if (!isset($value['class_name'])) {
                 throw new \InvalidArgumentException('class_name必须设置');
@@ -235,7 +235,6 @@ final class Application
      * @param $componentName
      * @param array $param
      * @throws \Exception
-     * @deprecated
      * @return mixed|null
      */
     public function component($componentName, array $param = [])
@@ -262,45 +261,6 @@ final class Application
                 $componentObj->select($database);
             }
             return $componentObj;
-        } catch (ContainerValueNotFoundException $e) {
-            throw $e;
-        } catch (ContainerException $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * 获取指定组件名字的对象
-     *
-     * @param $providerName
-     * @param array $param
-     * @throws \Exception
-     * @return mixed|null
-     */
-    public function provider($providerName, array $param = [])
-    {
-        if (!$this->container->has($providerName)) {
-            $providersPath = array_merge($this->config('app.providersPath') ?: [], $this->config('providersPath'));
-            $classExist = 0;
-            foreach ($providersPath as $namespace) {
-                $className = $namespace . '\\' . Inflector::classify($providerName) . 'Provider';
-                if (class_exists($className)) {
-                    $this->container->register(new $className(), $param);
-                    $classExist = 1;
-                    break;
-                }
-            }
-            if (!$classExist) {
-                return null;
-            }
-        }
-        try {
-            $providerObj = $this->container->get($providerName);
-            if ($providerName === Constants::REDIS) {
-                $database = (isset($param['database']) && is_numeric($param['database'])) ? $param['database'] : 0;
-                $providerObj->select($database);
-            }
-            return $providerObj;
         } catch (ContainerValueNotFoundException $e) {
             throw $e;
         } catch (ContainerException $e) {
@@ -378,7 +338,7 @@ final class Application
      * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
+    public function repository( $entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {
         $entityNamespace = $entityNamespace ?: 'Entity\\Models';
         $repositoryNamespace = $repositoryNamespace ?: 'Entity\\Repositories';
