@@ -120,11 +120,9 @@ final class Application
     public function db($dbName = '', $entityFolder = null)
     {
         try {
-            $dbConfig = $this->config('db.' . APPLICATION_ENV);
-            $dbName = $dbName ?: current(array_keys($dbConfig));
-            $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey',
-                    str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
-            if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->container->offsetExists($cacheKey)) {
+            $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));
+            $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
+            if ($this->config('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->container->offsetExists($cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Models';
                 $cache = APPLICATION_ENV === 'production' ? null : new ArrayCache();
                 $configuration = Setup::createAnnotationMetadataConfiguration([
@@ -132,8 +130,8 @@ final class Application
                 ], APPLICATION_ENV === 'production',
                     ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Proxies' . DIRECTORY_SEPARATOR,
                     $cache,
-                    $dbConfig[$dbName]['useSimpleAnnotationReader']);
-                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
+                    $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.' . 'useSimpleAnnotationReader'));
+                $entityManager = EntityManager::create($this->config('db.' . APPLICATION_ENV . '.' . $dbName), $configuration,
                     $this->component('eventManager'));
                 $this->container->offsetSet($cacheKey, $entityManager);
             }
@@ -359,8 +357,7 @@ final class Application
         $repositoryNamespace = $repositoryNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Repositories';
         $repositoryClassName = $repositoryNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName) . 'Repository';
         try {
-            $dbConfig = $this->config('db.' . APPLICATION_ENV);
-            $dbName = $dbName ?: current(array_keys($dbConfig));
+            $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));
             $key = str_replace(DIRECTORY_SEPARATOR, '', $repositoryClassName);
             if (!$this->container->offsetExists($key) && class_exists($repositoryClassName)) {
                 $this->container->offsetSet($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName)));
