@@ -225,8 +225,7 @@ final class Application
             }
             $className = $value['class_name'];
             $data = isset($value['params']) ? $value['params'] : [];
-            $listener === 1 ? $eventManager->{$methods[$listener]}($key,
-                new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
+            $listener === 1 ? $eventManager->{$methods[$listener]}($key, new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
         }
         return $eventManager;
     }
