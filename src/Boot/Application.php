@@ -122,7 +122,8 @@ final class Application
         try {
             $dbConfig = $this->config('db.' . APPLICATION_ENV);
             $dbName = $dbName ?: current(array_keys($dbConfig));
-            $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
+            $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey',
+                    str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
             if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->container->offsetExists($cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Models';
                 $cache = APPLICATION_ENV === 'production' ? null : new ArrayCache();
@@ -132,7 +133,8 @@ final class Application
                     ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Proxies' . DIRECTORY_SEPARATOR,
                     $cache,
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
-                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->component('eventManager'));
+                $entityManager = EntityManager::create($dbConfig[$dbName], $configuration,
+                    $this->component('eventManager'));
                 $this->container->offsetSet($cacheKey, $entityManager);
             }
             return $this->container->offsetGet($cacheKey);
@@ -226,7 +228,8 @@ final class Application
             }
             $className = $value['class_name'];
             $data = isset($value['params']) ? $value['params'] : [];
-            $listener === 1 ? $eventManager->{$methods[$listener]}($key, new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
+            $listener === 1 ? $eventManager->{$methods[$listener]}($key,
+                new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
         }
         return $eventManager;
     }
@@ -298,18 +301,22 @@ final class Application
      * 获取业务模型实例
      *
      * @param string $modelName 模型的名字
-     * @param array $parameters 实例化时需要的参数
+     * @param array $params 实例化时需要的参数
      * @param string $modelNamespace 模型命名空间
      * @return mixed
      */
-    public function model($modelName, array $parameters = [], $modelNamespace = null)
+    public function model($modelName, array $params = [], $modelNamespace = null)
     {
-        $modelNamespace = $modelNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Models';
-        $modelName = $modelNamespace . DIRECTORY_SEPARATOR . Inflector::classify($modelName) . 'Model';
-        if (class_exists($modelName)) {
-            return new $modelName($parameters);
+        try {
+            $modelNamespace = $modelNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Models';
+            $className = $modelNamespace . DIRECTORY_SEPARATOR . Inflector::classify($modelName) . 'Model';
+            if (!$this->container->offsetExists('model' . $modelName) && class_exists($className)) {
+                $this->container->offsetSet('model' . $modelName, new $className($params));
+            }
+            return $this->container->offsetGet('model' . $modelName);
+        } catch (\Exception $e) {
+            return null;
         }
-        return null;
     }
 
     /**
@@ -321,12 +328,16 @@ final class Application
      */
     public function entity($entityName, $entityNamespace = null)
     {
-        $entityNamespace = $entityNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Models';
-        $entityName = $entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName);
-        if (class_exists($entityName)) {
-            return new $entityName;
+        try {
+            $entityNamespace = $entityNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Models';
+            $className = $entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName);
+            if (!$this->container->offsetExists('entity' . $entityName) && class_exists($className)) {
+                $this->container->offsetSet('entity' . $entityName, new $className());
+            }
+            return $this->container->offsetGet('entity' . $entityName);
+        } catch (\Exception $e) {
+            return null;
         }
-        return null;
     }
 
     /**
@@ -340,21 +351,21 @@ final class Application
      * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository( $entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
+    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {
         $entityNamespace = $entityNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Models';
         $repositoryNamespace = $repositoryNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Repositories';
         $repositoryClassName = $repositoryNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName) . 'Repository';
-        if (class_exists($repositoryClassName)) {
-            try {
-                $dbConfig = $this->config('db.' . APPLICATION_ENV);
-                $dbName = $dbName ?: current(array_keys($dbConfig));
-                return $this->db($dbName, $entityFolder)->getRepository($entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName));
-            } catch (\Exception $e) {
-                throw $e;
+        try {
+            $dbConfig = $this->config('db.' . APPLICATION_ENV);
+            $dbName = $dbName ?: current(array_keys($dbConfig));
+            if (!$this->container->offsetExists('repository' . $entityName) && class_exists($repositoryClassName)) {
+                $this->container->offsetSet('repository' . $entityName, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName)));
             }
+            return $this->container->offsetGet('repository' . $entityName);
+        } catch (\Exception $e) {
+            return null;
         }
-        return null;
     }
 
     /**
@@ -367,12 +378,16 @@ final class Application
      */
     public function service($serviceName, array $params = [], $serviceNamespace = null)
     {
-        $serviceNamespace = $serviceNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Services';
-        $className = $serviceNamespace . DIRECTORY_SEPARATOR . Inflector::classify($serviceName) . 'Service';
-        if (class_exists($className)) {
-            return new $className($params);
+        try {
+            $serviceNamespace = $serviceNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Services';
+            $className = $serviceNamespace . DIRECTORY_SEPARATOR . Inflector::classify($serviceName) . 'Service';
+            if (!$this->container->offsetExists('service' . $serviceName) && class_exists($className)) {
+                $this->container->offsetSet('service' . $serviceName, new $className($params));
+            }
+            return $this->container->offsetGet('service' . $serviceName);
+        } catch (\Exception $e) {
+            return null;
         }
-        return null;
     }
 
     /**

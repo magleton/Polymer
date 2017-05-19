@@ -47,7 +47,7 @@ class CompanyServiceTest extends TestCase
 
     public function testUpdate()
     {
-        $this->assertEquals(15, $this->service->update());
+        $this->assertEquals(33, $this->service->update());
     }
 
     public function testGetData()

@@ -123,7 +123,7 @@ class CompanyModel extends Model
                     'data' => ['address' => 'aaaaa']
                 ]
             ]);
-            $obj = $this->make($data, ['id' => 5], true);
+            $obj = $this->make($data, ['id' => 33], true);
             $this->em->persist($obj);
             $this->em->flush();
             return $obj->getId();

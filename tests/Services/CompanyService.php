@@ -49,7 +49,8 @@ class CompanyService extends Service
     public function getData()
     {
         $repositoryObj = $this->app->repository('company', 'db1', APP_PATH . '/Entity/', 'Polymer\Tests\Entity\Models', 'Polymer\Tests\Entity\Repositories');
-        $entity = $repositoryObj->findOneBy(['id' => 2]);
+        $entity = $repositoryObj->findOneBy(['id' => 33]);
+        print_r(FuncUtils::entityToArray($entity));
         return FuncUtils::entityToArray($entity);
     }
 }
