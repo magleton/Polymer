@@ -131,8 +131,7 @@ final class Application
                     ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Proxies' . DIRECTORY_SEPARATOR,
                     $cache,
                     $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.' . 'useSimpleAnnotationReader'));
-                $entityManager = EntityManager::create($this->config('db.' . APPLICATION_ENV . '.' . $dbName), $configuration,
-                    $this->component('eventManager'));
+                $entityManager = EntityManager::create($this->config('db.' . APPLICATION_ENV . '.' . $dbName), $configuration, $this->component('eventManager'));
                 $this->container->offsetSet($cacheKey, $entityManager);
             }
             return $this->container->offsetGet($cacheKey);
