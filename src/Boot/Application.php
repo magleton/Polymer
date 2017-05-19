@@ -127,7 +127,7 @@ final class Application
                 $cache = APPLICATION_ENV === 'production' ? null : new ArrayCache();
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
-                ], APPLICATION_ENV === 'production',
+                ], APPLICATION_ENV === 'development',
                     ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Proxies' . DIRECTORY_SEPARATOR,
                     $cache,
                     $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.' . 'useSimpleAnnotationReader'));
