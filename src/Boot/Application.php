@@ -124,7 +124,7 @@ final class Application
             $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
             if ($this->config('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->container->offsetExists($cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Models';
-                $cache = APPLICATION_ENV === 'production' ? null : new ArrayCache();
+                $cache = APPLICATION_ENV === 'development' ? null : new ArrayCache();
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
                 ], APPLICATION_ENV === 'development',
