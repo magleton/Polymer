@@ -110,7 +110,7 @@ Polymer是一个基于Slim、Doctrine、Twig的MVC框架!设计上只是将其�
             return $this->withJson(['data' => 'data']);
         }
     }
-将其保存在app\CMS]\Controller里面.
+将其保存在app\CMS\Controller里面.
 
 7、路由配置:
 
