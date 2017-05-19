@@ -235,37 +235,29 @@ final class Application
      *
      * @param $componentName
      * @param array $param
-     * @throws \Exception
      * @return mixed|null
      */
     public function component($componentName, array $param = [])
     {
-        if (!$this->container->has($componentName)) {
-            $providersPath = array_merge($this->config('app.providersPath') ?: [], $this->config('providersPath'));
-            $classExist = 0;
-            foreach ($providersPath as $namespace) {
-                $className = $namespace . DIRECTORY_SEPARATOR . Inflector::classify($componentName) . 'Provider';
-                if (class_exists($className)) {
-                    $this->container->register(new $className(), $param);
-                    $classExist = 1;
-                    break;
+        try {
+            if (!$this->container->offsetExists($componentName)) {
+                $providersPath = array_merge($this->config('app.providersPath') ?: [], $this->config('providersPath'));
+                foreach ($providersPath as $namespace) {
+                    $className = $namespace . DIRECTORY_SEPARATOR . Inflector::classify($componentName) . 'Provider';
+                    if (class_exists($className)) {
+                        $this->container->register(new $className(), $param);
+                        break;
+                    }
                 }
             }
-            if (!$classExist) {
-                return null;
-            }
-        }
-        try {
-            $componentObj = $this->container->get($componentName);
+            $componentObj = $this->container->offsetGet($componentName);
             if ($componentName === Constants::REDIS) {
                 $database = (isset($param['database']) && is_numeric($param['database'])) ? $param['database'] : 0;
                 $componentObj->select($database);
             }
             return $componentObj;
-        } catch (ContainerValueNotFoundException $e) {
-            throw $e;
-        } catch (ContainerException $e) {
-            throw $e;
+        } catch (\Exception $e) {
+            return null;
         }
     }
 
