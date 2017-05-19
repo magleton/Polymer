@@ -49,7 +49,7 @@ class Str
      *
      * @return string
      *
-     * @throws \RuntimeException
+     * @throws \Exception
      */
     public static function random($length = 16)
     {
@@ -172,16 +172,5 @@ class Str
         $value = ucwords(str_replace(['-', '_'], ' ', $value));
 
         return static::$studlyCache[$key] = str_replace(' ', '', $value);
-    }
-
-
-    public static function isJson($value)
-    {
-        return json_decode($value) !== null;
-    }
-
-    public static function json2Array($value)
-    {
-        return json_decode($value, true);
     }
 }

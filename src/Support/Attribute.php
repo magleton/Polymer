@@ -30,16 +30,6 @@ abstract class Attribute extends Collection
     protected $requirements = [];
 
     /**
-     * Constructor.
-     *
-     * @param array $attributes
-     */
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-    }
-
-    /**
      * Set attribute.
      *
      * @param string $attribute
@@ -130,7 +120,7 @@ abstract class Attribute extends Collection
     /**
      * Magic call.
      *
-     * @param string $method
+     * @param mixed $method
      * @param array $args
      * @throws \Exception
      * @return Attribute

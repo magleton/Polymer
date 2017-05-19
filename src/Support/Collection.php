@@ -23,7 +23,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
     /**
      * set data.
      *
-     * @param mixed $items
+     * @param array $items
      */
     public function __construct(array $items = [])
     {
@@ -55,12 +55,10 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
 
         foreach ($keys as $key) {
             $value = $this->get($key);
-
-            if (!is_null($value)) {
+            if (null !== $value) {
                 $return[$key] = $value;
             }
         }
-
         return $return;
     }
 
@@ -103,7 +101,7 @@ class Collection implements ArrayAccess, Countable, IteratorAggregate, JsonSeria
      */
     public function has($key)
     {
-        return !is_null(Arr::get($this->items, $key));
+        return null !== Arr::get($this->items, $key);
     }
 
     /**
