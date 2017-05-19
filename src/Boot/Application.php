@@ -347,7 +347,6 @@ final class Application
      * @param null $entityFolder 实体文件的路径
      * @param string $entityNamespace 实体的命名空间
      * @param string $repositoryNamespace Repository的命名空间
-     * @throws \Exception
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
     public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
