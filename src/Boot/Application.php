@@ -100,7 +100,7 @@ final class Application
             $this->configCache = new ArrayCache();
             $this->container = new Container($this->config('slim'));
             $initAppFile = ROOT_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitAppProvider.php';
-            $initAppClass = file_exists($initAppFile) ? $initAppClass = APP_NAME . '\Providers\InitAppProvider' : InitAppProvider::class;
+            $initAppClass = file_exists($initAppFile) ? APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitAppProvider' : InitAppProvider::class;
             $this->container->register(new $initAppClass());
             $this->container['application'] = $this;
             static::setInstance($this);
@@ -124,11 +124,13 @@ final class Application
             $dbName = $dbName ?: current(array_keys($dbConfig));
             $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
             if (isset($dbConfig[$dbName]) && $dbConfig[$dbName] && !$this->container->offsetExists($cacheKey)) {
-                $entityFolder = $entityFolder ?: ROOT_PATH . '/entity/Models';
+                $entityFolder = $entityFolder ?: ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Models';
                 $cache = APPLICATION_ENV === 'production' ? null : new ArrayCache();
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
-                ], APPLICATION_ENV === 'production', ROOT_PATH . '/entity/Proxies/', $cache,
+                ], APPLICATION_ENV === 'production',
+                    ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Proxies' . DIRECTORY_SEPARATOR,
+                    $cache,
                     $dbConfig[$dbName]['useSimpleAnnotationReader']);
                 $entityManager = EntityManager::create($dbConfig[$dbName], $configuration, $this->component('eventManager'));
                 $this->container->offsetSet($cacheKey, $entityManager);
@@ -155,12 +157,12 @@ final class Application
             if ($this->configCache->fetch('configCache') && $this->configCache->fetch('configCache')->get($key)) {
                 return $this->configCache->fetch('configCache')->get($key, $default);
             }
-            $configPaths = [dirname(__DIR__) . '/Config'];
-            if (defined('ROOT_PATH') && file_exists(ROOT_PATH . '/config') && is_dir(ROOT_PATH . '/config')) {
-                $configPaths[] = ROOT_PATH . '/config';
+            $configPaths = [dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Config'];
+            if (defined('ROOT_PATH') && file_exists(ROOT_PATH . DIRECTORY_SEPARATOR . 'config') && is_dir(ROOT_PATH . DIRECTORY_SEPARATOR . 'config')) {
+                $configPaths[] = ROOT_PATH . DIRECTORY_SEPARATOR . 'config';
             }
-            if (defined('APP_PATH') && file_exists(APP_PATH . '/Config') && is_dir(APP_PATH . '/Config')) {
-                $configPaths[] = APP_PATH . '/Config';
+            if (defined('APP_PATH') && file_exists(APP_PATH . DIRECTORY_SEPARATOR . 'Config') && is_dir(APP_PATH . DIRECTORY_SEPARATOR . 'Config')) {
+                $configPaths[] = APP_PATH . DIRECTORY_SEPARATOR . 'Config';
             }
             if (null === $this->configObject) {
                 $this->configObject = new Config($configPaths);
@@ -243,7 +245,7 @@ final class Application
             $providersPath = array_merge($this->config('app.providersPath') ?: [], $this->config('providersPath'));
             $classExist = 0;
             foreach ($providersPath as $namespace) {
-                $className = $namespace . '\\' . Inflector::classify($componentName) . 'Provider';
+                $className = $namespace . DIRECTORY_SEPARATOR . Inflector::classify($componentName) . 'Provider';
                 if (class_exists($className)) {
                     $this->container->register(new $className(), $param);
                     $classExist = 1;
@@ -302,8 +304,8 @@ final class Application
      */
     public function model($modelName, array $parameters = [], $modelNamespace = null)
     {
-        $modelNamespace = $modelNamespace ?: APP_NAME . '\\Models';
-        $modelName = $modelNamespace . '\\' . Inflector::classify($modelName) . 'Model';
+        $modelNamespace = $modelNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Models';
+        $modelName = $modelNamespace . DIRECTORY_SEPARATOR . Inflector::classify($modelName) . 'Model';
         if (class_exists($modelName)) {
             return new $modelName($parameters);
         }
@@ -319,8 +321,8 @@ final class Application
      */
     public function entity($entityName, $entityNamespace = null)
     {
-        $entityNamespace = $entityNamespace ?: 'Entity\\Models';
-        $entityName = $entityNamespace . '\\' . Inflector::classify($entityName);
+        $entityNamespace = $entityNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Models';
+        $entityName = $entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName);
         if (class_exists($entityName)) {
             return new $entityName;
         }
@@ -340,15 +342,14 @@ final class Application
      */
     public function repository( $entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {
-        $entityNamespace = $entityNamespace ?: 'Entity\\Models';
-        $repositoryNamespace = $repositoryNamespace ?: 'Entity\\Repositories';
-        $repositoryClassName = $repositoryNamespace . '\\' . Inflector::classify($entityName) . 'Repository';
+        $entityNamespace = $entityNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Models';
+        $repositoryNamespace = $repositoryNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Repositories';
+        $repositoryClassName = $repositoryNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName) . 'Repository';
         if (class_exists($repositoryClassName)) {
             try {
                 $dbConfig = $this->config('db.' . APPLICATION_ENV);
                 $dbName = $dbName ?: current(array_keys($dbConfig));
-                return $this->db($dbName,
-                    $entityFolder)->getRepository($entityNamespace . '\\' . Inflector::classify($entityName));
+                return $this->db($dbName, $entityFolder)->getRepository($entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName));
             } catch (\Exception $e) {
                 throw $e;
             }
@@ -366,8 +367,8 @@ final class Application
      */
     public function service($serviceName, array $params = [], $serviceNamespace = null)
     {
-        $serviceNamespace = $serviceNamespace ?: APP_NAME . '\\Services';
-        $className = $serviceNamespace . '\\' . Inflector::classify($serviceName) . 'Service';
+        $serviceNamespace = $serviceNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Services';
+        $className = $serviceNamespace . DIRECTORY_SEPARATOR . Inflector::classify($serviceName) . 'Service';
         if (class_exists($className)) {
             return new $className($params);
         }
