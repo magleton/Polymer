@@ -310,10 +310,11 @@ final class Application
         try {
             $modelNamespace = $modelNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Models';
             $className = $modelNamespace . DIRECTORY_SEPARATOR . Inflector::classify($modelName) . 'Model';
-            if (!$this->container->offsetExists('model' . $modelName) && class_exists($className)) {
-                $this->container->offsetSet('model' . $modelName, new $className($params));
+            $key = str_replace(DIRECTORY_SEPARATOR, '', $className);
+            if (!$this->container->offsetExists($key) && class_exists($className)) {
+                $this->container->offsetSet($key, new $className($params));
             }
-            return $this->container->offsetGet('model' . $modelName);
+            return $this->container->offsetGet($key);
         } catch (\Exception $e) {
             return null;
         }
@@ -331,10 +332,11 @@ final class Application
         try {
             $entityNamespace = $entityNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Models';
             $className = $entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName);
-            if (!$this->container->offsetExists('entity' . $entityName) && class_exists($className)) {
-                $this->container->offsetSet('entity' . $entityName, new $className());
+            $key = str_replace(DIRECTORY_SEPARATOR, '', $className);
+            if (!$this->container->offsetExists($key) && class_exists($className)) {
+                $this->container->offsetSet($key, new $className());
             }
-            return $this->container->offsetGet('entity' . $entityName);
+            return $this->container->offsetGet($key);
         } catch (\Exception $e) {
             return null;
         }
@@ -359,10 +361,11 @@ final class Application
         try {
             $dbConfig = $this->config('db.' . APPLICATION_ENV);
             $dbName = $dbName ?: current(array_keys($dbConfig));
-            if (!$this->container->offsetExists('repository' . $entityName) && class_exists($repositoryClassName)) {
-                $this->container->offsetSet('repository' . $entityName, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName)));
+            $key = str_replace(DIRECTORY_SEPARATOR, '', $repositoryClassName);
+            if (!$this->container->offsetExists($key) && class_exists($repositoryClassName)) {
+                $this->container->offsetSet($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName)));
             }
-            return $this->container->offsetGet('repository' . $entityName);
+            return $this->container->offsetGet($key);
         } catch (\Exception $e) {
             return null;
         }
@@ -381,10 +384,11 @@ final class Application
         try {
             $serviceNamespace = $serviceNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Services';
             $className = $serviceNamespace . DIRECTORY_SEPARATOR . Inflector::classify($serviceName) . 'Service';
-            if (!$this->container->offsetExists('service' . $serviceName) && class_exists($className)) {
-                $this->container->offsetSet('service' . $serviceName, new $className($params));
+            $key = str_replace(DIRECTORY_SEPARATOR, '', $className);
+            if (!$this->container->offsetExists($key) && class_exists($className)) {
+                $this->container->offsetSet($key, new $className($params));
             }
-            return $this->container->offsetGet('service' . $serviceName);
+            return $this->container->offsetGet($key);
         } catch (\Exception $e) {
             return null;
         }
