@@ -243,7 +243,7 @@ final class Application
             if (!$this->container->offsetExists($componentName)) {
                 $providersPath = array_merge($this->config('app.providersPath') ?: [], $this->config('providersPath'));
                 foreach ($providersPath as $namespace) {
-                    $className = $namespace . DIRECTORY_SEPARATOR . Inflector::classify($componentName) . 'Provider';
+                    $className = $namespace . '\\' . Inflector::classify($componentName) . 'Provider';
                     if (class_exists($className)) {
                         $this->container->register(new $className(), $param);
                         break;
@@ -296,9 +296,9 @@ final class Application
     public function model($modelName, array $params = [], $modelNamespace = null)
     {
         try {
-            $modelNamespace = $modelNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Models';
-            $className = $modelNamespace . DIRECTORY_SEPARATOR . Inflector::classify($modelName) . 'Model';
-            $key = str_replace(DIRECTORY_SEPARATOR, '', $className);
+            $modelNamespace = $modelNamespace ?: APP_NAME . '\\Models';
+            $className = $modelNamespace . '\\' . Inflector::classify($modelName) . 'Model';
+            $key = str_replace('\\', '', $className);
             if (!$this->container->offsetExists($key) && class_exists($className)) {
                 $this->container->offsetSet($key, new $className($params));
             }
@@ -318,9 +318,9 @@ final class Application
     public function entity($entityName, $entityNamespace = null)
     {
         try {
-            $entityNamespace = $entityNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Models';
-            $className = $entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName);
-            $key = str_replace(DIRECTORY_SEPARATOR, '', $className);
+            $entityNamespace = $entityNamespace ?: 'Entity\\Models';
+            $className = $entityNamespace . '\\' . Inflector::classify($entityName);
+            $key = str_replace('\\', '', $className);
             if (!$this->container->offsetExists($key) && class_exists($className)) {
                 $this->container->offsetSet($key, new $className());
             }
@@ -342,14 +342,14 @@ final class Application
      */
     public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {
-        $entityNamespace = $entityNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Models';
-        $repositoryNamespace = $repositoryNamespace ?: 'Entity' . DIRECTORY_SEPARATOR . 'Repositories';
-        $repositoryClassName = $repositoryNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName) . 'Repository';
+        $entityNamespace = $entityNamespace ?: 'Entity\\Models';
+        $repositoryNamespace = $repositoryNamespace ?: 'Entity\\Repositories';
+        $repositoryClassName = $repositoryNamespace . '\\' . Inflector::classify($entityName) . 'Repository';
         try {
             $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));
-            $key = str_replace(DIRECTORY_SEPARATOR, '', $repositoryClassName);
+            $key = str_replace('\\', '', $repositoryClassName);
             if (!$this->container->offsetExists($key) && class_exists($repositoryClassName)) {
-                $this->container->offsetSet($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . DIRECTORY_SEPARATOR . Inflector::classify($entityName)));
+                $this->container->offsetSet($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . Inflector::classify($entityName)));
             }
             return $this->container->offsetGet($key);
         } catch (\Exception $e) {
@@ -368,9 +368,9 @@ final class Application
     public function service($serviceName, array $params = [], $serviceNamespace = null)
     {
         try {
-            $serviceNamespace = $serviceNamespace ?: APP_NAME . DIRECTORY_SEPARATOR . 'Services';
-            $className = $serviceNamespace . DIRECTORY_SEPARATOR . Inflector::classify($serviceName) . 'Service';
-            $key = str_replace(DIRECTORY_SEPARATOR, '', $className);
+            $serviceNamespace = $serviceNamespace ?: APP_NAME . '\\Services';
+            $className = $serviceNamespace . '\\' . Inflector::classify($serviceName) . 'Service';
+            $key = str_replace('\\', '', $className);
             if (!$this->container->offsetExists($key) && class_exists($className)) {
                 $this->container->offsetSet($key, new $className($params));
             }
