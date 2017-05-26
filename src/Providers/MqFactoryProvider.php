@@ -25,10 +25,7 @@ class MqFactoryProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['mq_factory'] = function (Container $container) {
-            $redis = $container['application']->component('redis');
-            $redis->setOption(\Redis::OPT_PREFIX, 'bernard:');
-            $driver = new PhpRedisDriver($redis);
-            return new PersistentFactory($driver, $container['application']->component('mq_serializer'));
+            return new PersistentFactory($container['application']->component('mq_driver'), $container['application']->component('mq_serializer'));
         };
     }
 }

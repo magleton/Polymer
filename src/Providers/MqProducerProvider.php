@@ -25,10 +25,7 @@ class MqProducerProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['mq_producer'] = function (Container $container) {
-            $driver = $container['application']->component('mq_driver');
-            $serializer = $container['application']->component('mq_serializer');
-            $middleware = $container['application']->component('mq_middleware');
-            return new Producer(new PersistentFactory($driver, $serializer), $middleware);
+            return new Producer($container['application']->component('mq_factory'), $container['application']->component('mq_middleware'));
         };
     }
 }
