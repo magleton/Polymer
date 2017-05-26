@@ -32,7 +32,8 @@
     "symfony/expression-language": "~3.2",
     "ext-pdo": "*",
     "ext-simplexml": "*",
-    "ext-exif": "*"
+    "ext-exif": "*",
+    "bernard/bernard": "*"
   },
   "require-dev": {
     "guzzlehttp/guzzle": "~6.2",
