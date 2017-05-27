@@ -33,7 +33,7 @@
     "ext-pdo": "*",
     "ext-simplexml": "*",
     "ext-exif": "*",
-    "bernard/bernard": "*"
+    "bernard/bernard": "dev-master"
   },
   "require-dev": {
     "guzzlehttp/guzzle": "~6.2",

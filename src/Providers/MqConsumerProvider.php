@@ -24,7 +24,8 @@ class MqConsumerProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['mq_consumer'] = function (Container $container) {
-            return new Consumer($container['application']->component('mq_receivers'), $container['application']->component('mq_middleware'));
+            //return new Consumer($container['application']->component('mq_receivers'), $container['application']->component('mq_middleware'));
+            return new Consumer($container['application']->component('mq_receivers'), $container['application']->component('mq_event_dispatcher'));
         };
     }
 }

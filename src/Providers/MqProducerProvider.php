@@ -25,7 +25,8 @@ class MqProducerProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['mq_producer'] = function (Container $container) {
-            return new Producer($container['application']->component('mq_factory'), $container['application']->component('mq_middleware'));
+            //return new Producer($container['application']->component('mq_factory'), $container['application']->component('mq_middleware'));  //0.x版本
+            return new Producer($container['application']->component('mq_factory'), $container['application']->component('mq_event_dispatcher')); //1.x版本
         };
     }
 }

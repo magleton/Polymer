@@ -7,6 +7,7 @@
 
 namespace Polymer\Providers;
 
+use Bernard\Serializer;
 use Bernard\Serializer\SimpleSerializer;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -24,7 +25,8 @@ class MqSerializerProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['mq_serializer'] = function (Container $container) {
-            return new SimpleSerializer();
+            // return new SimpleSerializer();  //0.x版本
+            return new Serializer();  //1.x 版本
         };
     }
 }
