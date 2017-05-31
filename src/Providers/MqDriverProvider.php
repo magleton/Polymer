@@ -25,6 +25,7 @@ class MqDriverProvider implements ServiceProviderInterface
     {
         $pimple['mq_driver'] = function (Container $container) {
             $redis = $container['application']->component('redis');
+            $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
             $redis->setOption(\Redis::OPT_PREFIX, 'bernard:');
             return new PhpRedisDriver($redis);
         };
