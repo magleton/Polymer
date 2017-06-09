@@ -320,11 +320,7 @@ final class Application
         try {
             $entityNamespace = $entityNamespace ?: 'Entity\\Models';
             $className = $entityNamespace . '\\' . Inflector::classify($entityName);
-            $key = str_replace('\\', '', $className);
-            if (!$this->container->offsetExists($key) && class_exists($className)) {
-                $this->container->offsetSet($key, new $className());
-            }
-            return $this->container->offsetGet($key);
+            return new $className;
         } catch (\Exception $e) {
             return null;
         }
