@@ -4,6 +4,7 @@
  * Date: 16-8-26
  * Time: 上午9:24
  */
+
 namespace Polymer\Providers;
 
 use Pimple\Container;
@@ -28,7 +29,7 @@ class RedisCacheProvider implements ServiceProviderInterface
                 $namespace = $container->offsetExists('redis_namespace') ? $container->offsetGet('redis_namespace') : 'redisCache';
                 $database = $container->offsetExists('redis_database') ? $container->offsetGet('redis_database') : 0;
                 $redisCache->setNamespace($namespace);
-                $redisCache->setRedis($container['application']->component('redis', ['database' => $database]));
+                $redisCache->setRedis($container['application']->component('redis', ['database' => (int)$database]));
                 return $redisCache;
             } catch (\Exception $e) {
                 throw $e;
