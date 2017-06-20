@@ -37,8 +37,8 @@ class IpFilterMiddleware
         $this->mode = $mode;
         $this->handler = function (Request $request, Response $response) {
             try {
-                $response = $response->withStatus(401);
-                $response->getBody()->write('Access denied');
+                $response = $response->withStatus(403);
+                $response->getBody()->write(' 403 Forbidden');
                 return $response;
             } catch (\Exception $e) {
                 return null;
