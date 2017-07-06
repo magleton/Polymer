@@ -33,6 +33,7 @@
     "ext-pdo": "*",
     "ext-simplexml": "*",
     "ext-exif": "*",
+    "goaop/framework": "*",
     "bernard/bernard": "dev-master"
   },
   "require-dev": {

@@ -72,6 +72,16 @@ $common_config = [
     'session_handler' => [
         'cls' => \Polymer\Session\SecureHandler::class,
         'params' => ''
+    ],
+    //AOP配置信息
+    'aop' => [
+        'init' => [
+            'debug' => true,
+            'cacheDir' => APP_PATH . '/log/aop/',
+            'excludePaths' => [
+                ROOT_PATH . '/vendor/',
+            ],
+        ]
     ]
 ];
 
