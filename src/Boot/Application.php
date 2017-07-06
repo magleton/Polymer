@@ -99,9 +99,10 @@ final class Application
             $this->container = new Container($this->config('slim'));
             $initAppFile = ROOT_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitAppProvider.php';
             $initAppClass = file_exists($initAppFile) ? APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitAppProvider' : InitAppProvider::class;
-            $this->container->register(new $initAppClass());
             $this->container['application'] = $this;
+            $this->container->register(new $initAppClass());
             static::setInstance($this);
+            $this->config('app.use_aspect') && $this->component('aop');
         } catch (\Exception $e) {
             throw $e;
         }
