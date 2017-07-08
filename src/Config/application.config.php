@@ -66,7 +66,14 @@ $common_config = [
         ],
     ],
     //服务供给者的命名空间
-    'providersPath' => ['Polymer\\Providers'],
+    'providers_path' => ['Polymer\\Providers'],
+
+    //生成的路由文件存放路径
+    'router_path' => [
+        'router' => APP_PATH . 'Routers' . DIRECTORY_SEPARATOR . 'router.php',
+        'router_files' => APP_PATH . 'Routers' . DIRECTORY_SEPARATOR . '*_router.php',
+        'lock' => APP_PATH . DIRECTORY_SEPARATOR . 'Routers' . DIRECTORY_SEPARATOR . 'router.lock'
+    ],
 
     //Session的处理类
     'session_handler' => [

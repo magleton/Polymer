@@ -240,7 +240,7 @@ final class Application
     {
         try {
             if (!$this->container->offsetExists($componentName)) {
-                $providersPath = array_merge($this->config('app.providersPath') ?: [], $this->config('providersPath'));
+                $providersPath = array_merge($this->config('app.providers_path' , []), $this->config('providers_path'));
                 foreach ($providersPath as $namespace) {
                     $className = $namespace . '\\' . Inflector::classify($componentName) . 'Provider';
                     if (class_exists($className)) {
