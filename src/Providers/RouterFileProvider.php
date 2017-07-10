@@ -4,6 +4,7 @@
  * Date: 16-8-26
  * Time: 下午4:28
  */
+
 namespace Polymer\Providers;
 
 use Pimple\Container;
@@ -23,7 +24,7 @@ class RouterFileProvider implements ServiceProviderInterface
     {
         $pimple['routerFile'] = function (Container $container) {
             $routerLockFile = $container['application']->config('app.router_path.lock', $container['application']->config('router_path.lock'));
-            if (!file_exists($routerLockFile) || $container['application']->config('app.generate_router', false)) {
+            if (routeGeneration()) {
                 if (file_exists($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')))) {
                     @unlink($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')));
                 }

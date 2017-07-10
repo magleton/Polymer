@@ -145,3 +145,16 @@ if (!function_exists('debugger')) {
         }
     }
 }
+
+if (!function_exists('routeGeneration')) {
+    /**
+     * 是否重新生成路由文件
+     *
+     * @return bool
+     */
+    function routeGeneration()
+    {
+        $routerLockFile = app()->config('app.router_path.lock', app()->config('router_path.lock'));
+        return !file_exists($routerLockFile) || app()->config('app.generate_router', false);
+    }
+}
