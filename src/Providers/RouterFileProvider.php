@@ -23,7 +23,6 @@ class RouterFileProvider implements ServiceProviderInterface
     public function register(Container $pimple)
     {
         $pimple['routerFile'] = function (Container $container) {
-            $routerLockFile = $container['application']->config('app.router_path.lock', $container['application']->config('router_path.lock'));
             if (routeGeneration()) {
                 if (file_exists($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')))) {
                     @unlink($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')));
@@ -55,7 +54,7 @@ class RouterFileProvider implements ServiceProviderInterface
                 }
                 file_put_contents($container['application']->config('app.router_path.router', $container['application']->config('router_path.router')), $routerContents);
                 $container['router']->setCacheFile($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')));
-                touch($routerLockFile);
+                touch($container['application']->config('app.router_path.lock', $container['application']->config('router_path.lock')));
             }
             require_once $container['application']->config('app.router_path.router', $container['application']->config('router_path.router'));
         };
