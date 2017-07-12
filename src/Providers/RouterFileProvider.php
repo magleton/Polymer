@@ -24,8 +24,8 @@ class RouterFileProvider implements ServiceProviderInterface
     {
         $pimple['routerFile'] = function (Container $container) {
             if (routeGeneration()) {
-                if (file_exists($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')))) {
-                    @unlink($container['application']->config('app.router_cache_file', $container['application']->config('slim.settings.routerCacheFile')));
+                if (file_exists($container['application']->config('slim.settings.routerCacheFile'))) {
+                    @unlink($container['application']->config('slim.settings.routerCacheFile'));
                 }
                 $routerContents = '<?php ' . "\n" . '$app = $container[\'application\']->component(\'app\');';
                 if (class_exists('\RunTracy\Middlewares\TracyMiddleware')) {
