@@ -240,7 +240,7 @@ final class Application
     {
         try {
             if (!$this->container->offsetExists($componentName)) {
-                $providersPath = array_merge($this->config('app.providers_path' , []), $this->config('providers_path'));
+                $providersPath = array_merge($this->config('app.providers_path', []), $this->config('providers_path'));
                 foreach ($providersPath as $namespace) {
                     $className = $namespace . '\\' . Inflector::classify($componentName) . 'Provider';
                     if (class_exists($className)) {
@@ -295,7 +295,7 @@ final class Application
     public function model($modelName, array $params = [], $modelNamespace = null)
     {
         try {
-            $modelNamespace = $modelNamespace ?: APP_NAME . '\\Models';
+            $modelNamespace = $modelNamespace ?: (defined('DEPEND_NAME') ? DEPEND_NAME : APP_NAME) . '\\Models';
             $className = $modelNamespace . '\\' . Inflector::classify($modelName) . 'Model';
             $key = str_replace('\\', '', $className);
             if (!$this->container->offsetExists($key) && class_exists($className)) {
@@ -363,7 +363,7 @@ final class Application
     public function service($serviceName, array $params = [], $serviceNamespace = null)
     {
         try {
-            $serviceNamespace = $serviceNamespace ?: APP_NAME . '\\Services';
+            $serviceNamespace = $serviceNamespace ?: (defined('DEPEND_NAME') ? DEPEND_NAME : APP_NAME) . '\\Services';
             $className = $serviceNamespace . '\\' . Inflector::classify($serviceName) . 'Service';
             $key = str_replace('\\', '', $className);
             if (!$this->container->offsetExists($key) && class_exists($className)) {
