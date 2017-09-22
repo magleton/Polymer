@@ -251,7 +251,7 @@ final class Application
             }
             $componentObj = $this->container->offsetGet($componentName);
             if ($componentName === Constants::REDIS) {
-                $database = (isset($param['database']) && is_numeric($param['database'])) ? $param['database'] : 0;
+                $database = (isset($param['database']) && is_numeric($param['database'])) ? $param['database'] & 15 : 0;
                 $componentObj->select($database);
             }
             return $componentObj;
