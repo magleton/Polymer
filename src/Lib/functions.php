@@ -44,7 +44,9 @@ if (!function_exists('getIP')) {
     function getIP()
     {
         $IP = '0.0.0.0';
-        if (isset($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP']) {
+        if (isset($_SERVER['HTTP_CDN_SRC_IP']) && $_SERVER['HTTP_CDN_SRC_IP']) {
+            $IP = $_SERVER['HTTP_CDN_SRC_IP'];
+        } elseif (isset($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP']) {
             $IP = $_SERVER['HTTP_CLIENT_IP'];
         } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR']) {
             $IP = $_SERVER['HTTP_X_FORWARDED_FOR'];
