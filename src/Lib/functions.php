@@ -44,19 +44,19 @@ if (!function_exists('getIP')) {
     function getIP()
     {
         $IP = '0.0.0.0';
-        if (isset($_SERVER['HTTP_CDN_SRC_IP']) && $_SERVER['HTTP_CDN_SRC_IP']) {
+        if (!empty($_SERVER['HTTP_CDN_SRC_IP']) && $_SERVER['HTTP_CDN_SRC_IP']) {
             $IP = $_SERVER['HTTP_CDN_SRC_IP'];
-        } elseif (isset($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP']) {
+        } elseif (!empty($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP']) {
             $IP = $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (isset($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR']) {
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR']) {
             $IP = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } elseif (isset($_SERVER['HTTP_X_FORWARDED']) && $_SERVER['HTTP_X_FORWARDED']) {
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED']) && $_SERVER['HTTP_X_FORWARDED']) {
             $IP = $_SERVER['HTTP_X_FORWARDED'];
-        } elseif (isset($_SERVER['HTTP_FORWARDED_FOR']) && $_SERVER['HTTP_FORWARDED_FOR']) {
+        } elseif (!empty($_SERVER['HTTP_FORWARDED_FOR']) && $_SERVER['HTTP_FORWARDED_FOR']) {
             $IP = $_SERVER['HTTP_FORWARDED_FOR'];
-        } elseif (isset($_SERVER['HTTP_FORWARDED']) && $_SERVER['HTTP_FORWARDED']) {
+        } elseif (!empty($_SERVER['HTTP_FORWARDED']) && $_SERVER['HTTP_FORWARDED']) {
             $IP = $_SERVER['HTTP_FORWARDED'];
-        } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR']) {
+        } elseif (!empty($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR']) {
             $IP = $_SERVER['REMOTE_ADDR'];
         }
         return $IP;
@@ -146,7 +146,7 @@ if (!function_exists('authCode')) {
      * @param int $expiry
      * @return string
      */
-    function authCode($string, $operation = 'DECODE', $key = '', $expiry = 0)
+    function authCode($string, $key = '', $operation = 'DECODE', $expiry = 0)
     {
         $cKeyLength = 4;
         $key = md5($key ?: 'polymerKey');
@@ -162,7 +162,7 @@ if (!function_exists('authCode')) {
         }
         $cryptKey = $keyA . md5($keyA . $keyC);
         $keyLength = strlen($cryptKey);
-        $string = $operation === 'DECODE' ? base64_decode(substr($string, $cKeyLength)) : sprintf('%010d',$expiry ? $expiry + time() : 0) . substr(md5($string . $keyB), 0, 16) . $string;
+        $string = $operation === 'DECODE' ? base64_decode(substr($string, $cKeyLength)) : sprintf('%010d', $expiry ? $expiry + time() : 0) . substr(md5($string . $keyB), 0, 16) . $string;
         $string_length = strlen($string);
         $result = '';
         $box = range(0, 255);
@@ -185,13 +185,11 @@ if (!function_exists('authCode')) {
             $result .= chr(ord($string[$i]) ^ ($box[($box[$a] + $box[$j]) % 256]));
         }
         if ($operation === 'DECODE') {
-            if ((substr($result, 0, 10) == 0 || substr($result, 0, 10) - time() > 0) && 0 === strcmp(substr($result, 10, 16), substr(md5(substr($result, 26) . $keyB), 0, 16))) {
+            if ((0 === strpos($result, '0000000000') || substr($result, 0, 10) - time() > 0) && 0 === strcmp(substr($result, 10, 16), substr(md5(substr($result, 26) . $keyB), 0, 16))) {
                 return substr($result, 26);
-            } else {
-                return '';
             }
-        } else {
-            return $keyC . str_replace('=', '', base64_encode($result));
+            return '';
         }
+        return $keyC . str_replace('=', '', base64_encode($result));
     }
 }
