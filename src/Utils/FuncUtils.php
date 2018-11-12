@@ -54,15 +54,18 @@ class FuncUtils
     }
 
     /**
-     * 将实体对象转换为数组
+     *  获取序列化器
+     * @version  2018年11月12日
+     * @author   zj chen <britton@126.com>
+     * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
      *
-     * @param mixed $entity 实体对象
      * @param array $ignoredAttributes
-     * @param null  $format 转换成的格式  json xml
+     * @param null  $format
      *
-     * @return array|object|\Symfony\Component\Serializer\Normalizer\scalar
+     * @return Serializer
+     *
      */
-    public static function entityToArray($entity, array $ignoredAttributes = [], $format = null)
+    private static function getSerializer(array $ignoredAttributes = [])
     {
         $encoders = [new XmlEncoder(), new JsonEncoder()];
         $objectNormalizer = new ObjectNormalizer();
@@ -72,6 +75,53 @@ class FuncUtils
         });
         $normalizers = [$objectNormalizer];
         $serializer = new Serializer($normalizers, $encoders);
-        return $serializer->normalize($entity, $format);
+        return $serializer;
+    }
+
+    /**
+     * 将实体对象转换为数组
+     *
+     * @param mixed $entity 实体对象
+     * @param array $ignoredAttributes
+     *
+     * @return array|object|\Symfony\Component\Serializer\Normalizer\scalar
+     */
+    public static function entityToArray($entity, array $ignoredAttributes = [])
+    {
+        return self::getSerializer($ignoredAttributes)->normalize($entity);
+    }
+
+    /**
+     *  对象转JSON
+     * @version  2018年11月12日
+     * @author   zj chen <britton@126.com>
+     * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
+     *
+     * @param       $entity
+     * @param array $ignoredAttributes
+     *
+     * @return bool|float|int|string
+     *
+     */
+    public static function entityToJson($entity, array $ignoredAttributes = [])
+    {
+        return self::getSerializer($ignoredAttributes)->serialize($entity, 'json');
+    }
+
+    /**
+     * 对象转XML
+     * @version  2018年11月12日
+     * @author   zj chen <britton@126.com>
+     * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
+     *
+     * @param       $entity
+     * @param array $ignoredAttributes
+     *
+     * @return bool|float|int|string
+     *
+     */
+    public static function entityToXML($entity, array $ignoredAttributes = [])
+    {
+        return self::getSerializer($ignoredAttributes)->serialize($entity, 'xml');
     }
 }
