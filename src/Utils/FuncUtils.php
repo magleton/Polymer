@@ -4,6 +4,7 @@
  * Date: 2016/10/16
  * Time: 18:40
  */
+
 namespace Polymer\Utils;
 
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -19,6 +20,7 @@ class FuncUtils
      *
      * @param int $len
      * @param int $type (1=>数字 , 2=>字母 , 3=>混合)
+     *
      * @return string
      */
     public static function generateSalt($len = 32, $type = 3)
@@ -42,9 +44,9 @@ class FuncUtils
     /**
      * 用于Symfony的Callback验证器
      *
-     * @param $object
+     * @param                           $object
      * @param ExecutionContextInterface $context
-     * @param $payload
+     * @param                           $payload
      */
     public static function validate($object, ExecutionContextInterface $context, $payload)
     {
@@ -55,13 +57,20 @@ class FuncUtils
      * 将实体对象转换为数组
      *
      * @param mixed $entity 实体对象
-     * @param null $format 转换成的格式  json xml
+     * @param array $ignoredAttributes
+     * @param null  $format 转换成的格式  json xml
+     *
      * @return array|object|\Symfony\Component\Serializer\Normalizer\scalar
      */
-    public static function entityToArray($entity, $format = null)
+    public static function entityToArray($entity, array $ignoredAttributes = [], $format = null)
     {
-        $encoders = array(new XmlEncoder(), new JsonEncoder());
-        $normalizers = array(new ObjectNormalizer());
+        $encoders = [new XmlEncoder(), new JsonEncoder()];
+        $objectNormalizer = new ObjectNormalizer();
+        $objectNormalizer->setIgnoredAttributes($ignoredAttributes);
+        $objectNormalizer->setCircularReferenceHandler(function ($object) {
+            return get_class($object);
+        });
+        $normalizers = [$objectNormalizer];
         $serializer = new Serializer($normalizers, $encoders);
         return $serializer->normalize($entity, $format);
     }
