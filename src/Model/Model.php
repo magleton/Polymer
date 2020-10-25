@@ -8,7 +8,7 @@
 namespace Polymer\Model;
 
 use Doctrine\Common\Cache\Cache;
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\Inflector;
 use Doctrine\DBAL\Sharding\PoolingShardManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
@@ -244,7 +244,7 @@ class Model
      *
      * @return PoolingShardManager|null
      */
-    protected function sharedManager()
+    protected function sharedManager(): ?PoolingShardManager
     {
         if ($this->em) {
             return new PoolingShardManager($this->em->getConnection());

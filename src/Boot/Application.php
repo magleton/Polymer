@@ -337,8 +337,8 @@ final class Application
      */
     public function repository(string $entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {
-        $entityNamespace = $entityNamespace ?: 'Entity\\Models';
-        $repositoryNamespace = $repositoryNamespace ?: 'Entity\\Repositories';
+        $entityNamespace = $entityNamespace ?: APP_NAME.'\\Entity\\Mapping';
+        $repositoryNamespace = $repositoryNamespace ?: APP_NAME.'\\Entity\\Repositories';
         $repositoryClassName = $repositoryNamespace . '\\' . Inflector::classify($entityName) . 'Repository';
         try {
             $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));

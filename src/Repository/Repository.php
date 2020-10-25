@@ -4,6 +4,7 @@
  * Date: 16-12-12
  * Time: 上午8:55
  */
+
 namespace Polymer\Repository;
 
 use Doctrine\ORM\EntityManager;
@@ -11,7 +12,6 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping;
 use Exception;
 use Polymer\Boot\Application;
-use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\PresenterException;
 
 class Repository extends EntityRepository
@@ -35,7 +35,7 @@ class Repository extends EntityRepository
      *
      * @var array
      */
-    protected $rules = [];
+    protected array $rules = [];
 
     /**
      * Initializes a new <tt>EntityRepository</tt>.
@@ -56,10 +56,10 @@ class Repository extends EntityRepository
      * @param array $rules 验证数据的规则
      * @param array $groups 验证组
      * @param string $key 存储错误信息的键
-     * @throws Exception
      * @return $this
+     * @throws Exception
      */
-    public function validate(array $data = [], array $rules = [], array $groups = [], $key = 'error')
+    public function validate(array $data = [], array $rules = [], array $groups = [], $key = 'error'): self
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
@@ -68,6 +68,20 @@ class Repository extends EntityRepository
             throw $e;
         }
         return $this;
+    }
+
+    /**
+     * 获取对象属性
+     *
+     * @param $propertyName
+     * @return mixed
+     */
+    protected function getProperty($propertyName)
+    {
+        if (isset($this->$propertyName)) {
+            return $this->$propertyName;
+        }
+        return null;
     }
 
     /**
@@ -96,23 +110,9 @@ class Repository extends EntityRepository
      * @param $value
      * @return $this
      */
-    protected function setProperty($propertyName, $value)
+    protected function setProperty($propertyName, $value): self
     {
         $this->$propertyName = $value;
         return $this;
-    }
-
-    /**
-     * 获取对象属性
-     *
-     * @param $propertyName
-     * @return mixed
-     */
-    protected function getProperty($propertyName)
-    {
-        if (isset($this->$propertyName)) {
-            return $this->$propertyName;
-        }
-        return null;
     }
 }

@@ -34,13 +34,14 @@
     "ext-simplexml": "*",
     "ext-exif": "*",
     "goaop/framework": ">=2.3",
-    "bernard/bernard": "dev-master"
+    "bernard/bernard": "dev-master",
+    "dto/dto": ">=3.2"
   },
   "require-dev": {
     "roave/security-advisories": "dev-master",
     "guzzlehttp/guzzle": "^6.2",
     "vlucas/phpdotenv": "^2.4",
-    "runcmf/runtracy": "^0.2",
+    "runcmf/runtracy": ">=0.2",
     "mikey179/vfsStream": "^1.6",
     "mockery/mockery": "^0.9",
     "satooshi/php-coveralls": "^1.0",
