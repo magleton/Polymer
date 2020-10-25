@@ -6,9 +6,13 @@
  *
  * @author macro chen <macro_fengye@163.com>
  */
+
 namespace Polymer\Controller;
 
-use Interop\Container\ContainerInterface;
+use Exception;
+use Polymer\Boot\Application;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
 use Slim\Http\Response;
 
 class Controller
@@ -21,7 +25,7 @@ class Controller
 
     /**
      * 整个框架的应用
-     * @var \Polymer\Boot\Application
+     * @var Application
      */
     protected $app;
 
@@ -29,7 +33,7 @@ class Controller
      * Controller constructor.
      *
      * @param ContainerInterface $ci
-     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws ContainerExceptionInterface
      */
 
     public function __construct(ContainerInterface $ci)
@@ -40,11 +44,11 @@ class Controller
     /**
      * 模板渲染
      *
-     * @author macro chen <macro_fengye@163.com>
      * @param string $template 模板文件
      * @param array $data 传递到模板的数据
-     * @throws \Exception
      * @return mixed
+     * @throws Exception
+     * @author macro chen <macro_fengye@163.com>
      */
     protected function render($template, array $data = [])
     {
@@ -59,16 +63,16 @@ class Controller
      * This method prepares the response object to return an HTTP Json
      * response to the client.
      *
-     * @param  mixed $data The data
-     * @param  int $status The HTTP status code.
-     * @param  int $encodingOptions Json encoding options
+     * @param mixed $data The data
+     * @param int $status The HTTP status code.
+     * @param int $encodingOptions Json encoding options
      * @return Response|string
      */
     protected function withJson($data, $status = null, $encodingOptions = 0)
     {
         try {
             return $this->app->component('response')->withJson($data, $status, $encodingOptions);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return json_encode(['msg' => $e->getMessage()], $encodingOptions);
         }
     }

@@ -1,14 +1,22 @@
 <?php
+
+use Doctrine\DBAL\Logging\DebugStack;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Monolog\Processor\UidProcessor;
+use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Boot\Application;
+use RunTracy\Helpers\Profiler\Profiler;
+use Tracy\Debugger;
 
 if (!function_exists('app')) {
     /**
      * 获取应用实例
      *
-     * @author <macro_fengye@163.com> macro chen
      * @param null $make 是否返回对象实例
      * @param array $parameters
      * @return Application
+     * @author <macro_fengye@163.com> macro chen
      */
     function app($make = null, array $parameters = [])
     {
@@ -23,14 +31,14 @@ if (!function_exists('logger')) {
     /**
      * 记录日志，便于调试
      *
-     * @author <macro_fengye@163.com> macro chen
      * @param $message
      * @param array $content
      * @param string $file
      * @param string $log_name
      * @param int $level
+     * @author <macro_fengye@163.com> macro chen
      */
-    function logger($message, array $content, $file = '', $log_name = 'LOG', $level = \Monolog\Logger::WARNING)
+    function logger($message, array $content, $file = '', $log_name = 'LOG', $level = Logger::WARNING)
     {
         $levels = [
             100 => 'debug',
@@ -42,9 +50,9 @@ if (!function_exists('logger')) {
             550 => 'alert',
             600 => 'emergency'
         ];
-        $logger = new \Monolog\Logger($log_name);
-        $logger->pushProcessor(new \Monolog\Processor\UidProcessor());
-        $logger->pushHandler(new \Monolog\Handler\StreamHandler($file ? $file : APP_PATH . '/log/log.log', $level));
+        $logger = new Logger($log_name);
+        $logger->pushProcessor(new UidProcessor());
+        $logger->pushHandler(new StreamHandler($file ? $file : APP_PATH . '/log/log.log', $level));
         $function_name = $levels[$level];
         $logger->$function_name($message, $content);
     }
@@ -54,11 +62,18 @@ if (!function_exists('handleShutdown')) {
     /**
      * PHP错误处理函数
      *
+     * @throws EmptyDirectoryException
+     * @throws JsonException
      * @author <macro_fengye@163.com> macro chen
      */
     function handleShutdown()
     {
         $error = error_get_last();
+        if (empty($error)) {
+            $msg = "错误数组为空";
+            app()->config('logger')->error($msg);
+            return;
+        }
         if ($error['type'] === E_ERROR) {
             if (app()->config('logger')) {
                 $msg = 'Type : ' . $error['type'] . '\nMessage : ' . $error['message'] . '\nFile : ' . $error['file'] . '\nLine : ' . $error['line'];
@@ -69,7 +84,7 @@ if (!function_exists('handleShutdown')) {
                 if (defined('TEMPLATE_PATH') && file_exists(TEMPLATE_PATH . 'error.twig')) {
                     echo @file_get_contents(TEMPLATE_PATH . 'error.twig');
                 } else {
-                    echo json_encode(['code' => 2000, 'msg' => 'Error', 'data' => []]);
+                    echo json_encode(['code' => 2000, 'msg' => 'Error', 'data' => []], JSON_THROW_ON_ERROR);
                 }
             }
         }
@@ -81,13 +96,13 @@ if (!function_exists('handleError')) {
     /**
      * 自定义的错误处理函数
      *
-     * @author <macro_fengye@163.com> macro chen
      * @param $level
      * @param $message
      * @param string $file
      * @param int $line
      * @param array $context
      * @throws ErrorException
+     * @author <macro_fengye@163.com> macro chen
      */
     function handleError($level, $message, $file = '', $line = 0, $context = [])
     {
@@ -102,9 +117,9 @@ if (PHP_MAJOR_VERSION === 7 && !function_exists('handleException')) {
     /**
      * 自定义的异常处理函数
      *
-     * @author <macro_fengye@163.com> macro chen
      * @param mixed $e
      * @throws Exception
+     * @author <macro_fengye@163.com> macro chen
      */
     function handleException($e)
     {
@@ -116,9 +131,9 @@ if (PHP_MAJOR_VERSION === 5 && !function_exists('handleException')) {
     /**
      * 自定义的异常处理函数
      *
-     * @author <macro_fengye@163.com> macro chen
      * @param Exception $e
      * @throws Exception
+     * @author <macro_fengye@163.com> macro chen
      */
     function handleException(Exception $e)
     {
@@ -136,12 +151,12 @@ if (!function_exists('debugger')) {
      */
     function debugger($devMode = 0, $dbName = null, $logPath = APP_PATH . '/log')
     {
-        if (class_exists(\RunTracy\Helpers\Profiler\Profiler::class)) {
+        if (class_exists(Profiler::class)) {
             $doctrineConfig = app()->db($dbName)->getConfiguration();
-            $doctrineConfig->setSQLLogger(new \Doctrine\DBAL\Logging\DebugStack());
+            $doctrineConfig->setSQLLogger(new DebugStack());
             app()->offSetValueToContainer('doctrineConfig', $doctrineConfig);
-            \RunTracy\Helpers\Profiler\Profiler::enable(true);
-            \Tracy\Debugger::enable($devMode ? \Tracy\Debugger::PRODUCTION : \Tracy\Debugger::DEVELOPMENT, $logPath);
+            Profiler::enable(true);
+            Debugger::enable($devMode ? Debugger::PRODUCTION : Debugger::DEVELOPMENT, $logPath);
         }
     }
 }
