@@ -18,7 +18,7 @@ if (!function_exists('app')) {
      * @return Application
      * @author <macro_fengye@163.com> macro chen
      */
-    function app($make = null, array $parameters = [])
+    function app($make = null, array $parameters = []): Application
     {
         if (null === $make) {
             return Application::getInstance();

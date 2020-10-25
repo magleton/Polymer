@@ -4,14 +4,16 @@
  * Date: 17-3-21
  * Time: 下午1:25
  */
+
 namespace Polymer\Providers;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
+use Exception;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Symfony\Component\Cache\Adapter\DoctrineAdapter;
 use Symfony\Component\Validator\Mapping\Cache\DoctrineCache;
 use Symfony\Component\Validator\Validation;
 
@@ -29,7 +31,7 @@ class ValidatorProvider implements ServiceProviderInterface
     {
         $pimple['validator'] = function (Container $container) {
             try {
-                AnnotationRegistry::registerLoader('class_exists');
+                //AnnotationRegistry::registerLoader('class_exists');
                 $reader = new AnnotationReader();
                 AnnotationReader::addGlobalIgnoredName('dummy');
                 if (extension_loaded('apcu')) {
@@ -37,8 +39,9 @@ class ValidatorProvider implements ServiceProviderInterface
                 } else {
                     $cache = new ArrayCache();
                 }
-                return Validation::createValidatorBuilder()->setMetadataCache(new DoctrineCache($cache))->enableAnnotationMapping($reader)->getValidator();
-            } catch (\Exception $e) {
+                return Validation::createValidatorBuilder()->setMappingCache(new DoctrineAdapter($cache))->enableAnnotationMapping($reader)->getValidator();
+                //return Validation::createValidatorBuilder()->setMetadataCache(new DoctrineCache($cache))->enableAnnotationMapping($reader)->getValidator();
+            } catch (Exception $e) {
                 return null;
             }
         };

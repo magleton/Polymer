@@ -4,6 +4,7 @@
  * Date: 2016/10/26
  * Time: 19:42
  */
+
 namespace Polymer\Model;
 
 use Doctrine\Common\Cache\Cache;
@@ -11,6 +12,7 @@ use Doctrine\Common\Inflector\Inflector;
 use Doctrine\DBAL\Sharding\PoolingShardManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
+use Exception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\ModelInstanceErrorException;
@@ -23,49 +25,49 @@ class Model
      *
      * @var Application
      */
-    protected $app = null;
+    protected ?object $app = null;
 
     /**
      * 验证组件
      *
      * @var RecursiveValidator
      */
-    protected $validator = null;
+    protected ?object $validator = null;
 
     /**
      * 要验证的实体对象
      *
-     * @var null
+     * @var object|null
      */
-    protected $entityObject = null;
+    protected ?object $entityObject = null;
 
     /**
      * 需要映射的字段
      *
      * @var array
      */
-    protected $mappingField = [];
+    protected array $mappingField = [];
 
     /**
      * 需要排除掉的字段
      *
      * @var array
      */
-    protected $excludeField = [];
+    protected array $excludeField = [];
 
     /**
      * EntityManager实例
      *
      * @var EntityManager
      */
-    protected $em = null;
+    protected ?object $em = null;
 
     /**
      * 保存自定义数据,供验证出错时显示提示信息用
      *
      * @var array
      */
-    private $customerData = [];
+    private array $customerData = [];
 
     /**
      * 模型构造函数
@@ -76,7 +78,7 @@ class Model
     {
         try {
             $this->app = app();
-            $schema = isset($params['schema']) ? $params['schema'] : $this->getProperty('schema');
+            $schema = $params['schema'] ?? $this->getProperty('schema');
             if ($schema) {
                 $cache = $this->getProperty('cache') ?: null;
                 $this->em = $this->app->db($schema);
@@ -86,9 +88,23 @@ class Model
                     $this->em->getConfiguration()->setResultCacheImpl($cache);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new ModelInstanceErrorException('模型实例化错误' . $e->getMessage());
         }
+    }
+
+    /**
+     * 获取对象属性
+     *
+     * @param $propertyName
+     * @return mixed
+     */
+    protected function getProperty($propertyName)
+    {
+        if (isset($this->$propertyName)) {
+            return $this->$propertyName;
+        }
+        return null;
     }
 
     /**
@@ -98,7 +114,7 @@ class Model
      * @param array $criteria 获取对象的条件(用于更新数据)
      * @param bool $returnEObj 是否返回实体对象
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
     protected function make(array $data = [], array $criteria = [], $returnEObj = false)
     {
@@ -112,7 +128,7 @@ class Model
                 }
             }
             return $returnEObj ? $this->entityObject : $this;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }
@@ -120,9 +136,9 @@ class Model
     /**
      * 获取实体对象
      *
-     * @throws EntityNotFoundException | \Exception
      * @param array $criteria
      * @return Object
+     * @throws EntityNotFoundException | Exception
      */
     private function obtainEObj(array $criteria = [])
     {
@@ -145,48 +161,13 @@ class Model
     }
 
     /**
-     * 验证数据或者对象
-     *
-     * @param array $rules 验证规则
-     * @param array $groups 验证组
-     * @return bool
-     * @throws \Exception
-     */
-    protected function validate(array $rules = [], array $groups = null)
-    {
-        $rules = $rules ?: $this->getProperty('rules');
-        if ($rules) {
-            try {
-                $validator = $this->app->component('biz_validator');
-                $validateResult = $validator->validateObject($this->entityObject, $rules, $groups);
-                if (count($validateResult)) {
-                    foreach ($validateResult as $error) {
-                        $tmpMappingField = array_flip($this->mappingField);
-                        $propertyName = $error->getPropertyPath();
-                        if (isset($tmpMappingField[$propertyName]) && array_key_exists($tmpMappingField[$propertyName], array_merge($this->app->component('request')->getParams(), $this->customerData))) {
-                            $propertyName = $tmpMappingField[$propertyName];
-                        }
-                        $errorData[$propertyName] = $error->getMessage();
-                    }
-                    $this->app->component('error_collection')->set($this->getProperty('table'), $errorData);
-                    throw new EntityValidateErrorException('数据验证失败!');
-                }
-                return $this->entityObject;
-            } catch (\Exception $e) {
-                throw $e;
-            }
-        }
-        return $this->entityObject;
-    }
-
-    /**
      * 合并请求参数数据与自定义参数数据
      *
      * @param array $data 需要验证的数据
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function mergeParams(array $data = [])
+    protected function mergeParams(array $data = []): array
     {
         $excludeField = $this->getProperty('excludeField');
         $mappingField = $this->getProperty('mappingField');
@@ -203,17 +184,57 @@ class Model
     }
 
     /**
+     * 验证数据或者对象
+     *
+     * @param array $rules 验证规则
+     * @param array $groups 验证组
+     * @param bool $returnErr 是否返回错误信息
+     * @return bool
+     * @throws Exception
+     */
+    protected function validate(array $rules = [], array $groups = null, bool $returnErr = false)
+    {
+        $rules = $rules ?: $this->getProperty('rules');
+        if ($rules) {
+            $errorData = [];
+            try {
+                $validator = $this->app->component('biz_validator');
+                $validateResult = $validator->validateObject($this->entityObject, $rules, $groups);
+                if (count($validateResult)) {
+                    foreach ($validateResult as $error) {
+                        $tmpMappingField = array_flip($this->mappingField);
+                        $propertyName = $error->getPropertyPath();
+                        if (isset($tmpMappingField[$propertyName]) && array_key_exists($tmpMappingField[$propertyName], array_merge($this->app->component('request')->getParams(), $this->customerData))) {
+                            $propertyName = $tmpMappingField[$propertyName];
+                        }
+                        $errorData[$propertyName] = $error->getMessage();
+                    }
+                    if($returnErr){
+                        return  $errorData;
+                    }
+                    $this->app->component('error_collection')->set($this->getProperty('table'), $errorData);
+                    throw new EntityValidateErrorException('数据验证失败!');
+                }
+                return $this->entityObject;
+            } catch (Exception $e) {
+                throw $e;
+            }
+        }
+        return $this->entityObject;
+    }
+
+    /**
      * 切换数据库的链接
      *
      * @param int $shardId
      * @return boolean
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function switchConnect($shardId)
+    protected function switchConnect($shardId): ?bool
     {
         try {
             return $this->em->getConnection()->connect((int)$shardId);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
     }
@@ -238,23 +259,9 @@ class Model
      * @param $value
      * @return $this
      */
-    protected function setProperty($propertyName, $value)
+    protected function setProperty($propertyName, $value): self
     {
         $this->$propertyName = $value;
         return $this;
-    }
-
-    /**
-     * 获取对象属性
-     *
-     * @param $propertyName
-     * @return mixed
-     */
-    protected function getProperty($propertyName)
-    {
-        if (isset($this->$propertyName)) {
-            return $this->$propertyName;
-        }
-        return null;
     }
 }

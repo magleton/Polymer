@@ -4,8 +4,10 @@
  * Date: 17-2-17
  * Time: 下午1:13
  */
+
 namespace Polymer\Service;
 
+use Exception;
 use Polymer\Boot\Application;
 use Slim\Http\Request;
 
@@ -30,7 +32,7 @@ class Service
      *
      * @var array
      */
-    protected $rules = [];
+    protected array $rules = [];
 
     /**
      * Service constructor.
@@ -40,8 +42,8 @@ class Service
 
     public function __construct(array $params = [])
     {
-        $this->app = isset($params['app']) ? $params['app'] : app();
-        $this->request = isset($params['request']) ? $params['request'] : $this->app->component('request');
+        $this->app = $params['app'] ?? app();
+        $this->request = $params['request'] ?? $this->app->component('request');
     }
 
     /**
@@ -51,30 +53,17 @@ class Service
      * @param array $rules 验证数据的规则
      * @param array $groups 验证组
      * @param string $key 存储错误信息的键
-     * @throws \Exception
      * @return $this
+     * @throws Exception
      */
     protected function validate(array $data = [], array $rules = [], array $groups = [], $key = 'error')
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
             $this->app->component('biz_validator')->validateField($data, $rules, $groups, $key);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
-        return $this;
-    }
-
-    /**
-     * 给对象新增属性
-     *
-     * @param $propertyName
-     * @param $value
-     * @return $this
-     */
-    protected function setProperty($propertyName, $value)
-    {
-        $this->$propertyName = $value;
         return $this;
     }
 
@@ -90,5 +79,18 @@ class Service
             return $this->$propertyName;
         }
         return null;
+    }
+
+    /**
+     * 给对象新增属性
+     *
+     * @param $propertyName
+     * @param $value
+     * @return $this
+     */
+    protected function setProperty($propertyName, $value)
+    {
+        $this->$propertyName = $value;
+        return $this;
     }
 }

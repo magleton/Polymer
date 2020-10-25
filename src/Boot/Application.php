@@ -331,11 +331,11 @@ final class Application
      * @param string $entityName 实体的名字
      * @param string $dbName 数据库的名字
      * @param null $entityFolder 实体文件的路径
-     * @param string $entityNamespace 实体的命名空间
-     * @param string $repositoryNamespace Repository的命名空间
+     * @param null $entityNamespace 实体的命名空间
+     * @param null $repositoryNamespace Repository的命名空间
      * @return \Doctrine\ORM\EntityRepository | Repository | NULL
      */
-    public function repository($entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
+    public function repository(string $entityName, $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {
         $entityNamespace = $entityNamespace ?: 'Entity\\Models';
         $repositoryNamespace = $repositoryNamespace ?: 'Entity\\Repositories';
@@ -348,6 +348,7 @@ final class Application
             }
             return $this->container->offsetGet($key);
         } catch (\Exception $e) {
+            print_r($e);
             return null;
         }
     }
