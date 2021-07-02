@@ -232,7 +232,7 @@ final class Application
      *
      * @param array $params
      * @return EventManager|null
-     * @throws ORMException
+     * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
     public function addEvent(array $params = []): ?EventManager
@@ -317,7 +317,7 @@ final class Application
     {
         try {
             $entityNamespace = $entityNamespace ?: 'Entity\\Models';
-            $className = $entityNamespace . '\\' . Inflector::classify($entityName);
+            $className = $entityNamespace . '\\' . $this->getInflector()->classify($entityName);
             return new $className;
         } catch (Exception $e) {
             return null;
@@ -338,12 +338,12 @@ final class Application
     {
         $entityNamespace = $entityNamespace ?: APP_NAME . '\\Entity\\Mapping';
         $repositoryNamespace = $repositoryNamespace ?: APP_NAME . '\\Entity\\Repositories';
-        $repositoryClassName = $repositoryNamespace . '\\' . Inflector::classify($entityName) . 'Repository';
+        $repositoryClassName = $repositoryNamespace . '\\' . $this->getInflector()->classify($entityName) . 'Repository';
         try {
             $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));
             $key = str_replace('\\', '', $repositoryClassName);
             if (!$this->pimpleContainer->offsetExists($key) && class_exists($repositoryClassName)) {
-                $this->pimpleContainer->offsetSet($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . Inflector::classify($entityName)));
+                $this->pimpleContainer->offsetSet($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . $this->getInflector()->classify($entityName)));
             }
             return $this->pimpleContainer->offsetGet($key);
         } catch (Exception $e) {
@@ -395,7 +395,7 @@ final class Application
     {
         try {
             $serviceNamespace = $serviceNamespace ?: (defined('DEPEND_NAMESPACE') ? DEPEND_NAMESPACE : APP_NAME) . '\\Services';
-            $className = $serviceNamespace . '\\' . Inflector::classify($serviceName) . 'Service';
+            $className = $serviceNamespace . '\\' . $this->getInflector()->classify($serviceName) . 'Service';
             $key = str_replace('\\', '', $className);
             if (!$this->pimpleContainer->offsetExists($key) && class_exists($className)) {
                 $this->pimpleContainer->offsetSet($key, new $className($params));
