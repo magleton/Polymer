@@ -12,7 +12,6 @@ namespace Polymer\Controller;
 use Exception;
 use JsonException;
 use Polymer\Boot\Application;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -32,15 +31,14 @@ class Controller
     protected Application $application;
 
     /**
-     * Controller constructor.
+     * 获取Application
      *
-     * @param ContainerInterface $ci
-     * @throws ContainerExceptionInterface
+     * @return Application
      */
-
-    public function __construct(ContainerInterface $ci)
+    public function getApplication(): Application
     {
-        $this->application = $ci->get('application');
+        $this->application = Application::getInstance();
+        return $this->application;
     }
 
     /**

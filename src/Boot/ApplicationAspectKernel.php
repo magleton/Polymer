@@ -7,7 +7,6 @@
 
 namespace Polymer\Boot;
 
-use Go\Aop\Aspect;
 use Go\Core\AspectContainer;
 use Go\Core\AspectKernel;
 

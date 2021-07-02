@@ -26,7 +26,6 @@ class Service
      * @var Application
      */
     protected Application $application;
-
     /**
      * 验证规则
      *
@@ -35,15 +34,14 @@ class Service
     protected array $rules = [];
 
     /**
-     * Service constructor.
+     * 获取Application
      *
-     * @param array $params
+     * @return Application
      */
-
-    public function __construct(array $params = [])
+    public function getApplication(): Application
     {
-        $this->application = $params['app'] ?? app();
-        $this->request = $params['request'] ?? $this->application->component('request');
+        $this->application = Application::getInstance();
+        return $this->application;
     }
 
     /**
@@ -56,7 +54,7 @@ class Service
      * @return $this
      * @throws Exception
      */
-    protected function validate(array $data = [], array $rules = [], array $groups = [], $key = 'error')
+    protected function validate(array $data = [], array $rules = [], array $groups = [], string $key = 'error'): self
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
@@ -73,12 +71,9 @@ class Service
      * @param $propertyName
      * @return mixed
      */
-    protected function getProperty($propertyName)
+    protected function getProperty($propertyName): mixed
     {
-        if (isset($this->$propertyName)) {
-            return $this->$propertyName;
-        }
-        return null;
+        return $this->$propertyName ?? null;
     }
 
     /**
@@ -88,7 +83,7 @@ class Service
      * @param $value
      * @return $this
      */
-    protected function setProperty($propertyName, $value)
+    protected function setProperty($propertyName, $value): self
     {
         $this->$propertyName = $value;
         return $this;

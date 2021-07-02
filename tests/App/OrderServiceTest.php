@@ -25,7 +25,7 @@ class OrderServiceTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->service = $this->app->service('order', [], 'Polymer\Tests\Services');
+        $this->service = $this->app->service('order', 'Polymer\Tests\Services', []);
     }
 
     protected function tearDown()

@@ -28,7 +28,7 @@ class CompanyServiceTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->service = $this->app->service('company', ['request' => null, 'app' => null], 'Polymer\\Tests\\Services');
+        $this->service = $this->app->service('company', 'Polymer\\Tests\\Services', ['request' => null, 'app' => null]);
     }
 
     protected function tearDown()

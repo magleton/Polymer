@@ -7,13 +7,11 @@
 
 namespace Polymer\Providers;
 
-use DI\Bridge\Slim\Bridge;
 use DI\Container;
 use http\Message\Body;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\App;
 use Slim\Factory\AppFactory;
 
 class InitApplicationProvider
@@ -24,11 +22,11 @@ class InitApplicationProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer): void
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer->set('notAllowedHandler', static function (Container $container) {
+        $diContainer->set('notAllowedHandler', static function (Container $container) {
             return static function (ServerRequestInterface $request, ResponseInterface $response, $methods) use ($container) {
                 $response
                     ->withStatus(405)
@@ -40,7 +38,7 @@ class InitApplicationProvider
             };
         });
 
-        $pimpleContainer->set('notFoundHandler', static function (Container $container) {
+        $diContainer->set('notFoundHandler', static function (Container $container) {
             return static function (ServerRequestInterface $request, ResponseInterface $response) use ($container) {
                 if ($container['application']->config('app.is_rest', false)) {
                     $response
@@ -76,11 +74,11 @@ class InitApplicationProvider
             };
         });
 
-        $pimpleContainer->set('phpErrorHandler', static function (Container $container) {
+        $diContainer->set('phpErrorHandler', static function (Container $container) {
             return $container['errorHandler'];
         });
 
-        $pimpleContainer->set('errorHandler', static function (Container $container) {
+        $diContainer->set('errorHandler', static function (Container $container) {
             return static function (ServerRequestInterface $request, ResponseInterface $response, $exception) use ($container) {
                 $container->register(new LoggerProvider());
                 $container['logger']->error($exception->__toString());
@@ -120,9 +118,8 @@ class InitApplicationProvider
             };
         });
 
-        $pimpleContainer->set('app', static function (Container $pimpleContainer) {
-            return AppFactory::createFromContainer($pimpleContainer);
-            //return Bridge::create($pimpleContainer);
+        $diContainer->set('app', static function (Container $diContainer) {
+            return AppFactory::createFromContainer($diContainer);
         });
     }
 }

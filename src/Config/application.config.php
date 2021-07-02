@@ -80,7 +80,7 @@ return [
     //Session的处理类
     'session_handler' => [
         'cls' => SecureHandler::class,
-        'params' => ''
+        'params' => 'AAAAA'
     ],
     //AOP配置信息
     'aop' => [

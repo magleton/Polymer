@@ -8,8 +8,8 @@
 namespace Polymer\Boot;
 
 use DI\Container;
+use DI\ContainerBuilder;
 use DI\Definition\Source\DefinitionArray;
-use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
 use Doctrine\Inflector\Inflector;
@@ -26,8 +26,8 @@ use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\InitApplicationProvider;
 use Polymer\Repository\Repository;
 use Polymer\Utils\Constants;
+use ReflectionClass;
 use Slim\App;
-use Slim\Factory\AppFactory;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\DoctrineProvider;
 use Throwable;
@@ -126,9 +126,9 @@ final class Application
             });
             register_shutdown_function('handleShutdown');
             $this->configCache = new DoctrineProvider(new ArrayAdapter());
-            $this->app = AppFactory::create();
-            //$this->pimpleContainer = new PimpleContainer($this->config('slim'));
-            $this->diContainer = new Container(new DefinitionArray($this->config('slim')));
+            $builder = new ContainerBuilder();
+            $builder->useAnnotations(true)->addDefinitions(new DefinitionArray($this->initConfigObject()));
+            $this->diContainer = $builder->build();
             $initAppFile = ROOT_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitApplicationProvider.php';
             $initAppClass = file_exists($initAppFile) ? APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitApplicationProvider' : InitApplicationProvider::class;
             $this->diContainer->set('application', $this);
@@ -138,6 +138,39 @@ final class Application
         } catch (Exception $e) {
             throw $e;
         }
+    }
+
+    /**
+     * 将配置文件合并为一个数组
+     *
+     * @return array
+     */
+    public function initConfigObject(): array
+    {
+        $configPaths = $this->getConfigPaths();
+        if (null === $this->configObject) {
+            $this->configObject = new Config($configPaths);
+            $this->configCache->save('configCache', $this->configObject);
+        }
+        return $this->configObject->all();
+    }
+
+    /**
+     * 获取项目的配置文件位置
+     *
+     *
+     * @return array
+     */
+    public function getConfigPaths(): array
+    {
+        $configPaths = [dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Config'];
+        if (defined('ROOT_PATH') && file_exists(ROOT_PATH . DIRECTORY_SEPARATOR . 'config') && is_dir(ROOT_PATH . DIRECTORY_SEPARATOR . 'config')) {
+            $configPaths[] = ROOT_PATH . DIRECTORY_SEPARATOR . 'config';
+        }
+        if (defined('APP_PATH') && file_exists(APP_PATH . DIRECTORY_SEPARATOR . 'Config') && is_dir(APP_PATH . DIRECTORY_SEPARATOR . 'Config')) {
+            $configPaths[] = APP_PATH . DIRECTORY_SEPARATOR . 'Config';
+        }
+        return $configPaths;
     }
 
     /**
@@ -156,18 +189,7 @@ final class Application
             if ($this->configCache->fetch('configCache') && $this->configCache->fetch('configCache')->get($key)) {
                 return $this->configCache->fetch('configCache')->get($key, $default);
             }
-            $configPaths = [dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Config'];
-            if (defined('ROOT_PATH') && file_exists(ROOT_PATH . DIRECTORY_SEPARATOR . 'config') && is_dir(ROOT_PATH . DIRECTORY_SEPARATOR . 'config')) {
-                $configPaths[] = ROOT_PATH . DIRECTORY_SEPARATOR . 'config';
-            }
-            if (defined('APP_PATH') && file_exists(APP_PATH . DIRECTORY_SEPARATOR . 'Config') && is_dir(APP_PATH . DIRECTORY_SEPARATOR . 'Config')) {
-                $configPaths[] = APP_PATH . DIRECTORY_SEPARATOR . 'Config';
-            }
-            if (null === $this->configObject) {
-                $this->configObject = new Config($configPaths);
-                $this->configCache->save('configCache', $this->configObject);
-            }
-            return $this->configObject->get($key, $default);
+            return $default;
         } catch (Exception $e) {
             throw $e;
         }
@@ -391,18 +413,20 @@ final class Application
      * 获取服务组件
      *
      * @param string $serviceName
-     * @param array $params
      * @param string|null $serviceNamespace
+     * @param array $params
      * @return null | Object
      */
-    public function service(string $serviceName, array $params = [], string $serviceNamespace = null): ?object
+    public function service(string $serviceName, string $serviceNamespace = null, ...$params): ?object
     {
         try {
             $serviceNamespace = $serviceNamespace ?: (defined('DEPEND_NAMESPACE') ? DEPEND_NAMESPACE : APP_NAME) . '\\Services';
             $className = $serviceNamespace . '\\' . $this->getInflector()->classify($serviceName) . 'Service';
             $key = str_replace('\\', '', $className);
             if (!$this->diContainer->has($key) && class_exists($className)) {
-                $this->diContainer->set($key, new $className($params));
+                $class = new ReflectionClass($className);
+                $instance = $class->newInstanceArgs($params);
+                $this->diContainer->set($key, $instance);
             }
             return $this->diContainer->get($key);
         } catch (Exception $e) {
