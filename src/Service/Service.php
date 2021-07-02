@@ -9,17 +9,9 @@ namespace Polymer\Service;
 
 use Exception;
 use Polymer\Boot\Application;
-use Psr\Http\Message\ServerRequestInterface;
 
 class Service
 {
-    /**
-     * 请求对象
-     *
-     * @var ServerRequestInterface
-     */
-    protected ServerRequestInterface $request;
-
     /**
      * 全局应用
      *
@@ -32,17 +24,6 @@ class Service
      * @var array
      */
     protected array $rules = [];
-
-    /**
-     * 获取Application
-     *
-     * @return Application
-     */
-    public function getApplication(): Application
-    {
-        $this->application = Application::getInstance();
-        return $this->application;
-    }
 
     /**
      * 验证字段的值
@@ -58,7 +39,7 @@ class Service
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
-            $this->application->component('biz_validator')->validateField($data, $rules, $groups, $key);
+            $this->getApplication()->component('biz_validator')->validateField($data, $rules, $groups, $key);
         } catch (Exception $e) {
             throw $e;
         }
@@ -74,6 +55,17 @@ class Service
     protected function getProperty($propertyName): mixed
     {
         return $this->$propertyName ?? null;
+    }
+
+    /**
+     * 获取Application
+     *
+     * @return Application
+     */
+    public function getApplication(): Application
+    {
+        $this->application = Application::getInstance();
+        return $this->application;
     }
 
     /**
