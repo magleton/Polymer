@@ -7,11 +7,10 @@
 
 namespace Polymer\Providers;
 
-use Bernard\Driver\PhpRedisDriver;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
+use Redis;
 
-class MqDriverProvider implements ServiceProviderInterface
+class MqDriverProvider
 {
     /**
      * Registers services on the given container.
@@ -25,8 +24,8 @@ class MqDriverProvider implements ServiceProviderInterface
     {
         $pimpleContainer['mq_driver'] = function (Container $container) {
             $redis = $container['application']->component('redis');
-            $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
-            $redis->setOption(\Redis::OPT_PREFIX, 'bernard:');
+            $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_NONE);
+            $redis->setOption(Redis::OPT_PREFIX, 'bernard:');
             return new PhpRedisDriver($redis);
         };
     }

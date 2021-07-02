@@ -4,12 +4,14 @@
  * Date: 2016/9/1
  * Time: 19:40
  */
+
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
+use Exception;
+use Redis;
 
-class RedisProvider implements ServiceProviderInterface
+class RedisProvider
 {
     /**
      * Registers services on the given container.
@@ -25,11 +27,11 @@ class RedisProvider implements ServiceProviderInterface
             try {
                 $serverName = $container->offsetExists('redis_server') ? $container->offsetGet('redis_server') : 'server1';
                 $serversConfig = $container['application']->config('cache.redis.' . $serverName);
-                $redis = new \Redis();
+                $redis = new Redis();
                 $redis->connect($serversConfig['server']['host'], $serversConfig['server']['port'], $serversConfig['server']['timeout']);
                 (isset($serversConfig['server']['password']) && $serversConfig['server']['password']) && $redis->auth($serversConfig['server']['password']);
                 return $redis;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return null;
             }
         };

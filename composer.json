@@ -11,6 +11,7 @@
   "prefer-stable": true,
   "require": {
     "php": ">=7.4",
+    "slim/psr7": "1.4",
     "slim/slim": ">=4",
     "slim/flash": ">=0.4",
     "slim/csrf": ">=1.2",

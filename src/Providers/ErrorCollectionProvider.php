@@ -7,11 +7,10 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 use Polymer\Support\Collection;
 
-class ErrorCollectionProvider implements ServiceProviderInterface
+class ErrorCollectionProvider
 {
     /**
      * Registers services on the given container.

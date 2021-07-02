@@ -7,17 +7,16 @@
 
 namespace Polymer\Providers;
 
+use DI\Container;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Cache\ApcuCache;
 use Doctrine\Common\Cache\ArrayCache;
 use Exception;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
 use Symfony\Component\Cache\Adapter\DoctrineAdapter;
 use Symfony\Component\Validator\Mapping\Cache\DoctrineCache;
 use Symfony\Component\Validator\Validation;
 
-class ValidatorProvider implements ServiceProviderInterface
+class ValidatorProvider
 {
     /**
      * Registers services on the given container.

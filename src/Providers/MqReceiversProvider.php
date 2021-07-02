@@ -7,11 +7,9 @@
 
 namespace Polymer\Providers;
 
-use Bernard\Router\SimpleRouter;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 
-class MqReceiversProvider implements ServiceProviderInterface
+class MqReceiversProvider
 {
     /**
      * Registers services on the given container.

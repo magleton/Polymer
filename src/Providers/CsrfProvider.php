@@ -7,14 +7,11 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 use RuntimeException;
 use Slim\Csrf\Guard;
-use Slim\Http\Request;
-use Slim\Http\Response;
 
-class CsrfProvider implements ServiceProviderInterface
+class CsrfProvider
 {
     /**
      * Registers services on the given container.

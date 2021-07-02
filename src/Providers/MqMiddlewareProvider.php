@@ -7,13 +7,9 @@
 
 namespace Polymer\Providers;
 
-use Bernard\Middleware\ErrorLogFactory;
-use Bernard\Middleware\FailuresFactory;
-use Bernard\Middleware\MiddlewareBuilder;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 
-class MqMiddlewareProvider implements ServiceProviderInterface
+class MqMiddlewareProvider
 {
     /**
      * Registers services on the given container.

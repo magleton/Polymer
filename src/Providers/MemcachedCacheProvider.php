@@ -7,11 +7,11 @@
 
 namespace Polymer\Providers;
 
+use DI\Container;
 use Doctrine\Common\Cache\MemcachedCache;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use Exception;
 
-class MemcachedCacheProvider implements ServiceProviderInterface
+class MemcachedCacheProvider
 {
     /**
      * Registers services on the given container.
@@ -30,7 +30,7 @@ class MemcachedCacheProvider implements ServiceProviderInterface
                 $memcachedCache->setNamespace($namespace);
                 $memcachedCache->setMemcached($container['application']->component('memcached'));
                 return $memcachedCache;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw $e;
             }
         };

@@ -7,10 +7,11 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
+use Exception;
+use Memcached;
 
-class MemcachedProvider implements ServiceProviderInterface
+class MemcachedProvider
 {
     /**
      * Registers services on the given container.
@@ -28,14 +29,14 @@ class MemcachedProvider implements ServiceProviderInterface
                 $cacheConfig = $container['application']->config('cache.memcached.' . $serverName);
                 $serversConfig = isset($cacheConfig['servers']) ? $cacheConfig['servers'] : [];
                 if ($serversConfig) {
-                    $memcached = new \Memcached();
+                    $memcached = new Memcached();
                     foreach ($serversConfig as $key => $server) {
                         $memcached->addServer($server['host'], $server['port'], $server['timeout']);
                     }
                     return $memcached;
                 }
                 return null;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw $e;
             }
         };

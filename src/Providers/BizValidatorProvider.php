@@ -7,11 +7,10 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 use Polymer\Validator\BizValidator;
 
-class BizValidatorProvider implements ServiceProviderInterface
+class BizValidatorProvider
 {
     public function register(Container $pimpleContainer): void
     {

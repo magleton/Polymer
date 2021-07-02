@@ -4,13 +4,13 @@
  * Date: 16-9-8
  * Time: 上午8:38
  */
+
 namespace Polymer\Providers;
 
+use DI\Container;
 use Polymer\Session\Session;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
 
-class SessionProvider implements ServiceProviderInterface
+class SessionProvider
 {
     /**
      * Registers services on the given container.

@@ -7,11 +7,12 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
+use InvalidArgumentException;
+use RuntimeException;
 use Slim\Flash\Messages;
 
-class FlashProvider implements ServiceProviderInterface
+class FlashProvider
 {
     /**
      * Registers services on the given container.
@@ -27,9 +28,9 @@ class FlashProvider implements ServiceProviderInterface
             try {
                 $container['application']->component('session');
                 return new Messages();
-            } catch (\InvalidArgumentException $e) {
+            } catch (InvalidArgumentException $e) {
                 return null;
-            } catch (\RuntimeException $e) {
+            } catch (RuntimeException $e) {
                 return null;
             }
         };

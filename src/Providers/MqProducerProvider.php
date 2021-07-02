@@ -7,12 +7,9 @@
 
 namespace Polymer\Providers;
 
-use Bernard\Producer;
-use Bernard\QueueFactory\PersistentFactory;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 
-class MqProducerProvider implements ServiceProviderInterface
+class MqProducerProvider
 {
     /**
      * Registers services on the given container.

@@ -4,13 +4,14 @@
  * Date: 16-8-26
  * Time: 上午9:24
  */
+
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 use Doctrine\Common\Cache\MemcacheCache;
+use Exception;
 
-class MemcacheCacheProvider implements ServiceProviderInterface
+class MemcacheCacheProvider
 {
     /**
      * Registers services on the given container.
@@ -29,7 +30,7 @@ class MemcacheCacheProvider implements ServiceProviderInterface
                 $memcacheCache->setNamespace($namespace);
                 $memcacheCache->setMemcache($container['application']->component('memcache'));
                 return $memcacheCache;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw $e;
             }
         };

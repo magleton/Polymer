@@ -7,11 +7,13 @@
 
 namespace Polymer\Providers;
 
+use DI\Bridge\Slim\Bridge;
 use DI\Container;
 use http\Message\Body;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\App;
 use Slim\Factory\AppFactory;
 
 class InitApplicationProvider
@@ -120,6 +122,7 @@ class InitApplicationProvider
 
         $pimpleContainer->set('app', static function (Container $pimpleContainer) {
             return AppFactory::createFromContainer($pimpleContainer);
+            //return Bridge::create($pimpleContainer);
         });
     }
 }

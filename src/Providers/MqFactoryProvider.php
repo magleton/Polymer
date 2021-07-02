@@ -7,12 +7,9 @@
 
 namespace Polymer\Providers;
 
-use Bernard\Driver\PhpRedisDriver;
-use Bernard\QueueFactory\PersistentFactory;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 
-class MqFactoryProvider implements ServiceProviderInterface
+class MqFactoryProvider
 {
     /**
      * Registers services on the given container.

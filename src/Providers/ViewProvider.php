@@ -4,14 +4,17 @@
  * Date: 16-8-26
  * Time: 上午9:24
  */
+
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 use Slim\Views\Twig;
 use Slim\Views\TwigExtension;
+use Twig_Extension_Debug;
+use Twig_Extension_Profiler;
+use Twig_SimpleFunction;
 
-class ViewProvider implements ServiceProviderInterface
+class ViewProvider
 {
     /**
      * Registers services on the given container.
@@ -27,9 +30,9 @@ class ViewProvider implements ServiceProviderInterface
             $twig_config = $container['application']->config('twig') ?: [];
             $view = new Twig(TEMPLATE_PATH, $twig_config);
             $view->addExtension(new TwigExtension($container['router'], $container['request']->getUri()));
-            $view->addExtension(new \Twig_Extension_Profiler($container['twig_profile']));
-            $view->addExtension(new \Twig_Extension_Debug());
-            $view->getEnvironment()->addFunction(new \Twig_SimpleFunction('app', 'app'));
+            $view->addExtension(new Twig_Extension_Profiler($container['twig_profile']));
+            $view->addExtension(new Twig_Extension_Debug());
+            $view->getEnvironment()->addFunction(new Twig_SimpleFunction('app', 'app'));
             return $view;
         };
     }

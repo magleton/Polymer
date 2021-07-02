@@ -4,12 +4,14 @@
  * Date: 2016/9/1
  * Time: 19:45
  */
+
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
+use Exception;
+use Memcache;
 
-class MemcacheProvider implements ServiceProviderInterface
+class MemcacheProvider
 {
     /**
      * Registers services on the given container.
@@ -27,14 +29,14 @@ class MemcacheProvider implements ServiceProviderInterface
                 $cacheConfig = $container['application']->config('cache.memcache.' . $serverName);
                 $serversConfig = isset($cacheConfig['servers']) ? $cacheConfig['servers'] : [];
                 if ($serversConfig) {
-                    $memcache = new \Memcache();
+                    $memcache = new Memcache();
                     foreach ($serversConfig as $key => $server) {
                         $memcache->addServer($server['host'], $server['port'], $server['timeout']);
                     }
                     return $memcache;
                 }
                 return null;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw $e;
             }
         };

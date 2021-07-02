@@ -4,15 +4,16 @@
  * Date: 16-8-26
  * Time: 上午9:24
  */
+
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
+use Exception;
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
-use Monolog\Handler\StreamHandler;
 
-class LoggerProvider implements ServiceProviderInterface
+class LoggerProvider
 {
     /**
      * Registers services on the given container.
@@ -31,7 +32,7 @@ class LoggerProvider implements ServiceProviderInterface
                 $logger->pushProcessor(new UidProcessor());
                 $logger->pushHandler(new StreamHandler($settings['logger']['path'], $settings['logger']['level']));
                 return $logger;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return null;
             }
         };

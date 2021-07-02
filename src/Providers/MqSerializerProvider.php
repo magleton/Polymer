@@ -7,12 +7,9 @@
 
 namespace Polymer\Providers;
 
-use Bernard\Serializer;
-use Bernard\Serializer\SimpleSerializer;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 
-class MqSerializerProvider implements ServiceProviderInterface
+class MqSerializerProvider
 {
     /**
      * Registers services on the given container.

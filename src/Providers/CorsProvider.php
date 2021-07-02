@@ -7,14 +7,13 @@
 
 namespace Polymer\Providers;
 
+use DI\Container;
 use InvalidArgumentException;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Tuupola\Middleware\CorsMiddleware;
 
-class CorsProvider implements ServiceProviderInterface
+class CorsProvider
 {
     /**
      * Registers services on the given container.

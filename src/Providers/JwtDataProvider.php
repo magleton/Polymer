@@ -7,10 +7,10 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
+use stdClass;
 
-class JwtDataProvider implements ServiceProviderInterface
+class JwtDataProvider
 {
     /**
      * Registers services on the given container.
@@ -24,7 +24,7 @@ class JwtDataProvider implements ServiceProviderInterface
     public function register(Container $pimpleContainer)
     {
         $pimpleContainer['jwtData'] = function (Container $container) {
-            return new \stdClass();
+            return new stdClass();
         };
     }
 }

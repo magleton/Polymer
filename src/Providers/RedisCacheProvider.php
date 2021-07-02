@@ -7,11 +7,10 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
-use Doctrine\Common\Cache\RedisCache;
+use DI\Container;
+use Exception;
 
-class RedisCacheProvider implements ServiceProviderInterface
+class RedisCacheProvider
 {
     /**
      * Registers services on the given container.
@@ -31,7 +30,7 @@ class RedisCacheProvider implements ServiceProviderInterface
                 $redisCache->setNamespace($namespace);
                 $redisCache->setRedis($container['application']->component('redis', ['database' => (int)$database]));
                 return $redisCache;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 throw $e;
             }
         };

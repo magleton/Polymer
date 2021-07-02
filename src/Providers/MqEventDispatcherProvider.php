@@ -7,13 +7,10 @@
 
 namespace Polymer\Providers;
 
-use Bernard\EventListener\ErrorLogSubscriber;
-use Bernard\EventListener\FailureSubscriber;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class MqEventDispatcherProvider implements ServiceProviderInterface
+class MqEventDispatcherProvider
 {
     /**
      * Registers services on the given container.

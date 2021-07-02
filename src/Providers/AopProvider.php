@@ -7,11 +7,10 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 use Polymer\Boot\ApplicationAspectKernel;
 
-class AopProvider implements ServiceProviderInterface
+class AopProvider
 {
     /**
      * Registers services on the given container.

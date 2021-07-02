@@ -7,11 +7,9 @@
 
 namespace Polymer\Providers;
 
-use Bernard\Consumer;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 
-class MqConsumerProvider implements ServiceProviderInterface
+class MqConsumerProvider
 {
     /**
      * Registers services on the given container.

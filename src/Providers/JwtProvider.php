@@ -7,13 +7,11 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use DI\Container;
+use InvalidArgumentException;
 use Slim\Middleware\JwtAuthentication;
 
-class JwtProvider implements ServiceProviderInterface
+class JwtProvider
 {
     /**
      * Registers services on the given container.
@@ -40,7 +38,7 @@ class JwtProvider implements ServiceProviderInterface
                         return $response
                             ->withHeader('Content-Type', 'application/json')
                             ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-                    } catch (\InvalidArgumentException $e) {
+                    } catch (InvalidArgumentException $e) {
                         return null;
                     }
                 },
