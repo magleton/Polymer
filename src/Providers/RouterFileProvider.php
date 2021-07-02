@@ -27,10 +27,10 @@ class RouterFileProvider implements ServiceProviderInterface
                 if (file_exists($container['application']->config('slim.settings.routerCacheFile'))) {
                     @unlink($container['application']->config('slim.settings.routerCacheFile'));
                 }
-                $routerContents = '<?php ' . "\n" . '$app = $container[\'application\']->component(\'app\');';
-                /*if (class_exists('\RunTracy\Middlewares\TracyMiddleware')) {
-                    $routerContents .= "\n" . '$app->add(new \RunTracy\Middlewares\TracyMiddleware($app));';
-                }*/
+
+                $routerContents = '<?php' . "\n";
+                $routerContents .= ' use Polymer\Boot\Application;' . "\n";
+                $routerContents .= '$app = Application::getInstance()->getSlimApp();';
                 if ($container['application']->config('middleware')) {
                     foreach ($container['application']->config('middleware') as $key => $middleware) {
                         if (function_exists($middleware) && is_callable($middleware)) {

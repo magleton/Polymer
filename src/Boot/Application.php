@@ -128,7 +128,7 @@ final class Application
             $this->app = AppFactory::create();
             $this->pimpleContainer = new PimpleContainer($this->config('slim'));
             $initAppFile = ROOT_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitAppProvider.php';
-            $initAppClass = file_exists($initAppFile) ? APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitAppProvider' : InitApplicationProvider::class;
+            $initAppClass = file_exists($initAppFile) ? APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitApplicationProvider' : InitApplicationProvider::class;
             $this->pimpleContainer['application'] = $this;
             $this->pimpleContainer->register(new $initAppClass());
             self::setInstance($this);
