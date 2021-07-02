@@ -95,13 +95,13 @@ class CompanyModel extends Model
     public function save(array $data = [])
     {
         try {
-            $this->app->addEvent([Events::prePersist => ['class_name' => TestListener::class]]);
+            $this->application->addEvent([Events::prePersist => ['class_name' => TestListener::class]]);
             $obj = $this->make($data)->validate($this->rules, ['add']);
             $this->em->persist($obj);
             $this->em->flush();
             return $obj->getId();
         } catch (\Exception $e) {
-            print_r($this->app->component('error_collection')->all());
+            print_r($this->application->component('error_collection')->all());
             throw $e;
         }
     }
@@ -117,7 +117,7 @@ class CompanyModel extends Model
     public function update(array $data = [])
     {
         try {
-            $this->app->addEvent([
+            $this->application->addEvent([
                 Events::preUpdate => [
                     'class_name' => TestListener::class,
                     'data' => ['address' => 'aaaaa']

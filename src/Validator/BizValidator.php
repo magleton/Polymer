@@ -4,8 +4,10 @@
  * Date: 17-3-7
  * Time: 上午9:57
  */
+
 namespace Polymer\Validator;
 
+use Exception;
 use Polymer\Exceptions\FieldValidateErrorException;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 use Polymer\Boot\Application;
@@ -16,26 +18,26 @@ class BizValidator
     /**
      * 应用APP
      *
-     * @var Application
+     * @var ?Application
      */
-    protected $app = null;
+    protected ?Application $application = null;
 
     /**
      * 验证组件
      *
-     * @var RecursiveValidator
+     * @var ?RecursiveValidator
      */
-    protected $validator = null;
+    protected ?RecursiveValidator $validator = null;
 
     /**
      * Validator constructor.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct()
     {
-        $this->app = app();
-        $this->validator = $this->app->component('validator');
+        $this->application = app();
+        $this->validator = $this->application->component('validator');
     }
 
     /**
@@ -43,12 +45,12 @@ class BizValidator
      *
      * @param array $data 验证数据
      * @param array $rules 验证规则
-     * @param array $groups 验证组
+     * @param array|null $groups 验证组
      * @param string $key 错误信息的key，用于获取错误信息
-     * @throws \Exception
      * @return null
+     * @throws FieldValidateErrorException
      */
-    public function validateField(array $data = [], array $rules = [], array $groups = null, $key = 'error')
+    public function validateField(array $data = [], array $rules = [], array $groups = null, string $key = 'error'): void
     {
         $errorData = [];
         foreach ($data as $property => $val) {
@@ -63,36 +65,8 @@ class BizValidator
             }
         }
         if ($errorData) {
-            $this->app->component('error_collection')->set($key, $errorData);
+            $this->application->component('error_collection')->set($key, $errorData);
             throw new FieldValidateErrorException('数据验证失败');
-        }
-    }
-
-    /**
-     * 给对象赋值并且验证对象的值是否合法
-     *
-     * @param Object $validateObject 要验证的对象
-     * @param array $rules 验证规则
-     * @param array $groups 验证组
-     * @throws NoSuchMetadataException | \Exception
-     * @return boolean
-     */
-    public function validateObject($validateObject, array $rules = [], array $groups = null)
-    {
-        try {
-            $classMetadata = $this->validator->getMetadataFor($validateObject);
-            if ($rules) {
-                foreach ($classMetadata->getReflectionClass()->getProperties() as $val) {
-                    $property = $val->getName();
-                    if (isset($rules[$property])) {
-                        $constraints = $this->propertyConstraints($property, $rules);
-                        $classMetadata->addPropertyConstraints($property, $constraints);
-                    }
-                }
-            }
-            return $this->validator->validate($validateObject, null, $groups);
-        } catch (NoSuchMetadataException $e) {
-            throw $e;
         }
     }
 
@@ -103,7 +77,7 @@ class BizValidator
      * @param array $rules 验证规则
      * @return array
      */
-    private function propertyConstraints($property, array $rules)
+    private function propertyConstraints(string $property, array $rules): array
     {
         $constraints = [];
         foreach ($rules[$property] as $cls => $params) {
@@ -125,7 +99,7 @@ class BizValidator
      * @param string $cls
      * @return string
      */
-    private function getConstraintClass($cls = '')
+    private function getConstraintClass(string $cls = '')
     {
         $class = '';
         if (class_exists('\\Symfony\\Component\\Validator\\Constraints\\' . $cls)) {
@@ -139,5 +113,32 @@ class BizValidator
             return $class;
         }
         return $class;
+    }
+
+    /**
+     * 给对象赋值并且验证对象的值是否合法
+     *
+     * @param Object $validateObject 要验证的对象
+     * @param array $rules 验证规则
+     * @param array|null $groups 验证组
+     * @return boolean
+     */
+    public function validateObject(object $validateObject, array $rules = [], array $groups = null): bool
+    {
+        try {
+            $classMetadata = $this->validator->getMetadataFor($validateObject);
+            if ($rules) {
+                foreach ($classMetadata->getReflectionClass()->getProperties() as $val) {
+                    $property = $val->getName();
+                    if (isset($rules[$property])) {
+                        $constraints = $this->propertyConstraints($property, $rules);
+                        $classMetadata->addPropertyConstraints($property, $constraints);
+                    }
+                }
+            }
+            return $this->validator->validate($validateObject, null, $groups);
+        } catch (NoSuchMetadataException $e) {
+            throw $e;
+        }
     }
 }

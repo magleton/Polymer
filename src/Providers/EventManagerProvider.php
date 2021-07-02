@@ -7,11 +7,10 @@
 
 namespace Polymer\Providers;
 
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 use Doctrine\Common\EventManager;
 
-class EventManagerProvider implements ServiceProviderInterface
+class EventManagerProvider
 {
     /**
      * Registers services on the given container.
@@ -19,12 +18,12 @@ class EventManagerProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['eventManager'] = function (Container $container) {
+        $diContainer->set('eventManager', static function (Container $container) {
             return new EventManager();
-        };
+        });
     }
 }

@@ -1,5 +1,8 @@
 <?php
-$common_config = [
+
+use Polymer\Session\SecureHandler;
+
+return [
     'slim' => [
         'mode' => APPLICATION_ENV,
         'settings' => [
@@ -15,7 +18,6 @@ $common_config = [
                 'level' => Monolog\Logger::DEBUG,
                 'path' => APP_PATH . 'log/error.log',
             ],
-
             'tracy' => [
                 'showPhpInfoPanel' => 0,
                 'showSlimRouterPanel' => 0,
@@ -77,7 +79,7 @@ $common_config = [
 
     //Session的处理类
     'session_handler' => [
-        'cls' => \Polymer\Session\SecureHandler::class,
+        'cls' => SecureHandler::class,
         'params' => ''
     ],
     //AOP配置信息
@@ -91,5 +93,3 @@ $common_config = [
         ]
     ]
 ];
-
-return $common_config;

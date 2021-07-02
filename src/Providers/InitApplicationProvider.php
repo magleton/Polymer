@@ -7,15 +7,14 @@
 
 namespace Polymer\Providers;
 
+use DI\Container;
 use http\Message\Body;
 use InvalidArgumentException;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Factory\AppFactory;
 
-class InitApplicationProvider implements ServiceProviderInterface
+class InitApplicationProvider
 {
     /**
      * Registers services on the given container.
@@ -27,7 +26,7 @@ class InitApplicationProvider implements ServiceProviderInterface
      */
     public function register(Container $pimpleContainer): void
     {
-        $pimpleContainer['notAllowedHandler'] = static function (Container $container) {
+        $pimpleContainer->set('notAllowedHandler', static function (Container $container) {
             return static function (ServerRequestInterface $request, ResponseInterface $response, $methods) use ($container) {
                 $response
                     ->withStatus(405)
@@ -37,9 +36,9 @@ class InitApplicationProvider implements ServiceProviderInterface
                     ->write('Method must be one of: ' . implode(', ', $methods));
                 return $response;
             };
-        };
+        });
 
-        $pimpleContainer['notFoundHandler'] = static function (Container $container) {
+        $pimpleContainer->set('notFoundHandler', static function (Container $container) {
             return static function (ServerRequestInterface $request, ResponseInterface $response) use ($container) {
                 if ($container['application']->config('app.is_rest', false)) {
                     $response
@@ -73,13 +72,13 @@ class InitApplicationProvider implements ServiceProviderInterface
                     return $response;
                 }
             };
-        };
+        });
 
-        $pimpleContainer['phpErrorHandler'] = static function (Container $container) {
+        $pimpleContainer->set('phpErrorHandler', static function (Container $container) {
             return $container['errorHandler'];
-        };
+        });
 
-        $pimpleContainer['errorHandler'] = static function (Container $container) {
+        $pimpleContainer->set('errorHandler', static function (Container $container) {
             return static function (ServerRequestInterface $request, ResponseInterface $response, $exception) use ($container) {
                 $container->register(new LoggerProvider());
                 $container['logger']->error($exception->__toString());
@@ -117,10 +116,10 @@ class InitApplicationProvider implements ServiceProviderInterface
                     return $response;
                 }
             };
-        };
+        });
 
-        $pimpleContainer['app'] = static function (Container $pimpleContainer) {
-            return AppFactory::createFromContainer(new \Pimple\Psr11\Container($pimpleContainer));
-        };
+        $pimpleContainer->set('app', static function (Container $pimpleContainer) {
+            return AppFactory::createFromContainer($pimpleContainer);
+        });
     }
 }

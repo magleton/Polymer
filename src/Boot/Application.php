@@ -7,6 +7,8 @@
 
 namespace Polymer\Boot;
 
+use DI\Container;
+use DI\Definition\Source\DefinitionArray;
 use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
@@ -21,7 +23,6 @@ use InvalidArgumentException;
 use JetBrains\PhpStorm\Pure;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
-use Pimple\Container as PimpleContainer;
 use Polymer\Providers\InitApplicationProvider;
 use Polymer\Repository\Repository;
 use Polymer\Utils\Constants;
@@ -50,9 +51,9 @@ final class Application
     /**
      * 应用的服务容器
      *
-     * @var PimpleContainer
+     * @var Container
      */
-    private PimpleContainer $pimpleContainer;
+    private Container $diContainer;
 
     /**
      * 配置文件对象
@@ -105,6 +106,7 @@ final class Application
             $this->component('routerFile');
             $this->component('app')->run();
         } catch (Exception $e) {
+            print_r($e);
             throw $e;
         }
     }
@@ -125,11 +127,12 @@ final class Application
             register_shutdown_function('handleShutdown');
             $this->configCache = new DoctrineProvider(new ArrayAdapter());
             $this->app = AppFactory::create();
-            $this->pimpleContainer = new PimpleContainer($this->config('slim'));
+            //$this->pimpleContainer = new PimpleContainer($this->config('slim'));
+            $this->diContainer = new Container(new DefinitionArray($this->config('slim')));
             $initAppFile = ROOT_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitApplicationProvider.php';
             $initAppClass = file_exists($initAppFile) ? APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitApplicationProvider' : InitApplicationProvider::class;
-            $this->pimpleContainer['application'] = $this;
-            $this->pimpleContainer->register(new $initAppClass());
+            $this->diContainer->set('application', $this);
+            $this->diContainer->call([new $initAppClass(), 'register'], [$this->diContainer]);
             self::setInstance($this);
             $this->config('app.use_aspect') && $this->component('aop');
         } catch (Exception $e) {
@@ -180,17 +183,18 @@ final class Application
     public function component($componentName, array $param = []): mixed
     {
         try {
-            if (!$this->pimpleContainer->offsetExists($componentName)) {
+            if (!$this->diContainer->has($componentName)) {
                 $providersPath = array_merge($this->config('app.providers_path', []), $this->config('providers_path'));
                 foreach ($providersPath as $namespace) {
                     $className = $namespace . '\\' . $this->getInflector()->classify($componentName) . 'Provider';
                     if (class_exists($className)) {
-                        $this->pimpleContainer->register(new $className(), $param);
+                        $param[0] = $this->diContainer;
+                        $this->diContainer->call([new $className(), 'register'], $param);
                         break;
                     }
                 }
             }
-            $componentObj = $this->pimpleContainer->offsetGet($componentName);
+            $componentObj = $this->diContainer->get($componentName);
             if ($componentName === Constants::REDIS) {
                 $database = (isset($param['database']) && is_numeric($param['database'])) ? $param['database'] & 15 : 0;
                 $componentObj->select($database);
@@ -297,10 +301,10 @@ final class Application
             $modelNamespace = $modelNamespace ?: (defined('DEPEND_NAMESPACE') ? DEPEND_NAMESPACE : APP_NAME) . '\\Models';
             $className = $modelNamespace . '\\' . $this->getInflector()->classify($modelName) . 'Model';
             $key = str_replace('\\', '', $className);
-            if (!$this->pimpleContainer->offsetExists($key) && class_exists($className)) {
-                $this->pimpleContainer->offsetSet($key, new $className($params));
+            if (!$this->diContainer->has($key) && class_exists($className)) {
+                $this->diContainer->set($key, new $className($params));
             }
-            return $this->pimpleContainer->offsetGet($key);
+            return $this->diContainer->get($key);
         } catch (Exception $e) {
             return null;
         }
@@ -342,10 +346,10 @@ final class Application
         try {
             $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));
             $key = str_replace('\\', '', $repositoryClassName);
-            if (!$this->pimpleContainer->offsetExists($key) && class_exists($repositoryClassName)) {
-                $this->pimpleContainer->offsetSet($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . $this->getInflector()->classify($entityName)));
+            if (!$this->diContainer->has($key) && class_exists($repositoryClassName)) {
+                $this->diContainer->set($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . $this->getInflector()->classify($entityName)));
             }
-            return $this->pimpleContainer->offsetGet($key);
+            return $this->diContainer->get($key);
         } catch (Exception $e) {
             print_r($e);
             return null;
@@ -365,7 +369,7 @@ final class Application
         try {
             $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));
             $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
-            if ($this->config('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->pimpleContainer->offsetExists($cacheKey)) {
+            if ($this->config('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->diContainer->has($cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Models';
                 $cache = APPLICATION_ENV === 'development' ? null : new ArrayCache();
                 $configuration = Setup::createAnnotationMetadataConfiguration([
@@ -375,9 +379,9 @@ final class Application
                     $cache,
                     $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.' . 'useSimpleAnnotationReader'));
                 $entityManager = EntityManager::create($this->config('db.' . APPLICATION_ENV . '.' . $dbName), $configuration, $this->component('eventManager'));
-                $this->pimpleContainer->offsetSet($cacheKey, $entityManager);
+                $this->diContainer->set($cacheKey, $entityManager);
             }
-            return $this->pimpleContainer->offsetGet($cacheKey);
+            return $this->diContainer->get($cacheKey);
         } catch (Exception $e) {
             throw $e;
         }
@@ -397,10 +401,10 @@ final class Application
             $serviceNamespace = $serviceNamespace ?: (defined('DEPEND_NAMESPACE') ? DEPEND_NAMESPACE : APP_NAME) . '\\Services';
             $className = $serviceNamespace . '\\' . $this->getInflector()->classify($serviceName) . 'Service';
             $key = str_replace('\\', '', $className);
-            if (!$this->pimpleContainer->offsetExists($key) && class_exists($className)) {
-                $this->pimpleContainer->offsetSet($key, new $className($params));
+            if (!$this->diContainer->has($key) && class_exists($className)) {
+                $this->diContainer->set($key, new $className($params));
             }
-            return $this->pimpleContainer->offsetGet($key);
+            return $this->diContainer->get($key);
         } catch (Exception $e) {
             return null;
         }
@@ -416,7 +420,7 @@ final class Application
     public function offSetValueToContainer($key, $value): void
     {
         try {
-            !$this->pimpleContainer->offsetExists($key) && $this->pimpleContainer->offsetSet($key, $value);
+            !$this->diContainer->has($key) && $this->diContainer->set($key, $value);
         } catch (Exception $e) {
             throw $e;
         }

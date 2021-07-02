@@ -7,11 +7,10 @@
 
 namespace Polymer\Providers;
 
+use DI\Container;
 use Exception;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
 
-class RouterFileProvider implements ServiceProviderInterface
+class RouterFileProvider
 {
     /**
      * Registers services on the given container.
@@ -23,31 +22,33 @@ class RouterFileProvider implements ServiceProviderInterface
      */
     public function register(Container $pimpleContainer): void
     {
-        $pimpleContainer['routerFile'] = static function (Container $container) {
-            $routerFilePath = $container['application']->config('app.router_path.router', $container['application']->config('router_path.router'));
+        $pimpleContainer->set('routerFile', static function (Container $container) {
+            $routerFilePath = $container->get('application')->config('app.router_path.router',
+                $container->get('application')->config('router_path.router'));
             if (routeGeneration()) {
-                if (file_exists($container['application']->config('slim.settings.routerCacheFile'))) {
-                    @unlink($container['application']->config('slim.settings.routerCacheFile'));
+                if (file_exists($container->get('application')->config('slim.settings.routerCacheFile'))) {
+                    @unlink($container->get('application')->config('slim.settings.routerCacheFile'));
                 }
 
                 $routerContents = '<?php' . "\n";
                 $routerContents .= 'use Polymer\Boot\Application;' . "\n";
                 $routerContents .= '$app = Application::getInstance()->component("app");';
-                if ($container['application']->config('middleware')) {
-                    foreach ($container['application']->config('middleware') as $key => $middleware) {
+                if ($container->get('application')->config('middleware')) {
+                    foreach ($container->get('application')->config('middleware') as $key => $middleware) {
                         if (function_exists($middleware) && is_callable($middleware)) {
                             $routerContents .= "\n" . '$app->add("' . $middleware . '");';
-                        } elseif ($container['application']->component($middleware)) {
-                            $routerContents .= "\n" . '$app->add($container[\'application\']->component("' . $middleware . '"));';
-                        } elseif ($container['application']->component($key)) {
-                            $routerContents .= "\n" . '$app->add($container[\'application\']->component("' . $key . '"));';
+                        } elseif ($container->get('application')->component($middleware)) {
+                            $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $middleware . '"));';
+                        } elseif ($container->get('application')->component($key)) {
+                            $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $key . '"));';
                         } elseif (class_exists($middleware)) {
                             $routerContents .= "\n" . '$app->add("' . $middleware . '");';
                         }
                     }
                 }
                 $routerContents .= "\n";
-                foreach (glob($container['application']->config('app.router_path.router_files', $container['application']->config('router_path.router_files'))) as $key => $file_name) {
+                foreach (glob($container->get("application")->config('app.router_path.router_files',
+                    $container->get("application")->config('router_path.router_files'))) as $key => $file_name) {
                     $contents = file_get_contents($file_name);
                     preg_match_all('/app->[\s\S]*/', $contents, $matches);
                     foreach ($matches[0] as $kk => $vv) {
@@ -55,12 +56,15 @@ class RouterFileProvider implements ServiceProviderInterface
                     }
                 }
                 file_put_contents($routerFilePath, $routerContents);
-                file_put_contents($container['application']->config('app.router_path.lock', $container['application']->config('router_path.lock')), $container['application']->config('current_version'));
+                file_put_contents($container->get("application")->config('app.router_path.lock',
+                    $container->get("application")->config('router_path.lock')),
+                    $container->get("application")->config('current_version'));
             }
             if (file_exists($routerFilePath)) {
                 require_once $routerFilePath;
+                return;
             }
             throw new Exception("路由文件不存在~~~");
-        };
+        });
     }
 }
