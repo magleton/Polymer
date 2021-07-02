@@ -127,7 +127,7 @@ final class Application
             $this->configCache = new DoctrineProvider(new ArrayAdapter());
             $this->app = AppFactory::create();
             $this->pimpleContainer = new PimpleContainer($this->config('slim'));
-            $initAppFile = ROOT_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitAppProvider.php';
+            $initAppFile = ROOT_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitApplicationProvider.php';
             $initAppClass = file_exists($initAppFile) ? APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitApplicationProvider' : InitApplicationProvider::class;
             $this->pimpleContainer['application'] = $this;
             $this->pimpleContainer->register(new $initAppClass());
