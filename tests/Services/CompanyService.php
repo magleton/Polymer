@@ -26,7 +26,7 @@ class CompanyService extends Service
             'created' => time(),
             'updated' => time()
         ];
-        $model = $this->app->model('company', [], 'Polymer\\Tests\\Models');
+        $model = $this->application->model('company', [], 'Polymer\\Tests\\Models');
         return $model->save($data);
     }
 
@@ -36,7 +36,7 @@ class CompanyService extends Service
      */
     public function update()
     {
-        $model = $this->app->model('company', [], 'Polymer\\Tests\\Models');
+        $model = $this->application->model('company', [], 'Polymer\\Tests\\Models');
         $data = ['name' => 'updateupdateupdateupdate'];
         return $model->update($data);
     }
@@ -48,7 +48,7 @@ class CompanyService extends Service
      */
     public function getData()
     {
-        $repositoryObj = $this->app->repository('company', 'db1', APP_PATH . '/Entity/', 'Polymer\Tests\Entity\Models', 'Polymer\Tests\Entity\Repositories');
+        $repositoryObj = $this->application->repository('company', 'db1', APP_PATH . '/Entity/', 'Polymer\Tests\Entity\Models', 'Polymer\Tests\Entity\Repositories');
         $entity = $repositoryObj->findOneBy(['id' => 33]);
         print_r(FuncUtils::entityToArray($entity));
         return FuncUtils::entityToArray($entity);

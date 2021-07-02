@@ -9,23 +9,23 @@ namespace Polymer\Service;
 
 use Exception;
 use Polymer\Boot\Application;
-use Slim\Http\Request;
+use Psr\Http\Message\ServerRequestInterface;
 
 class Service
 {
     /**
      * 请求对象
      *
-     * @var Request
+     * @var ServerRequestInterface
      */
-    protected $request;
+    protected ServerRequestInterface $request;
 
     /**
      * 全局应用
      *
      * @var Application
      */
-    protected $app;
+    protected Application $application;
 
     /**
      * 验证规则
@@ -42,8 +42,8 @@ class Service
 
     public function __construct(array $params = [])
     {
-        $this->app = $params['app'] ?? app();
-        $this->request = $params['request'] ?? $this->app->component('request');
+        $this->application = $params['app'] ?? app();
+        $this->request = $params['request'] ?? $this->application->component('request');
     }
 
     /**
@@ -60,7 +60,7 @@ class Service
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
-            $this->app->component('biz_validator')->validateField($data, $rules, $groups, $key);
+            $this->application->component('biz_validator')->validateField($data, $rules, $groups, $key);
         } catch (Exception $e) {
             throw $e;
         }

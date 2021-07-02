@@ -26,7 +26,7 @@ class OrderService extends Service
             'created' => time(),
             'updated' => 0
         ];
-        $model = $this->app->model('order', [], 'Polymer\Tests\Models');
+        $model = $this->application->model('order', [], 'Polymer\Tests\Models');
         return $model->save($data);
     }
 
@@ -36,7 +36,7 @@ class OrderService extends Service
             'address' => 'update Address',
             'updated' => time()
         ];
-        $model = $this->app->model('order', [], 'Polymer\Tests\Models');
+        $model = $this->application->model('order', [], 'Polymer\Tests\Models');
         return $model->update(['id' => 1], $data);
     }
 }
