@@ -19,11 +19,11 @@ class ViewProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['view'] = function (Container $container) {
+        $pimpleContainer['view'] = function (Container $container) {
             $twig_config = $container['application']->config('twig') ?: [];
             $view = new Twig(TEMPLATE_PATH, $twig_config);
             $view->addExtension(new TwigExtension($container['router'], $container['request']->getUri()));

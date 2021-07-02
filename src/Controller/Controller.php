@@ -27,7 +27,7 @@ class Controller
      * 整个框架的应用
      * @var Application
      */
-    protected $app;
+    protected Application $application;
 
     /**
      * Controller constructor.

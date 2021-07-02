@@ -7,11 +7,12 @@
 
 namespace Polymer\Providers;
 
+use InvalidArgumentException;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Slim\Http\Request;
-use Slim\Http\Response;
-use Tuupola\Middleware\Cors;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Tuupola\Middleware\CorsMiddleware;
 
 class CorsProvider implements ServiceProviderInterface
 {
@@ -21,12 +22,12 @@ class CorsProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer): void
     {
-        $pimple['cors'] = function ($container) {
-            return new Cors([
+        $pimpleContainer['cors'] = static function (Container $container) {
+            return new CorsMiddleware([
                 'origin' => ['*'],
                 'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
                 'headers.allow' => [
@@ -45,15 +46,17 @@ class CorsProvider implements ServiceProviderInterface
                 'headers.expose' => ['Etag'],
                 'credentials' => true,
                 'cache' => 0,
-                'error' => function (Request $request, Response $response, $arguments) {
+                'error' => function (ServerRequestInterface $request, ResponseInterface $response, $arguments) {
                     $data['status'] = 'error';
                     $data['msg'] = $arguments['message'];
                     $data['code'] = 99;
                     try {
-                        return $response
+                        $response
                             ->withHeader('Content-Type', 'application/json')
-                            ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-                    } catch (\InvalidArgumentException $e) {
+                            ->getBody()
+                            ->write(json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                        return $response;
+                    } catch (InvalidArgumentException $e) {
                         return null;
                     }
                 }

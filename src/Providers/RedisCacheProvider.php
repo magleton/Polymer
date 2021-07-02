@@ -19,11 +19,11 @@ class RedisCacheProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['redisCache'] = function (Container $container) {
+        $pimpleContainer['redisCache'] = function (Container $container) {
             try {
                 $redisCache = new RedisCache();
                 $namespace = $container->offsetExists('redis_namespace') ? $container->offsetGet('redis_namespace') : 'redisCache';

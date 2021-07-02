@@ -20,11 +20,11 @@ class LoggerProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['logger'] = function (Container $container) {
+        $pimpleContainer['logger'] = function (Container $container) {
             try {
                 $settings = $container['application']->config('slim.settings');
                 $logger = new Logger($settings['logger']['name']);

@@ -23,11 +23,11 @@ class SerializerProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['serializer'] = function (Container $container) {
+        $pimpleContainer['serializer'] = function (Container $container) {
             $encoders = array(new XmlEncoder(), new JsonEncoder());
             $normalizers = array(new ObjectNormalizer());
             $serializer = new Serializer($normalizers, $encoders);

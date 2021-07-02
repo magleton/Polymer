@@ -21,11 +21,11 @@ class JwtProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['jwt'] = function (Container $container) {
+        $pimpleContainer['jwt'] = function (Container $container) {
             return new JwtAuthentication([
                 'header' => $container['application']->config('app.jwt.token', 'token'),
                 'regexp' => $container['application']->config('app.jwt.regexp', '/(.*)/'),

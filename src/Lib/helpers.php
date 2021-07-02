@@ -71,6 +71,9 @@ if (!function_exists('handleShutdown')) {
         $error = error_get_last();
         if (empty($error)) {
             $msg = "错误数组为空";
+            if (is_null(app()->config('logger'))) {
+                return;
+            }
             app()->config('logger')->error($msg);
             return;
         }

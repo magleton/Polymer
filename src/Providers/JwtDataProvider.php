@@ -18,12 +18,12 @@ class JwtDataProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      * @return mixed
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['jwtData'] = function (Container $container) {
+        $pimpleContainer['jwtData'] = function (Container $container) {
             return new \stdClass();
         };
     }

@@ -21,11 +21,11 @@ class MqEventDispatcherProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['mq_event_dispatcher'] = function (Container $container) {
+        $pimpleContainer['mq_event_dispatcher'] = function (Container $container) {
             $dispatcher = new EventDispatcher();
             $dispatcher->addSubscriber(new ErrorLogSubscriber());
             //$dispatcher->addSubscriber(new FailureSubscriber($container['application']->component('mq_producer')));

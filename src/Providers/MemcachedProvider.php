@@ -18,11 +18,11 @@ class MemcachedProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['memcached'] = function (Container $container) {
+        $pimpleContainer['memcached'] = function (Container $container) {
             try {
                 $serverName = $container->offsetExists('memcached_server') ? $container->offsetGet('memcached_server') : 'server1';
                 $cacheConfig = $container['application']->config('cache.memcached.' . $serverName);

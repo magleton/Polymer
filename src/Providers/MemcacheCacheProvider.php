@@ -18,11 +18,11 @@ class MemcacheCacheProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['memcacheCache'] = function (Container $container) {
+        $pimpleContainer['memcacheCache'] = function (Container $container) {
             try {
                 $namespace = $container->offsetExists('memcache_namespace') ? $container->offsetGet('memcache_namespace') : 'memcacheCache';
                 $memcacheCache = new MemcacheCache();

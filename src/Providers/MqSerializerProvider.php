@@ -20,11 +20,11 @@ class MqSerializerProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['mq_serializer'] = function (Container $container) {
+        $pimpleContainer['mq_serializer'] = function (Container $container) {
             // return new SimpleSerializer();  //0.x版本
             return new Serializer();  //1.x 版本
         };

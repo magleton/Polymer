@@ -19,11 +19,11 @@ class ErrorCollectionProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['error_collection'] = function (Container $container) {
+        $pimpleContainer['error_collection'] = function (Container $container) {
             return new Collection();
         };
     }

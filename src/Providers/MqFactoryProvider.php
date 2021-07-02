@@ -20,11 +20,11 @@ class MqFactoryProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['mq_factory'] = function (Container $container) {
+        $pimpleContainer['mq_factory'] = function (Container $container) {
             return new PersistentFactory($container['application']->component('mq_driver'), $container['application']->component('mq_serializer'));
         };
     }

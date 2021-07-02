@@ -19,11 +19,11 @@ class EventManagerProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['eventManager'] = function (Container $container) {
+        $pimpleContainer['eventManager'] = function (Container $container) {
             return new EventManager();
         };
     }

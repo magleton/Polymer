@@ -21,11 +21,11 @@ class MqMiddlewareProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['mq_middleware'] = function (Container $container) {
+        $pimpleContainer['mq_middleware'] = function (Container $container) {
             $chain = new MiddlewareBuilder();
             $chain->push(new ErrorLogFactory());
             $chain->push(new FailuresFactory($container['application']->component('mq_factory')));

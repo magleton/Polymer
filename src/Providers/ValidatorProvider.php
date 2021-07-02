@@ -25,11 +25,11 @@ class ValidatorProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['validator'] = function (Container $container) {
+        $pimpleContainer['validator'] = function (Container $container) {
             try {
                 //AnnotationRegistry::registerLoader('class_exists');
                 $reader = new AnnotationReader();

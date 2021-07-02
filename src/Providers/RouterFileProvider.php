@@ -18,19 +18,19 @@ class RouterFileProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['routerFile'] = function (Container $container) {
+        $pimpleContainer['routerFile'] = static function (Container $container) {
             if (routeGeneration()) {
                 if (file_exists($container['application']->config('slim.settings.routerCacheFile'))) {
                     @unlink($container['application']->config('slim.settings.routerCacheFile'));
                 }
                 $routerContents = '<?php ' . "\n" . '$app = $container[\'application\']->component(\'app\');';
-                if (class_exists('\RunTracy\Middlewares\TracyMiddleware')) {
+                /*if (class_exists('\RunTracy\Middlewares\TracyMiddleware')) {
                     $routerContents .= "\n" . '$app->add(new \RunTracy\Middlewares\TracyMiddleware($app));';
-                }
+                }*/
                 if ($container['application']->config('middleware')) {
                     foreach ($container['application']->config('middleware') as $key => $middleware) {
                         if (function_exists($middleware) && is_callable($middleware)) {

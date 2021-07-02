@@ -19,11 +19,11 @@ class FlashProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['flash'] = function (Container $container) {
+        $pimpleContainer['flash'] = function (Container $container) {
             try {
                 $container['application']->component('session');
                 return new Messages();

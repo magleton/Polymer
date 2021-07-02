@@ -20,11 +20,11 @@ class MqProducerProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['mq_producer'] = function (Container $container) {
+        $pimpleContainer['mq_producer'] = function (Container $container) {
             //return new Producer($container['application']->component('mq_factory'), $container['application']->component('mq_middleware'));  //0.x版本
             return new Producer($container['application']->component('mq_factory'), $container['application']->component('mq_event_dispatcher')); //1.x版本
         };

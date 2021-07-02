@@ -18,11 +18,11 @@ class SessionProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['session'] = function (Container $container) {
+        $pimpleContainer['session'] = function (Container $container) {
             ini_set('session.save_handler', 'files');
             $sessionHandler = $container['application']->config('session_handler.cls');
             if (class_exists($sessionHandler)) {

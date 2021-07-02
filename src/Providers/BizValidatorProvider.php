@@ -13,9 +13,9 @@ use Polymer\Validator\BizValidator;
 
 class BizValidatorProvider implements ServiceProviderInterface
 {
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer): void
     {
-        $pimple['biz_validator'] = function (Container $container) {
+        $pimpleContainer['biz_validator'] = static function (Container $container) {
             return new BizValidator();
         };
     }

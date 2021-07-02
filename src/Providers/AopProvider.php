@@ -7,9 +7,9 @@
 
 namespace Polymer\Providers;
 
-use Polymer\Boot\ApplicationAspectKernel;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
+use Polymer\Boot\ApplicationAspectKernel;
 
 class AopProvider implements ServiceProviderInterface
 {
@@ -19,11 +19,11 @@ class AopProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer): void
     {
-        $pimple['aop'] = function (Container $container) {
+        $pimpleContainer['aop'] = static function (Container $container) {
             $aspectKernel = ApplicationAspectKernel::getInstance();
             $aspectKernel->init(array_merge($container['application']->config('aop.init', []), $container['application']->config('app.aop.init', [])));
             return $aspectKernel;

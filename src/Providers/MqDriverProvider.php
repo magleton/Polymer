@@ -19,11 +19,11 @@ class MqDriverProvider implements ServiceProviderInterface
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimple A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimple)
+    public function register(Container $pimpleContainer)
     {
-        $pimple['mq_driver'] = function (Container $container) {
+        $pimpleContainer['mq_driver'] = function (Container $container) {
             $redis = $container['application']->component('redis');
             $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
             $redis->setOption(\Redis::OPT_PREFIX, 'bernard:');
