@@ -7,6 +7,7 @@
 
 namespace Polymer\Providers;
 
+use Exception;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
 
@@ -20,17 +21,18 @@ class RouterFileProvider implements ServiceProviderInterface
      *
      * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $pimpleContainer): void
     {
         $pimpleContainer['routerFile'] = static function (Container $container) {
+            $routerFilePath = $container['application']->config('app.router_path.router', $container['application']->config('router_path.router'));
             if (routeGeneration()) {
                 if (file_exists($container['application']->config('slim.settings.routerCacheFile'))) {
                     @unlink($container['application']->config('slim.settings.routerCacheFile'));
                 }
 
                 $routerContents = '<?php' . "\n";
-                $routerContents .= ' use Polymer\Boot\Application;' . "\n";
-                $routerContents .= '$app = Application::getInstance()->getSlimApp();';
+                $routerContents .= 'use Polymer\Boot\Application;' . "\n";
+                $routerContents .= '$app = Application::getInstance()->component("app");';
                 if ($container['application']->config('middleware')) {
                     foreach ($container['application']->config('middleware') as $key => $middleware) {
                         if (function_exists($middleware) && is_callable($middleware)) {
@@ -52,10 +54,13 @@ class RouterFileProvider implements ServiceProviderInterface
                         $routerContents .= '$' . $vv . "\n";
                     }
                 }
-                file_put_contents($container['application']->config('app.router_path.router', $container['application']->config('router_path.router')), $routerContents);
+                file_put_contents($routerFilePath, $routerContents);
                 file_put_contents($container['application']->config('app.router_path.lock', $container['application']->config('router_path.lock')), $container['application']->config('current_version'));
             }
-            require_once $container['application']->config('app.router_path.router', $container['application']->config('router_path.router'));
+            if (file_exists($routerFilePath)) {
+                require_once $routerFilePath;
+            }
+            throw new Exception("路由文件不存在~~~");
         };
     }
 }

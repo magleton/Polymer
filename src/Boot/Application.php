@@ -105,7 +105,6 @@ final class Application
             $this->component('routerFile');
             $this->component('app')->run();
         } catch (Exception $e) {
-            print_r($e);
             throw $e;
         }
     }
