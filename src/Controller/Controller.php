@@ -10,10 +10,11 @@
 namespace Polymer\Controller;
 
 use Exception;
+use JsonException;
 use Polymer\Boot\Application;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface;
 
 class Controller
 {
@@ -21,10 +22,11 @@ class Controller
      * Slim框架自动注册的Container
      * @var ContainerInterface
      */
-    protected $ci;
+    protected ContainerInterface $ci;
 
     /**
      * 整个框架的应用
+     *
      * @var Application
      */
     protected Application $application;
@@ -38,7 +40,7 @@ class Controller
 
     public function __construct(ContainerInterface $ci)
     {
-        $this->app = $ci->get('application');
+        $this->application = $ci->get('application');
     }
 
     /**
@@ -46,13 +48,14 @@ class Controller
      *
      * @param string $template 模板文件
      * @param array $data 传递到模板的数据
-     * @return mixed
+     * @return ResponseInterface
      * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
-    protected function render($template, array $data = [])
+    protected function render(string $template, ResponseInterface $response, array $data = []): ResponseInterface
     {
-        return $this->app->component('view')->render($this->app->component('response'), $template, $data);
+        $response->getBody()->write("");
+        return $response;
     }
 
     /**
@@ -64,16 +67,19 @@ class Controller
      * response to the client.
      *
      * @param mixed $data The data
-     * @param int $status The HTTP status code.
+     * @param ResponseInterface $response
+     * @param int|null $status The HTTP status code.
      * @param int $encodingOptions Json encoding options
-     * @return Response|string
+     * @return ResponseInterface
      */
-    protected function withJson($data, $status = null, $encodingOptions = 0)
+    protected function withJson(mixed $data, ResponseInterface $response, int $status = null, int $encodingOptions = 0): ResponseInterface
     {
         try {
-            return $this->app->component('response')->withJson($data, $status, $encodingOptions);
-        } catch (Exception $e) {
-            return json_encode(['msg' => $e->getMessage()], $encodingOptions);
+            $body = json_encode($data, JSON_THROW_ON_ERROR | $encodingOptions);
+        } catch (JsonException $e) {
+            $body = '{"code":500 , "msg":' . $e->getMessage() . ' , "data":null}';
         }
+        $response->getBody()->write($body);
+        return $response;
     }
 }
