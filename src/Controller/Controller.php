@@ -70,7 +70,7 @@ class Controller
      * @param int $encodingOptions Json encoding options
      * @return ResponseInterface
      */
-    protected function withJson(mixed $data, ResponseInterface $response, int $status = null, int $encodingOptions = 0): ResponseInterface
+    protected function withJson($data, ResponseInterface $response, int $status = null, int $encodingOptions = 0): ResponseInterface
     {
         try {
             $body = json_encode($data, JSON_THROW_ON_ERROR | $encodingOptions);

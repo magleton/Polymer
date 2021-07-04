@@ -7,10 +7,10 @@
 
 namespace Polymer\Boot;
 
+use Composer\Autoload\ClassLoader;
 use DI\Container;
 use DI\ContainerBuilder;
 use DI\Definition\Source\DefinitionArray;
-use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
 use Doctrine\Inflector\Inflector;
@@ -21,7 +21,6 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 use Exception;
 use InvalidArgumentException;
-use JetBrains\PhpStorm\Pure;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\InitApplicationProvider;
@@ -50,6 +49,13 @@ final class Application
     protected App $app;
 
     /**
+     * The loaded service providers.
+     *
+     * @var array
+     */
+    protected array $loadedProviders = [];
+
+    /**
      * 应用的服务容器
      *
      * @var Container
@@ -71,45 +77,18 @@ final class Application
     private ?Cache $configCache = null;
 
     /**
-     * 获取全局应用实例
-     *
-     * @return static
+     * @var ClassLoader
      */
-    public static function getInstance(): Application
-    {
-        if (null === self::$instance) {
-            self::$instance = new self;
-        }
-        return self::$instance;
-    }
+    private ClassLoader $classLoader;
 
     /**
-     * 设置全局可用的应用实例
-     *
-     * @param Application|null $application
-     * @return Application|null
-     */
-    public static function setInstance(Application $application = null): Application|null
-    {
-        return self::$instance = $application;
-    }
-
-    /**
-     * 启动WEB应用
-     *
+     * Application constructor.
      * @throws Exception
-     * @author macro chen <macro_fengye@163.com>
      */
-    public function start(): void
+    public function __construct()
     {
-        try {
-            $this->initEnvironment();
-            $this->component('routerFile');
-            $this->component('app')->run();
-        } catch (Exception $e) {
-            print_r($e);
-            throw $e;
-        }
+        self::setInstance($this);
+        $this->initEnvironment();
     }
 
     /**
@@ -118,7 +97,7 @@ final class Application
      * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
-    private function initEnvironment(): void
+    public function initEnvironment(): void
     {
         try {
             set_error_handler('handleError');
@@ -130,12 +109,12 @@ final class Application
             $builder = new ContainerBuilder();
             $builder->useAnnotations(true)->addDefinitions(new DefinitionArray($this->initConfigObject()));
             $this->diContainer = $builder->build();
-            $initAppFile = ROOT_PATH . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitApplicationProvider.php';
-            $initAppClass = file_exists($initAppFile) ? APP_NAME . DIRECTORY_SEPARATOR . 'Providers' . DIRECTORY_SEPARATOR . 'InitApplicationProvider' : InitApplicationProvider::class;
+            $initAppFile = ROOT_PATH . DS . 'app' . DS . APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider.php';
+            $initAppClass = file_exists($initAppFile) ? APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider' : InitApplicationProvider::class;
             $this->diContainer->set('application', $this);
-            $this->diContainer->call([new $initAppClass(), 'register'], [$this->diContainer]);
+            $this->register($initAppClass);
+            $this->component('aop');
             self::setInstance($this);
-            $this->config('app.use_aspect') && $this->component('aop');
         } catch (Exception $e) {
             throw $e;
         }
@@ -164,46 +143,35 @@ final class Application
      */
     public function getConfigPaths(): array
     {
-        $configPaths = [dirname(__DIR__) . DIRECTORY_SEPARATOR . 'Config'];
-        if (defined('ROOT_PATH') && file_exists(ROOT_PATH . DIRECTORY_SEPARATOR . 'config') && is_dir(ROOT_PATH . DIRECTORY_SEPARATOR . 'config')) {
-            $configPaths[] = ROOT_PATH . DIRECTORY_SEPARATOR . 'config';
+        $configPaths = [dirname(__DIR__) . DS . 'Config'];
+        if (defined('ROOT_PATH') && file_exists(ROOT_PATH . DS . 'config') && is_dir(ROOT_PATH . DS . 'config')) {
+            $configPaths[] = ROOT_PATH . DS . 'config';
         }
-        if (defined('APP_PATH') && file_exists(APP_PATH . DIRECTORY_SEPARATOR . 'Config') && is_dir(APP_PATH . DIRECTORY_SEPARATOR . 'Config')) {
-            $configPaths[] = APP_PATH . DIRECTORY_SEPARATOR . 'Config';
+        if (defined('APP_PATH') && file_exists(APP_PATH . DS . 'Config') && is_dir(APP_PATH . DS . 'Config')) {
+            $configPaths[] = APP_PATH . DS . 'Config';
         }
         return $configPaths;
     }
 
     /**
-     * 获取指定键的配置文件
-     *
-     * @param string $key
-     * @param mixed|null $default
-     * @return mixed
-     * @throws Exception
-     * @throws EmptyDirectoryException
-     * @author macro chen <macro_fengye@163.com>
+     * 注册应用配置的Provider
      */
-    public function config(string $key, mixed $default = null): mixed
+    public function register($provider): void
     {
-        try {
-            if ($this->configCache->fetch('configCache') && $this->configCache->fetch('configCache')->get($key)) {
-                return $this->configCache->fetch('configCache')->get($key, $default);
-            }
-            return $default;
-        } catch (Exception $e) {
-            throw $e;
+        if (!array_key_exists($provider, $this->loadedProviders)) {
+            $this->diContainer->call([new $provider(), 'register'], [$this->diContainer]);
+            $this->loadedProviders[$provider] = true;
         }
     }
 
     /**
      * 获取指定组件名字的对象
      *
-     * @param $componentName
+     * @param string $componentName
      * @param array $param
      * @return mixed
      */
-    public function component($componentName, array $param = []): mixed
+    public function component(string $componentName, array $param = [])
     {
         try {
             if (!$this->diContainer->has($componentName)) {
@@ -229,14 +197,93 @@ final class Application
     }
 
     /**
+     * 获取指定键的配置文件
+     *
+     * @param string $key
+     * @param mixed|null $default
+     * @return mixed
+     * @throws Exception
+     * @throws EmptyDirectoryException
+     * @author macro chen <macro_fengye@163.com>
+     */
+    public function config(string $key, $default = null)
+    {
+        try {
+            if ($this->configCache->fetch('configCache') && $this->configCache->fetch('configCache')->get($key)) {
+                return $this->configCache->fetch('configCache')->get($key, $default);
+            }
+            return $default;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
      * 将下划线转为驼峰
      * table_name =>  tableName
      *
      * @return Inflector
      */
-    #[Pure] public function getInflector(): Inflector
+    public function getInflector(): Inflector
     {
         return new Inflector(new NoopWordInflector(), new NoopWordInflector());
+    }
+
+    /**
+     * 获取全局应用实例
+     *
+     * @return static
+     */
+    public static function getInstance(): Application
+    {
+        if (null === self::$instance) {
+            self::$instance = new self;
+        }
+        return self::$instance;
+    }
+
+    /**
+     * 设置全局可用的应用实例
+     *
+     * @param Application|null $application
+     * @return Application|null
+     */
+    public static function setInstance(Application $application = null): ?Application
+    {
+        return self::$instance = $application;
+    }
+
+    /**
+     * @return ClassLoader
+     */
+    public function getClassLoader(): ClassLoader
+    {
+        return $this->classLoader;
+    }
+
+    /**
+     * @param ClassLoader $classLoader
+     */
+    public function setClassLoader(ClassLoader $classLoader): void
+    {
+        $this->classLoader = $classLoader;
+    }
+
+    /**
+     * 启动WEB应用
+     *
+     * @throws Exception
+     * @author macro chen <macro_fengye@163.com>
+     */
+    public function start(): void
+    {
+        try {
+            $this->component('routerFile');
+            $this->component('app')->run();
+        } catch (Exception $e) {
+            print_r($e);
+            throw $e;
+        }
     }
 
     /**
@@ -317,7 +364,7 @@ final class Application
      * @param string|null $modelNamespace 模型命名空间
      * @return mixed
      */
-    public function model(string $modelName, array $params = [], string $modelNamespace = null): mixed
+    public function model(string $modelName, array $params = [], string $modelNamespace = null)
     {
         try {
             $modelNamespace = $modelNamespace ?: (defined('DEPEND_NAMESPACE') ? DEPEND_NAMESPACE : APP_NAME) . '\\Models';
@@ -360,7 +407,7 @@ final class Application
      * @param null $repositoryNamespace Repository的命名空间
      * @return EntityRepository | Repository | NULL
      */
-    public function repository(string $entityName, string $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null): EntityRepository|Repository|null
+    public function repository(string $entityName, string $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
     {
         $entityNamespace = $entityNamespace ?: APP_NAME . '\\Entity\\Mapping';
         $repositoryNamespace = $repositoryNamespace ?: APP_NAME . '\\Entity\\Repositories';

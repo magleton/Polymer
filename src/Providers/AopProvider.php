@@ -18,14 +18,14 @@ class AopProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer): void
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['aop'] = static function (Container $container) {
+        $diContainer->set('aop', static function (Container $diContainer) {
             $aspectKernel = ApplicationAspectKernel::getInstance();
-            $aspectKernel->init(array_merge($container['application']->config('aop.init', []), $container['application']->config('app.aop.init', [])));
+            $aspectKernel->init(array_merge($diContainer->get('application')->config('aop.init', []), $diContainer->get('application')->config('app.aop.init', [])));
             return $aspectKernel;
-        };
+        });
     }
 }

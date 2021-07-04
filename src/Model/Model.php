@@ -98,7 +98,7 @@ class Model
      * @param $propertyName
      * @return mixed
      */
-    protected function getProperty($propertyName): mixed
+    protected function getProperty($propertyName)
     {
         return $this->$propertyName ?? null;
     }
@@ -109,10 +109,10 @@ class Model
      * @param array $data 自定义数据
      * @param array $criteria 获取对象的条件(用于更新数据)
      * @param bool $returnEObj 是否返回实体对象
-     * @return mixed
+     * @return Model|Object|null
      * @throws Exception
      */
-    protected function make(array $data = [], array $criteria = [], bool $returnEObj = false): mixed
+    protected function make(array $data = [], array $criteria = [], bool $returnEObj = false)
     {
         try {
             $this->entityObject = $this->obtainEObj($criteria);
@@ -185,10 +185,10 @@ class Model
      * @param array $rules 验证规则
      * @param array|null $groups 验证组
      * @param bool $returnErr 是否返回错误信息
-     * @return object|bool|array|null
+     * @return array|object|null
      * @throws EntityValidateErrorException
      */
-    protected function validate(array $rules = [], array $groups = null, bool $returnErr = false): object|bool|array|null
+    protected function validate(array $rules = [], array $groups = null, bool $returnErr = false)
     {
         $rules = $rules ?: $this->getProperty('rules');
         if ($rules) {

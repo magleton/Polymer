@@ -82,7 +82,8 @@ return [
         'cls' => SecureHandler::class,
         'params' => 'AAAAA'
     ],
-    //AOP配置信息
+    
+/*    //AOP配置信息
     'aop' => [
         'init' => [
             'debug' => true,
@@ -91,5 +92,5 @@ return [
                 ROOT_PATH . '/vendor/',
             ],
         ]
-    ]
+    ]*/
 ];

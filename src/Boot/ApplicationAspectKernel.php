@@ -7,6 +7,7 @@
 
 namespace Polymer\Boot;
 
+use Exception;
 use Go\Core\AspectContainer;
 use Go\Core\AspectKernel;
 
@@ -16,10 +17,10 @@ class ApplicationAspectKernel extends AspectKernel
      * Configure an AspectContainer with advisors, aspects and pointcuts
      *
      * @param AspectContainer $container
-     * @throws \Exception
      * @return void
+     * @throws Exception
      */
-    protected function configureAop(AspectContainer $container)
+    protected function configureAop(AspectContainer $container): void
     {
         try {
             $aspect = (array)app()->config('app.aop.aspect');
@@ -28,7 +29,7 @@ class ApplicationAspectKernel extends AspectKernel
                     $container->registerAspect(new $clazz());
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw  $e;
         }
     }
