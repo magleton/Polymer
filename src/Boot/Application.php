@@ -10,6 +10,7 @@ namespace Polymer\Boot;
 use DI\Container;
 use DI\ContainerBuilder;
 use DI\Definition\Source\DefinitionArray;
+use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
 use Doctrine\Inflector\Inflector;
@@ -297,7 +298,6 @@ final class Application
      *
      * @param array $params
      * @return EventManager|null
-     * @throws ORMException
      * @author macro chen <macro_fengye@163.com>
      */
     public function addSubscriber(array $params = []): ?EventManager
@@ -393,7 +393,7 @@ final class Application
             $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DIRECTORY_SEPARATOR], ['', ''], APP_PATH)) . '.' . $dbName;
             if ($this->config('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->diContainer->has($cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . DIRECTORY_SEPARATOR . 'entity' . DIRECTORY_SEPARATOR . 'Models';
-                $cache = APPLICATION_ENV === 'development' ? null : new ArrayCache();
+                $cache = APPLICATION_ENV === 'development' ? null : new DoctrineProvider(new ArrayAdapter());
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
                 ], APPLICATION_ENV === 'development',
