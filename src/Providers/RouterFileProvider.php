@@ -18,28 +18,28 @@ class RouterFileProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer): void
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer->set('routerFile', static function (Container $container) {
-            $routerFilePath = $container->get('application')->config('app.router_path.router',
-                $container->get('application')->config('router_path.router'));
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
+            $routerFilePath = $diContainer->get('application')->config('app.router_path.router',
+                $diContainer->get('application')->config('router_path.router'));
             if (routeGeneration()) {
-                if (file_exists($container->get('application')->config('slim.settings.routerCacheFile'))) {
-                    @unlink($container->get('application')->config('slim.settings.routerCacheFile'));
+                if (file_exists($diContainer->get('application')->config('slim.settings.routerCacheFile'))) {
+                    @unlink($diContainer->get('application')->config('slim.settings.routerCacheFile'));
                 }
 
                 $routerContents = '<?php' . "\n";
                 $routerContents .= 'use Polymer\Boot\Application;' . "\n";
                 $routerContents .= '$app = Application::getInstance()->component("app");';
-                if ($container->get('application')->config('middleware')) {
-                    foreach ($container->get('application')->config('middleware') as $key => $middleware) {
+                if ($diContainer->get('application')->config('middleware')) {
+                    foreach ($diContainer->get('application')->config('middleware') as $key => $middleware) {
                         if (function_exists($middleware) && is_callable($middleware)) {
                             $routerContents .= "\n" . '$app->add("' . $middleware . '");';
-                        } elseif ($container->get('application')->component($middleware)) {
+                        } elseif ($diContainer->get('application')->component($middleware)) {
                             $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $middleware . '"));';
-                        } elseif ($container->get('application')->component($key)) {
+                        } elseif ($diContainer->get('application')->component($key)) {
                             $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $key . '"));';
                         } elseif (class_exists($middleware)) {
                             $routerContents .= "\n" . '$app->add("' . $middleware . '");';
@@ -47,8 +47,8 @@ class RouterFileProvider
                     }
                 }
                 $routerContents .= "\n";
-                foreach (glob($container->get("application")->config('app.router_path.router_files',
-                    $container->get("application")->config('router_path.router_files'))) as $key => $file_name) {
+                foreach (glob($diContainer->get("application")->config('app.router_path.router_files',
+                    $diContainer->get("application")->config('router_path.router_files'))) as $key => $file_name) {
                     $contents = file_get_contents($file_name);
                     preg_match_all('/app->[\s\S]*/', $contents, $matches);
                     foreach ($matches[0] as $kk => $vv) {
@@ -56,9 +56,9 @@ class RouterFileProvider
                     }
                 }
                 file_put_contents($routerFilePath, $routerContents);
-                file_put_contents($container->get("application")->config('app.router_path.lock',
-                    $container->get("application")->config('router_path.lock')),
-                    $container->get("application")->config('current_version'));
+                file_put_contents($diContainer->get("application")->config('app.router_path.lock',
+                    $diContainer->get("application")->config('router_path.lock')),
+                    $diContainer->get("application")->config('current_version'));
             }
             if (file_exists($routerFilePath)) {
                 require_once $routerFilePath;

@@ -22,7 +22,7 @@ class EventManagerProvider
      */
     public function register(Container $diContainer): void
     {
-        $diContainer->set('eventManager', static function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             return new EventManager();
         });
     }
