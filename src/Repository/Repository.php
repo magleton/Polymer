@@ -8,12 +8,14 @@
 namespace Polymer\Repository;
 
 use DI\Annotation\Inject;
+use DI\Container;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping;
 use Exception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\PresenterException;
+use Polymer\Providers\BizValidatorProvider;
 
 class Repository extends EntityRepository
 {
@@ -30,6 +32,11 @@ class Repository extends EntityRepository
      * @var ?Application
      */
     protected Application $application;
+
+    /**
+     * @var Container
+     */
+    protected Container $diContainer;
 
     /**
      * 验证规则
@@ -51,6 +58,14 @@ class Repository extends EntityRepository
     }
 
     /**
+     * @return Container
+     */
+    public function getDiContainer(): Container
+    {
+        return $this->application->getDiContainer();
+    }
+
+    /**
      * 验证查询字段的值
      *
      * @param array $data 需要验证的数据
@@ -64,7 +79,7 @@ class Repository extends EntityRepository
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
-            $this->application->component('biz_validator')->validateField($data, $rules, $groups, $key);
+            $this->diContainer->get(BizValidatorProvider::class)->validateField($data, $rules, $groups, $key);
         } catch (Exception $e) {
             throw $e;
         }

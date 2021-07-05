@@ -27,6 +27,7 @@ use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\EventManagerProvider;
 use Polymer\Providers\InitApplicationProvider;
 use Polymer\Providers\RouterFileProvider;
+use Polymer\Providers\ValidatorProvider;
 use Polymer\Repository\Repository;
 use ReflectionClass;
 use Slim\App;
@@ -118,6 +119,7 @@ final class Application
             $this->register($initAppClass);
             $this->register(RouterFileProvider::class);
             $this->register(EventManagerProvider::class);
+            $this->register(ValidatorProvider::class);
         } catch (Exception $e) {
             throw $e;
         }

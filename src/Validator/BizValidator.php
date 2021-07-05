@@ -7,37 +7,49 @@
 
 namespace Polymer\Validator;
 
+use DI\Annotation\Inject;
+use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Exception;
-use Polymer\Exceptions\FieldValidateErrorException;
-use Symfony\Component\Validator\Validator\RecursiveValidator;
 use Polymer\Boot\Application;
+use Polymer\Exceptions\FieldValidateErrorException;
+use Polymer\Providers\ValidatorProvider;
 use Symfony\Component\Validator\Exception\NoSuchMetadataException;
+use Symfony\Component\Validator\Validator\RecursiveValidator;
 
 class BizValidator
 {
     /**
      * 应用APP
-     *
+     * @Inject
      * @var ?Application
      */
     protected ?Application $application = null;
 
     /**
-     * 验证组件
-     *
-     * @var ?RecursiveValidator
+     * @Inject
+     * @var Container
      */
-    protected ?RecursiveValidator $validator = null;
+    protected Container $diContainer;
+
+    /**
+     * 验证组件
+     * @Inject
+     * @var RecursiveValidator
+     */
+    protected RecursiveValidator $validator;
 
     /**
      * Validator constructor.
      *
      * @throws Exception
      */
-    public function __construct()
+    public function __construct(Container $diContainer)
     {
-        $this->application = app();
-        $this->validator = $this->application->component('validator');
+        $this->diContainer = $diContainer;
+        $this->application = $diContainer->get(Application::class);
+        $this->validator = $diContainer->get(ValidatorProvider::class);
     }
 
     /**
@@ -47,8 +59,10 @@ class BizValidator
      * @param array $rules 验证规则
      * @param array|null $groups 验证组
      * @param string $key 错误信息的key，用于获取错误信息
-     * @return null
+     * @return void
      * @throws FieldValidateErrorException
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function validateField(array $data = [], array $rules = [], array $groups = null, string $key = 'error'): void
     {
@@ -65,7 +79,7 @@ class BizValidator
             }
         }
         if ($errorData) {
-            $this->application->component('error_collection')->set($key, $errorData);
+            $this->diContainer->get('error_collection')->set($key, $errorData);
             throw new FieldValidateErrorException('数据验证失败');
         }
     }
@@ -99,16 +113,19 @@ class BizValidator
      * @param string $cls
      * @return string
      */
-    private function getConstraintClass(string $cls = '')
+    private function getConstraintClass(string $cls = ''): string
     {
         $class = '';
         if (class_exists('\\Symfony\\Component\\Validator\\Constraints\\' . $cls)) {
             $class = '\\Symfony\\Component\\Validator\\Constraints\\' . $cls;
             return $class;
-        } elseif (class_exists(APP_NAME . '\\Constraints\\' . $cls)) {
-            $class = APP_NAME . '\\Constraints\\' . $cls;
-            return $class;
-        } elseif (class_exists('Polymer\\Constraints\\' . $cls)) {
+        }
+
+        if (class_exists(APP_NAME . '\\Constraints\\' . $cls)) {
+            return APP_NAME . '\\Constraints\\' . $cls;
+        }
+
+        if (class_exists('Polymer\\Constraints\\' . $cls)) {
             $class = 'Polymer\\Constraints\\' . $cls;
             return $class;
         }

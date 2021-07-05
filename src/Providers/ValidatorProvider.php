@@ -24,11 +24,11 @@ class ValidatorProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['validator'] = function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             try {
                 //AnnotationRegistry::registerLoader('class_exists');
                 $reader = new AnnotationReader();
@@ -43,6 +43,6 @@ class ValidatorProvider
             } catch (Exception $e) {
                 return null;
             }
-        };
+        });
     }
 }

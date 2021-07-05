@@ -12,10 +12,10 @@ use Polymer\Validator\BizValidator;
 
 class BizValidatorProvider
 {
-    public function register(Container $pimpleContainer): void
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['biz_validator'] = static function (Container $container) {
-            return new BizValidator();
-        };
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
+            return new BizValidator($diContainer);
+        });
     }
 }

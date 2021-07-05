@@ -6,8 +6,6 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Boot\Application;
-use RunTracy\Helpers\Profiler\Profiler;
-use Tracy\Debugger;
 
 if (!function_exists('app')) {
     /**
