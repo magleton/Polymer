@@ -21,7 +21,6 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 use Exception;
 use InvalidArgumentException;
-use JetBrains\PhpStorm\Pure;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\InitApplicationProvider;
@@ -88,8 +87,8 @@ final class Application
      */
     public function __construct()
     {
-        self::setInstance($this);
         $this->initEnvironment();
+        self::setInstance($this);
     }
 
     /**
@@ -114,7 +113,6 @@ final class Application
             $initAppClass = file_exists($initAppFile) ? APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider' : InitApplicationProvider::class;
             $this->diContainer->set('application', $this);
             $this->register($initAppClass);
-            $this->component('aop');
             self::setInstance($this);
         } catch (Exception $e) {
             throw $e;
@@ -161,73 +159,8 @@ final class Application
     {
         if (!array_key_exists($provider, $this->loadedProviders)) {
             $this->diContainer->call([new $provider(), 'register'], [$this->diContainer]);
-            $this->loadedProviders[$provider] = true;
+            $this->loadedProviders[$provider] = $this->diContainer->get($provider);
         }
-    }
-
-    /**
-     * 获取指定组件名字的对象
-     *
-     * @param string $componentName
-     * @param array $param
-     * @return mixed
-     */
-    public function component(string $componentName, array $param = []): mixed
-    {
-        try {
-            if (!$this->diContainer->has($componentName)) {
-                $providersPath = array_merge($this->config('app.providers_path', []), $this->config('providers_path'));
-                foreach ($providersPath as $namespace) {
-                    $className = $namespace . '\\' . $this->getInflector()->classify($componentName) . 'Provider';
-                    if (class_exists($className)) {
-                        $param[0] = $this->diContainer;
-                        $this->diContainer->call([new $className(), 'register'], $param);
-                        break;
-                    }
-                }
-            }
-            $componentObj = $this->diContainer->get($componentName);
-            if ($componentName === Constants::REDIS) {
-                $database = (isset($param['database']) && is_numeric($param['database'])) ? $param['database'] & 15 : 0;
-                $componentObj->select($database);
-            }
-            return $componentObj;
-        } catch (Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * 获取指定键的配置文件
-     *
-     * @param string $key
-     * @param mixed|null $default
-     * @return mixed
-     * @throws Exception
-     * @throws EmptyDirectoryException
-     * @author macro chen <macro_fengye@163.com>
-     */
-    public function config(string $key, mixed $default = null): mixed
-    {
-        try {
-            if ($this->configCache->fetch('configCache') && $this->configCache->fetch('configCache')->get($key)) {
-                return $this->configCache->fetch('configCache')->get($key, $default);
-            }
-            return $default;
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * 将下划线转为驼峰
-     * table_name =>  tableName
-     *
-     * @return Inflector
-     */
-    #[Pure] public function getInflector(): Inflector
-    {
-        return new Inflector(new NoopWordInflector(), new NoopWordInflector());
     }
 
     /**
@@ -280,11 +213,84 @@ final class Application
     {
         try {
             $this->component('routerFile');
-            $this->component('app')->run();
+            $this->diContainer->get(App::class)->run();
         } catch (Exception $e) {
             print_r($e);
             throw $e;
         }
+    }
+
+    /**
+     * 获取指定组件名字的对象
+     *
+     * @param string $componentName
+     * @param array $param
+     * @return mixed
+     */
+    public function component(string $componentName, array $param = [])
+    {
+        try {
+            if (!$this->diContainer->has($componentName)) {
+                $providersPath = array_merge($this->config('app.providers_path', []), $this->config('providers_path'));
+                foreach ($providersPath as $namespace) {
+                    $className = $namespace . '\\' . $this->getInflector()->classify($componentName) . 'Provider';
+                    if (class_exists($className)) {
+                        $param[0] = $this->diContainer;
+                        $this->diContainer->call([new $className(), 'register'], $param);
+                        break;
+                    }
+                }
+            }
+            $componentObj = $this->diContainer->get($componentName);
+            if ($componentName === Constants::REDIS) {
+                $database = (isset($param['database']) && is_numeric($param['database'])) ? $param['database'] & 15 : 0;
+                $componentObj->select($database);
+            }
+            return $componentObj;
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取指定键的配置文件
+     *
+     * @param string $key
+     * @param mixed|null $default
+     * @return mixed
+     * @throws Exception
+     * @throws EmptyDirectoryException
+     * @author macro chen <macro_fengye@163.com>
+     */
+    public function config(string $key, $default = null)
+    {
+        try {
+            if ($this->configCache->fetch('configCache') && $this->configCache->fetch('configCache')->get($key)) {
+                return $this->configCache->fetch('configCache')->get($key, $default);
+            }
+            return $default;
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * 将下划线转为驼峰
+     * table_name =>  tableName
+     *
+     * @return Inflector
+     */
+    public function getInflector(): Inflector
+    {
+        return new Inflector(new NoopWordInflector(), new NoopWordInflector());
+    }
+
+    /**
+     * @return Container
+     */
+    public function getDiContainer(): Container
+    {
+        return $this->diContainer;
     }
 
     /**

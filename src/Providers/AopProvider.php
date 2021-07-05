@@ -22,7 +22,7 @@ class AopProvider
      */
     public function register(Container $diContainer): void
     {
-        $diContainer->set('aop', static function (Container $diContainer) {
+        $diContainer->set(__CLASS__, static function (Container $diContainer) {
             $aspectKernel = ApplicationAspectKernel::getInstance();
             $aspectKernel->init(array_merge($diContainer->get('application')->config('aop.init', []), $diContainer->get('application')->config('app.aop.init', [])));
             return $aspectKernel;

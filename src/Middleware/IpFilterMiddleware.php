@@ -7,14 +7,15 @@
 
 namespace Polymer\Middleware;
 
+use Exception;
 use Polymer\Utils\Constants;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class IpFilterMiddleware
 {
-    protected $addresses = [];
-    protected $mode = null;
+    protected array $addresses = [];
+    protected ?int $mode = null;
     protected $allowed = null;
     protected $handler = null;
 
@@ -24,7 +25,7 @@ class IpFilterMiddleware
      * @param array $addresses
      * @param int $mode
      */
-    public function __construct(array $addresses = [], $mode = Constants::ALLOW)
+    public function __construct(array $addresses = [], int $mode = Constants::ALLOW)
     {
         foreach ($addresses as $address) {
             if (is_array($address)) {
@@ -35,15 +36,42 @@ class IpFilterMiddleware
         }
         $this->patterns = $addresses;
         $this->mode = $mode;
-        $this->handler = function (Request $request, Response $response) {
+        $this->handler = function (ServerRequestInterface $request, ResponseInterface $response) {
             try {
                 $response = $response->withStatus(403);
                 $response->getBody()->write(' 403 Forbidden');
                 return $response;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return null;
             }
         };
+    }
+
+    /**
+     * 添加IP段
+     *
+     * @param $start
+     * @param $end
+     * @return $this
+     */
+    public function addIpRange($start, $end)
+    {
+        foreach (range(ip2long($start), ip2long($end)) as $address) {
+            $this->addresses[] = $address;
+        }
+        return $this;
+    }
+
+    /**
+     * 添加IP地址
+     *
+     * @param $ip
+     * @return $this
+     */
+    public function addIp($ip): IpFilterMiddleware
+    {
+        $this->addresses[] = ip2long($ip);
+        return $this;
     }
 
     /**
@@ -106,32 +134,5 @@ class IpFilterMiddleware
     public function setHandler($handler)
     {
         $this->handler = $handler;
-    }
-
-    /**
-     * 添加IP段
-     *
-     * @param $start
-     * @param $end
-     * @return $this
-     */
-    public function addIpRange($start, $end)
-    {
-        foreach (range(ip2long($start), ip2long($end)) as $address) {
-            $this->addresses[] = $address;
-        }
-        return $this;
-    }
-
-    /**
-     * 添加IP地址
-     *
-     * @param $ip
-     * @return $this
-     */
-    public function addIp($ip)
-    {
-        $this->addresses[] = ip2long($ip);
-        return $this;
     }
 }
