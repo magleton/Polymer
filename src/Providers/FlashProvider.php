@@ -20,19 +20,17 @@ class FlashProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['flash'] = function (Container $container) {
+        $diContainer->set(__CLASS__, static function (Container $container) {
             try {
                 $container['application']->component('session');
                 return new Messages();
-            } catch (InvalidArgumentException $e) {
-                return null;
-            } catch (RuntimeException $e) {
+            } catch (InvalidArgumentException | RuntimeException $e) {
                 return null;
             }
-        };
+        });
     }
 }

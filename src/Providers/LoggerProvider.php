@@ -21,11 +21,11 @@ class LoggerProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['logger'] = function (Container $container) {
+        $diContainer->set(__CLASS__, static function (Container $container) {
             try {
                 $settings = $container['application']->config('slim.settings');
                 $logger = new Logger($settings['logger']['name']);
@@ -35,6 +35,6 @@ class LoggerProvider
             } catch (Exception $e) {
                 return null;
             }
-        };
+        });
     }
 }

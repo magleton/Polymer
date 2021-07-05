@@ -8,6 +8,8 @@
 namespace Polymer\Providers;
 
 use DI\Container;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
 use Slim\Csrf\Guard;
 
@@ -19,14 +21,14 @@ class CsrfProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['csrf'] = static function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             try {
                 $guard = new Guard();
-                $guard->setFailureCallable(function (Request $request, Response $response, $next) {
+                $guard->setFailureCallable(function (ServerRequestInterface $request, ResponseInterface $response, $next) {
                     $request = $request->withAttribute('csrf_status', false);
                     return $next($request, $response);
                 });
@@ -34,6 +36,6 @@ class CsrfProvider
             } catch (RuntimeException $e) {
                 return null;
             }
-        };
+        });
     }
 }

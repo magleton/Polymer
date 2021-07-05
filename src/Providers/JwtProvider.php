@@ -9,6 +9,8 @@ namespace Polymer\Providers;
 
 use DI\Container;
 use InvalidArgumentException;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Slim\Middleware\JwtAuthentication;
 
 class JwtProvider
@@ -19,19 +21,19 @@ class JwtProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['jwt'] = function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             return new JwtAuthentication([
-                'header' => $container['application']->config('app.jwt.token', 'token'),
-                'regexp' => $container['application']->config('app.jwt.regexp', '/(.*)/'),
-                'secure' => $container['application']->config('app.jwt.secure', false),
-                'secret' => $container['application']->config('app.jwt.secret', '62f47d0439a14f8bddb465dff4317fdb'),
-                'path' => $container['application']->config('app.jwt.jwt_path'),
-                'passthrough' => $container['application']->config('app.jwt.pass_through'),
-                'error' => function (Request $request, Response $response, $arguments) {
+                'header' => $diContainer['application']->config('app.jwt.token', 'token'),
+                'regexp' => $diContainer['application']->config('app.jwt.regexp', '/(.*)/'),
+                'secure' => $diContainer['application']->config('app.jwt.secure', false),
+                'secret' => $diContainer['application']->config('app.jwt.secret', '62f47d0439a14f8bddb465dff4317fdb'),
+                'path' => $diContainer['application']->config('app.jwt.jwt_path'),
+                'passthrough' => $diContainer['application']->config('app.jwt.pass_through'),
+                'error' => function (ServerRequestInterface $request, ResponseInterface $response, $arguments) {
                     $data['status'] = 'error';
                     $data['message'] = var_export($arguments, true);
                     try {
@@ -42,10 +44,10 @@ class JwtProvider
                         return null;
                     }
                 },
-                'callback' => function (Request $request, Response $response, $arguments) use ($container) {
-                    $container['jwtData'] = $arguments['decoded'];
+                'callback' => function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($container) {
+                    $diContainer->set('jwtData', $arguments['decoded']);
                 }
             ]);
-        };
+        });
     }
 }

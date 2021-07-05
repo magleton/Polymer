@@ -21,11 +21,11 @@ class CorsProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer): void
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['cors'] = static function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             return new CorsMiddleware([
                 'origin' => ['*'],
                 'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -60,6 +60,6 @@ class CorsProvider
                     }
                 }
             ]);
-        };
+        });
     }
 }

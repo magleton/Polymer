@@ -49,7 +49,7 @@ return [
                     'ConsoleHashAlgorithm' => 'sha1',
                     // Home directory (multi-user mode supported) values ( var || array )
                     // '' || '/tmp' || ['user1' => '/home/user1', 'user2' => '/home/user2']
-                    'ConsoleHomeDirectory' => ['dev' => dirname(dirname(__DIR__))],
+                    'ConsoleHomeDirectory' => ['dev' => dirname(__DIR__, 2)],
                     // terminal.js full URI
                     'ConsoleTerminalJs' => '/js/jquery.terminal.min.js',
                     // terminal.css full URI
@@ -82,15 +82,15 @@ return [
         'cls' => SecureHandler::class,
         'params' => 'AAAAA'
     ],
-    
-/*    //AOP配置信息
-    'aop' => [
-        'init' => [
-            'debug' => true,
-            'cacheDir' => APP_PATH . '/log/aop/',
-            'excludePaths' => [
-                ROOT_PATH . '/vendor/',
-            ],
-        ]
-    ]*/
+
+    /*    //AOP配置信息
+        'aop' => [
+            'init' => [
+                'debug' => true,
+                'cacheDir' => APP_PATH . '/log/aop/',
+                'excludePaths' => [
+                    ROOT_PATH . '/vendor/',
+                ],
+            ]
+        ]*/
 ];

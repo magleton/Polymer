@@ -18,13 +18,13 @@ class JwtDataProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
-     * @return mixed
+     * @param Container $diContainer
+     * @return void
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['jwtData'] = function (Container $container) {
+        $diContainer->set(__CLASS__, function () use ($diContainer) {
             return new stdClass();
-        };
+        });
     }
 }
