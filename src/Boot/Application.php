@@ -21,6 +21,7 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 use Exception;
 use InvalidArgumentException;
+use JetBrains\PhpStorm\Pure;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\InitApplicationProvider;
@@ -171,7 +172,7 @@ final class Application
      * @param array $param
      * @return mixed
      */
-    public function component(string $componentName, array $param = [])
+    public function component(string $componentName, array $param = []): mixed
     {
         try {
             if (!$this->diContainer->has($componentName)) {
@@ -206,7 +207,7 @@ final class Application
      * @throws EmptyDirectoryException
      * @author macro chen <macro_fengye@163.com>
      */
-    public function config(string $key, $default = null)
+    public function config(string $key, mixed $default = null): mixed
     {
         try {
             if ($this->configCache->fetch('configCache') && $this->configCache->fetch('configCache')->get($key)) {
@@ -224,7 +225,7 @@ final class Application
      *
      * @return Inflector
      */
-    public function getInflector(): Inflector
+    #[Pure] public function getInflector(): Inflector
     {
         return new Inflector(new NoopWordInflector(), new NoopWordInflector());
     }

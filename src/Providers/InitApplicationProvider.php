@@ -22,11 +22,11 @@ class InitApplicationProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $diContainer A container instance
+     * @param Container $pimpleContainer A container instance
      */
-    public function register(Container $diContainer): void
+    public function register(Container $pimpleContainer): void
     {
-        $diContainer->set('notAllowedHandler', static function (Container $container) {
+        $pimpleContainer->set('notAllowedHandler', static function (Container $container) {
             return static function (ServerRequestInterface $request, ResponseInterface $response, $methods) use ($container) {
                 $response
                     ->withStatus(405)
@@ -38,7 +38,7 @@ class InitApplicationProvider
             };
         });
 
-        $diContainer->set('notFoundHandler', static function (Container $container) {
+        $pimpleContainer->set('notFoundHandler', static function (Container $container) {
             return static function (ServerRequestInterface $request, ResponseInterface $response) use ($container) {
                 if ($container['application']->config('app.is_rest', false)) {
                     $response
@@ -74,11 +74,11 @@ class InitApplicationProvider
             };
         });
 
-        $diContainer->set('phpErrorHandler', static function (Container $container) {
+        $pimpleContainer->set('phpErrorHandler', static function (Container $container) {
             return $container['errorHandler'];
         });
 
-        $diContainer->set('errorHandler', static function (Container $container) {
+        $pimpleContainer->set('errorHandler', static function (Container $container) {
             return static function (ServerRequestInterface $request, ResponseInterface $response, $exception) use ($container) {
                 $container->register(new LoggerProvider());
                 $container['logger']->error($exception->__toString());
@@ -118,8 +118,9 @@ class InitApplicationProvider
             };
         });
 
-        $diContainer->set('app', static function (Container $diContainer) {
-            return AppFactory::createFromContainer($diContainer);
+        $pimpleContainer->set('app', static function (Container $pimpleContainer) {
+            return AppFactory::createFromContainer($pimpleContainer);
+            //return Bridge::create($pimpleContainer);
         });
     }
 }
