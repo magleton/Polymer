@@ -7,6 +7,7 @@
 
 namespace Polymer\Repository;
 
+use DI\Annotation\Inject;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping;
@@ -25,10 +26,10 @@ class Repository extends EntityRepository
 
     /**
      * 全局应用实例
-     *
-     * @var Application
+     * @Inject
+     * @var ?Application
      */
-    protected $app = null;
+    protected Application $application;
 
     /**
      * 验证规则
@@ -46,7 +47,7 @@ class Repository extends EntityRepository
     public function __construct(EntityManager $em, Mapping\ClassMetadata $class)
     {
         parent::__construct($em, $class);
-        $this->app = app();
+        $this->application = app();
     }
 
     /**
@@ -59,11 +60,11 @@ class Repository extends EntityRepository
      * @return $this
      * @throws Exception
      */
-    public function validate(array $data = [], array $rules = [], array $groups = [], $key = 'error'): self
+    public function validate(array $data = [], array $rules = [], array $groups = [], string $key = 'error'): self
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
-            $this->app->component('biz_validator')->validateField($data, $rules, $groups, $key);
+            $this->application->component('biz_validator')->validateField($data, $rules, $groups, $key);
         } catch (Exception $e) {
             throw $e;
         }
@@ -78,10 +79,7 @@ class Repository extends EntityRepository
      */
     protected function getProperty($propertyName)
     {
-        if (isset($this->$propertyName)) {
-            return $this->$propertyName;
-        }
-        return null;
+        return $this->$propertyName ?? null;
     }
 
     /**

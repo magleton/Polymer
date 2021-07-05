@@ -8,6 +8,7 @@
 namespace Polymer\Boot;
 
 use Composer\Autoload\ClassLoader;
+use DI\Annotation\Inject;
 use DI\Container;
 use DI\ContainerBuilder;
 use DI\Definition\Source\DefinitionArray;
@@ -78,6 +79,7 @@ final class Application
     private ?Cache $configCache = null;
 
     /**
+     * @Inject
      * @var ClassLoader
      */
     private ClassLoader $classLoader;
@@ -126,7 +128,7 @@ final class Application
      *
      * @return array
      */
-    public function initConfigObject(): array
+    private function initConfigObject(): array
     {
         $configPaths = $this->getConfigPaths();
         if (null === $this->configObject) {
@@ -142,7 +144,7 @@ final class Application
      *
      * @return array
      */
-    public function getConfigPaths(): array
+    private function getConfigPaths(): array
     {
         $configPaths = [dirname(__DIR__) . DS . 'Config'];
         if (defined('ROOT_PATH') && file_exists(ROOT_PATH . DS . 'config') && is_dir(ROOT_PATH . DS . 'config')) {
@@ -196,14 +198,6 @@ final class Application
     public function getClassLoader(): ClassLoader
     {
         return $this->classLoader;
-    }
-
-    /**
-     * @param ClassLoader $classLoader
-     */
-    public function setClassLoader(ClassLoader $classLoader): void
-    {
-        $this->classLoader = $classLoader;
     }
 
     /**
@@ -411,7 +405,7 @@ final class Application
      * @return EntityManager
      * @throws ORMException | InvalidArgumentException | Exception
      */
-    public function db(string $dbName = '', mixed $entityFolder = null): EntityManager
+    public function db(string $dbName = '', string $entityFolder = null): EntityManager
     {
         try {
             $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));
