@@ -270,10 +270,10 @@ final class Application
      * @param int $listener 0 添加事件订阅器 1 添加事件监听器
      * @return mixed
      */
-    private function addEventOrSubscribe(array $params, int $listener): mixed
+    private function addEventOrSubscribe(array $params, int $listener)
     {
         $methods = ['addEventSubscriber', 'addEventListener'];
-        $eventManager = $this->component('eventManager');
+        $eventManager = $this->loadedProviders[EventManagerProvider::class];
         foreach ($params as $key => $value) {
             if (!isset($value['class_name'])) {
                 throw new InvalidArgumentException('class_name必须设置');
