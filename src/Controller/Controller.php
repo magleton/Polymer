@@ -9,7 +9,7 @@
 
 namespace Polymer\Controller;
 
-use Exception;
+use DI\Container;
 use JsonException;
 use Polymer\Boot\Application;
 use Psr\Container\ContainerInterface;
@@ -25,10 +25,16 @@ class Controller
 
     /**
      * 整个框架的应用
-     *
+     * @Inject
      * @var Application
      */
     protected Application $application;
+
+    /**
+     * @Inject
+     * @var Container
+     */
+    protected Container $diContainer;
 
     /**
      * 获取Application
@@ -37,17 +43,24 @@ class Controller
      */
     public function getApplication(): Application
     {
-        $this->application = Application::getInstance();
         return $this->application;
+    }
+
+    /**
+     * @return Container
+     */
+    public function getDiContainer(): Container
+    {
+        return $this->diContainer;
     }
 
     /**
      * 模板渲染
      *
      * @param string $template 模板文件
+     * @param ResponseInterface $response
      * @param array $data 传递到模板的数据
      * @return ResponseInterface
-     * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
     protected function render(string $template, ResponseInterface $response, array $data = []): ResponseInterface

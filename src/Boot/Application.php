@@ -157,12 +157,13 @@ final class Application
     /**
      * 注册应用配置的Provider
      */
-    public function register($provider): void
+    public function register($provider): ?object
     {
         if (!array_key_exists($provider, $this->loadedProviders)) {
             $this->diContainer->call([new $provider(), 'register'], [$this->diContainer]);
             $this->loadedProviders[$provider] = $this->diContainer->get($provider);
         }
+        return $this->loadedProviders[$provider];
     }
 
     /**

@@ -7,6 +7,7 @@
 
 namespace Polymer\Service;
 
+use DI\Container;
 use Exception;
 use Polymer\Boot\Application;
 
@@ -14,16 +15,33 @@ class Service
 {
     /**
      * 全局应用
+     * @Inject
      *
      * @var Application
      */
     protected Application $application;
+
     /**
      * 验证规则
      *
      * @var array
      */
     protected array $rules = [];
+
+    /**
+     * @Inject
+     *
+     * @var Container
+     */
+    protected Container $diContainer;
+
+    /**
+     * @return Container
+     */
+    public function getDiContainer(): Container
+    {
+        return $this->application->getDiContainer();
+    }
 
     /**
      * 验证字段的值
