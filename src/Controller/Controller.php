@@ -45,24 +45,6 @@ class Controller
     protected ServerRequestInterface $request;
 
     /**
-     * 获取Application
-     *
-     * @return Application
-     */
-    public function getApplication(): Application
-    {
-        return $this->application;
-    }
-
-    /**
-     * @return Container
-     */
-    public function getDiContainer(): Container
-    {
-        return $this->diContainer;
-    }
-
-    /**
      * 模板渲染
      *
      * @param string $template 模板文件
