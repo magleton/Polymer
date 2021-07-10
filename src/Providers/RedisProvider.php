@@ -19,14 +19,14 @@ class RedisProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['redis'] = function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             try {
-                $serverName = $container->offsetExists('redis_server') ? $container->offsetGet('redis_server') : 'server1';
-                $serversConfig = $container['application']->config('cache.redis.' . $serverName);
+                $serverName = $diContainer->has('redis_server') ? $diContainer->get('redis_server') : 'server1';
+                $serversConfig = $diContainer->get('application')->config('cache.redis.' . $serverName);
                 $redis = new Redis();
                 $redis->connect($serversConfig['server']['host'], $serversConfig['server']['port'], $serversConfig['server']['timeout']);
                 (isset($serversConfig['server']['password']) && $serversConfig['server']['password']) && $redis->auth($serversConfig['server']['password']);
@@ -34,6 +34,6 @@ class RedisProvider
             } catch (Exception $e) {
                 return null;
             }
-        };
+        });
     }
 }

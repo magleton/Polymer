@@ -24,9 +24,9 @@ class FlashProvider
      */
     public function register(Container $diContainer): void
     {
-        $diContainer->set(__CLASS__, static function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             try {
-                $container['application']->component('session');
+                $diContainer->get('application')->component('session');
                 return new Messages();
             } catch (InvalidArgumentException | RuntimeException $e) {
                 return null;

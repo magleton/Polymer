@@ -23,7 +23,7 @@ class JwtDataProvider
      */
     public function register(Container $diContainer): void
     {
-        $diContainer->set(__CLASS__, function () use ($diContainer) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             return new stdClass();
         });
     }

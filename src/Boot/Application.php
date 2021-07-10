@@ -70,16 +70,16 @@ final class Application
     /**
      * 配置文件对象
      *
-     * @var ?Config $configObject
+     * @var Config $config
      */
-    private ?Config $configObject = null;
+    private Config $config;
 
     /**
      * 配置文件缓存
      *
-     * @var ?Cache
+     * @var Cache
      */
-    private ?Cache $configCache = null;
+    private Cache $configCache;
 
     /**
      * @Inject
@@ -111,7 +111,6 @@ final class Application
                 print_r($throwable);
             });
             register_shutdown_function('handleShutdown');
-            $this->configCache = new DoctrineProvider(new ArrayAdapter());
             $builder = new ContainerBuilder();
             $builder->useAnnotations(true)->addDefinitions(new DefinitionArray($this->initConfig()));
             $this->diContainer = $builder->build();
@@ -134,22 +133,7 @@ final class Application
      */
     private function initConfig(): array
     {
-        $configPaths = $this->getConfigPaths();
-        if (null === $this->configObject) {
-            $this->configObject = new Config($configPaths);
-            $this->configCache->save('configCache', $this->configObject);
-        }
-        return $this->configObject->all();
-    }
-
-    /**
-     * 获取项目的配置文件位置
-     *
-     *
-     * @return array
-     */
-    private function getConfigPaths(): array
-    {
+        $this->configCache = new DoctrineProvider(new ArrayAdapter());
         $configPaths = [dirname(__DIR__) . DS . 'Config'];
         if (defined('ROOT_PATH') && file_exists(ROOT_PATH . DS . 'config') && is_dir(ROOT_PATH . DS . 'config')) {
             $configPaths[] = ROOT_PATH . DS . 'config';
@@ -157,7 +141,9 @@ final class Application
         if (defined('APP_PATH') && file_exists(APP_PATH . DS . 'Config') && is_dir(APP_PATH . DS . 'Config')) {
             $configPaths[] = APP_PATH . DS . 'Config';
         }
-        return $configPaths;
+        $this->config = new Config($configPaths);
+        $this->configCache->save('config', $this->config);
+        return $this->config->all();
     }
 
     /**
@@ -400,8 +386,8 @@ final class Application
     public function config(string $key, $default = null)
     {
         try {
-            if ($this->configCache->fetch('configCache') && $this->configCache->fetch('configCache')->get($key)) {
-                return $this->configCache->fetch('configCache')->get($key, $default);
+            if ($this->configCache->fetch('config') && $this->configCache->fetch('config')->get($key)) {
+                return $this->configCache->fetch('config')->get($key, $default);
             }
             return $default;
         } catch (Exception $e) {

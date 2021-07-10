@@ -17,7 +17,7 @@
     "slim/csrf": ">=1.2",
     "slim/twig-view": ">=3.2",
     "tuupola/cors-middleware": ">=1.2",
-    "tuupola/slim-jwt-auth": ">=2.3",
+    "tuupola/slim-jwt-auth": ">=3.3",
     "doctrine/inflector": ">=1.1",
     "doctrine/orm": ">=2.9",
     "beberlei/doctrineextensions": ">=1.3",
@@ -42,10 +42,10 @@
     "dto/dto": ">=3.2"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-master",
+    "roave/security-advisories": "dev-latest",
     "guzzlehttp/guzzle": ">=6.2",
     "vlucas/phpdotenv": ">=2.4",
-    "mikey179/vfsStream": ">=1.6",
+    "mikey179/vfsstream": ">=1.6",
     "mockery/mockery": ">=0.9",
     "satooshi/php-coveralls": ">=1.0",
     "phpunit/phpunit": ">=8",

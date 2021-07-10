@@ -22,18 +22,18 @@ class ViewProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['view'] = function (Container $container) {
-            $twig_config = $container['application']->config('twig') ?: [];
+        $diContainer->set(__CLASS__, static function () use ($diContainer){
+            $twig_config = $diContainer->get('application')->config('twig') ?: [];
             $view = new Twig(TEMPLATE_PATH, $twig_config);
-            $view->addExtension(new TwigExtension($container['router'], $container['request']->getUri()));
-            $view->addExtension(new Twig_Extension_Profiler($container['twig_profile']));
+            $view->addExtension(new TwigExtension($diContainer->get('router'), $diContainer->get('request')->getUri()));
+            $view->addExtension(new Twig_Extension_Profiler($diContainer->get('twig_profile')));
             $view->addExtension(new Twig_Extension_Debug());
             $view->getEnvironment()->addFunction(new Twig_SimpleFunction('app', 'app'));
             return $view;
-        };
+        });
     }
 }

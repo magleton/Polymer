@@ -25,9 +25,9 @@ class LoggerProvider
      */
     public function register(Container $diContainer): void
     {
-        $diContainer->set(__CLASS__, static function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             try {
-                $settings = $container['application']->config('slim.settings');
+                $settings = $diContainer->get('application')->config('slim.settings');
                 $logger = new Logger($settings['logger']['name']);
                 $logger->pushProcessor(new UidProcessor());
                 $logger->pushHandler(new StreamHandler($settings['logger']['path'], $settings['logger']['level']));

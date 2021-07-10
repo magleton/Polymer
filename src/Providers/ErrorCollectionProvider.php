@@ -18,12 +18,12 @@ class ErrorCollectionProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['error_collection'] = function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             return new Collection();
-        };
+        });
     }
 }

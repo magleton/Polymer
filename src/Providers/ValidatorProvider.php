@@ -9,11 +9,10 @@ namespace Polymer\Providers;
 
 use DI\Container;
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Cache\ApcuCache;
-use Doctrine\Common\Cache\ArrayCache;
 use Exception;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\DoctrineAdapter;
-use Symfony\Component\Validator\Mapping\Cache\DoctrineCache;
+use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\Validator\Validation;
 
 class ValidatorProvider
@@ -30,16 +29,10 @@ class ValidatorProvider
     {
         $diContainer->set(__CLASS__, static function () use ($diContainer) {
             try {
-                //AnnotationRegistry::registerLoader('class_exists');
                 $reader = new AnnotationReader();
                 AnnotationReader::addGlobalIgnoredName('dummy');
-                if (extension_loaded('apcu')) {
-                    $cache = new ApcuCache();
-                } else {
-                    $cache = new ArrayCache();
-                }
+                $cache = new DoctrineProvider(new ArrayAdapter());
                 return Validation::createValidatorBuilder()->setMappingCache(new DoctrineAdapter($cache))->enableAnnotationMapping($reader)->getValidator();
-                //return Validation::createValidatorBuilder()->setMetadataCache(new DoctrineCache($cache))->enableAnnotationMapping($reader)->getValidator();
             } catch (Exception $e) {
                 return null;
             }

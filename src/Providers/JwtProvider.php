@@ -11,7 +11,7 @@ use DI\Container;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Middleware\JwtAuthentication;
+use Tuupola\Middleware\JwtAuthentication;
 
 class JwtProvider
 {
@@ -27,24 +27,25 @@ class JwtProvider
     {
         $diContainer->set(__CLASS__, static function () use ($diContainer) {
             return new JwtAuthentication([
-                'header' => $diContainer['application']->config('app.jwt.token', 'token'),
-                'regexp' => $diContainer['application']->config('app.jwt.regexp', '/(.*)/'),
-                'secure' => $diContainer['application']->config('app.jwt.secure', false),
-                'secret' => $diContainer['application']->config('app.jwt.secret', '62f47d0439a14f8bddb465dff4317fdb'),
-                'path' => $diContainer['application']->config('app.jwt.jwt_path'),
-                'passthrough' => $diContainer['application']->config('app.jwt.pass_through'),
+                'header' => $diContainer->get('application')->config('app.jwt.token', 'token'),
+                'regexp' => $diContainer->get('application')->config('app.jwt.regexp', '/(.*)/'),
+                'secure' => $diContainer->get('application')->config('app.jwt.secure', false),
+                'secret' => $diContainer->get('application')->config('app.jwt.secret', '62f47d0439a14f8bddb465dff4317fdb'),
+                'path' => $diContainer->get('application')->config('app.jwt.jwt_path'),
+                'passthrough' => $diContainer->get('application')->config('app.jwt.pass_through'),
                 'error' => function (ServerRequestInterface $request, ResponseInterface $response, $arguments) {
                     $data['status'] = 'error';
                     $data['message'] = var_export($arguments, true);
                     try {
                         return $response
                             ->withHeader('Content-Type', 'application/json')
-                            ->write(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                            ->getBody()
+                            ->write(json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
                     } catch (InvalidArgumentException $e) {
                         return null;
                     }
                 },
-                'callback' => function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($container) {
+                'callback' => function (ServerRequestInterface $request, ResponseInterface $response, $arguments) use ($diContainer) {
                     $diContainer->set('jwtData', $arguments['decoded']);
                 }
             ]);

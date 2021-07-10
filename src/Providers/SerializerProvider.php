@@ -22,15 +22,14 @@ class SerializerProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['serializer'] = function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             $encoders = array(new XmlEncoder(), new JsonEncoder());
             $normalizers = array(new ObjectNormalizer());
-            $serializer = new Serializer($normalizers, $encoders);
-            return $serializer;
-        };
+            return new Serializer($normalizers, $encoders);
+        });
     }
 }

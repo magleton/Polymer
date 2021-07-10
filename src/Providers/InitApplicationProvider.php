@@ -121,7 +121,6 @@ class InitApplicationProvider
 
         $diContainer->set(App::class, static function (Container $pimpleContainer) {
             return AppFactory::createFromContainer($pimpleContainer);
-            //return Bridge::create($pimpleContainer);
         });
     }
 }

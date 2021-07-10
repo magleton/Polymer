@@ -18,21 +18,21 @@ class SessionProvider
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
-     * @param Container $pimpleContainer A container instance
+     * @param Container $diContainer A container instance
      */
-    public function register(Container $pimpleContainer)
+    public function register(Container $diContainer): void
     {
-        $pimpleContainer['session'] = function (Container $container) {
+        $diContainer->set(__CLASS__, static function () use ($diContainer) {
             ini_set('session.save_handler', 'files');
-            $sessionHandler = $container['application']->config('session_handler.cls');
+            $sessionHandler = $diContainer->get('application')->config('session_handler.cls');
             if (class_exists($sessionHandler)) {
-                $handler = new $sessionHandler($container['application']->config('session_handler.params'));
+                $handler = new $sessionHandler($diContainer->get('application')->config('session_handler.params'));
                 session_set_save_handler($handler, true);
                 $session = new Session();
                 $session->start();
                 return $session;
             }
             return null;
-        };
+        });
     }
 }
