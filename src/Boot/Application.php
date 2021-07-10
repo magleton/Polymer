@@ -12,6 +12,8 @@ use DI\Annotation\Inject;
 use DI\Container;
 use DI\ContainerBuilder;
 use DI\Definition\Source\DefinitionArray;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
 use Doctrine\Inflector\Inflector;
@@ -92,7 +94,7 @@ final class Application
     public function __construct()
     {
         self::setInstance($this);
-        $this->initEnvironment();
+        $this->init();
     }
 
     /**
@@ -101,7 +103,7 @@ final class Application
      * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
-    public function initEnvironment(): void
+    public function init(): void
     {
         try {
             set_error_handler('handleError');
@@ -111,7 +113,7 @@ final class Application
             register_shutdown_function('handleShutdown');
             $this->configCache = new DoctrineProvider(new ArrayAdapter());
             $builder = new ContainerBuilder();
-            $builder->useAnnotations(true)->addDefinitions(new DefinitionArray($this->initConfigObject()));
+            $builder->useAnnotations(true)->addDefinitions(new DefinitionArray($this->initConfig()));
             $this->diContainer = $builder->build();
             $initAppFile = ROOT_PATH . DS . 'app' . DS . APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider.php';
             $initAppClass = file_exists($initAppFile) ? APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider' : InitApplicationProvider::class;
@@ -130,7 +132,7 @@ final class Application
      *
      * @return array
      */
-    private function initConfigObject(): array
+    private function initConfig(): array
     {
         $configPaths = $this->getConfigPaths();
         if (null === $this->configObject) {
@@ -160,14 +162,22 @@ final class Application
 
     /**
      * 注册应用配置的Provider
+     *
+     * @param $provider
+     * @return ?object
      */
     public function register($provider): ?object
     {
-        if (!array_key_exists($provider, $this->loadedProviders)) {
-            $this->diContainer->call([new $provider(), 'register'], [$this->diContainer]);
-            $this->loadedProviders[$provider] = $this->diContainer->get($provider);
+        try {
+            if (!array_key_exists($provider, $this->loadedProviders)) {
+                $this->diContainer->call([new $provider(), 'register'], [$this->diContainer]);
+                $this->loadedProviders[$provider] = $this->diContainer->get($provider);
+            }
+            return $this->loadedProviders[$provider];
+        } catch (NotFoundException | DependencyException $exception) {
+
         }
-        return $this->loadedProviders[$provider];
+        return null;
     }
 
     /**
@@ -208,13 +218,12 @@ final class Application
      * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
-    public function start(): void
+    public function run(): void
     {
         try {
             $this->diContainer->get(RouterFileProvider::class);
             $this->diContainer->get(App::class)->run();
         } catch (Exception $e) {
-            print_r($e);
             throw $e;
         }
     }
@@ -228,15 +237,16 @@ final class Application
     }
 
     /**
-     * 启动控制台，包括单元测试及其他的控制台程序(定时任务等...)
+     * 启动控制台,包括单元测试及其他的控制台程序(定时任务等...)
      *
      * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
-    public function startConsole(): void
+    public function runConsole(): void
     {
         try {
-            $this->initEnvironment();
+            self::setInstance($this);
+            $this->init();
         } catch (Exception $e) {
             throw $e;
         }

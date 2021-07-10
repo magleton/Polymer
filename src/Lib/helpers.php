@@ -1,6 +1,5 @@
 <?php
 
-use Doctrine\DBAL\Logging\DebugStack;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
@@ -139,26 +138,6 @@ if (PHP_MAJOR_VERSION === 5 && !function_exists('handleException')) {
     function handleException(Exception $e)
     {
         throw $e;
-    }
-}
-
-if (!function_exists('debugger')) {
-    /**
-     * 调试应用的各种性能
-     *
-     * @param int $devMode 开发模式
-     * @param null $dbName 如果需要开启数据库的记录,则需要传递数据库名字
-     * @param string $logPath 记录日志的路径
-     */
-    function debugger($devMode = 0, $dbName = null, $logPath = APP_PATH . '/log')
-    {
-        if (class_exists(Profiler::class)) {
-            $doctrineConfig = app()->db($dbName)->getConfiguration();
-            $doctrineConfig->setSQLLogger(new DebugStack());
-            app()->offSetValueToContainer('doctrineConfig', $doctrineConfig);
-            Profiler::enable(true);
-            Debugger::enable($devMode ? Debugger::PRODUCTION : Debugger::DEVELOPMENT, $logPath);
-        }
     }
 }
 
