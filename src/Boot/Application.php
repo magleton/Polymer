@@ -11,6 +11,7 @@ use Composer\Autoload\ClassLoader;
 use DI\Annotation\Inject;
 use DI\Container;
 use DI\ContainerBuilder;
+use DI\Definition\Helper\DefinitionHelper;
 use DI\Definition\Source\DefinitionArray;
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -28,11 +29,14 @@ use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\EventManagerProvider;
 use Polymer\Providers\InitApplicationProvider;
+use Polymer\Providers\LoggerProvider;
 use Polymer\Providers\RouterFileProvider;
 use Polymer\Providers\ValidatorProvider;
 use Polymer\Repository\Repository;
+use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 use Slim\App;
+use Slim\Factory\ServerRequestCreatorFactory;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\DoctrineProvider;
 use Throwable;
@@ -63,9 +67,9 @@ final class Application
     /**
      * 应用的服务容器
      *
-     * @var Container
+     * @var ?Container
      */
-    private Container $diContainer;
+    private ?Container $diContainer = null;
 
     /**
      * 配置文件对象
@@ -113,7 +117,9 @@ final class Application
             register_shutdown_function('handleShutdown');
             $builder = new ContainerBuilder();
             $builder->useAnnotations(true)->addDefinitions(new DefinitionArray($this->initConfig()));
-            $this->diContainer = $builder->build();
+            if ($this->diContainer === null) {
+                $this->diContainer = $builder->build();
+            }
             $initAppFile = ROOT_PATH . DS . 'app' . DS . APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider.php';
             $initAppClass = file_exists($initAppFile) ? APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider' : InitApplicationProvider::class;
             $this->diContainer->set('application', $this);
@@ -121,6 +127,7 @@ final class Application
             $this->register(RouterFileProvider::class);
             $this->register(EventManagerProvider::class);
             $this->register(ValidatorProvider::class);
+            $this->register(LoggerProvider::class);
         } catch (Exception $e) {
             throw $e;
         }
@@ -208,10 +215,25 @@ final class Application
     {
         try {
             $this->diContainer->get(RouterFileProvider::class);
-            $this->diContainer->get(App::class)->run();
+            $app = $this->diContainer->get(App::class);
+            $serverRequestCreator = ServerRequestCreatorFactory::create();
+            $request = $serverRequestCreator->createServerRequestFromGlobals();
+            $this->diContainer->set(ServerRequestInterface::class, $request);
+            $app->run($request);
         } catch (Exception $e) {
             throw $e;
         }
+    }
+
+    /**
+     * 定义一个对象或者值到容器
+     *
+     * @param string $name Entry name
+     * @param mixed|DefinitionHelper $value Value, use definition helpers to define objects
+     */
+    public function set(string $name, $value): void
+    {
+        $this->getDiContainer()->set($name, $value);
     }
 
     /**
@@ -475,5 +497,18 @@ final class Application
     public function getSlimApp(): App
     {
         return $this->app;
+    }
+
+    /**
+     * 获取容器中的对象
+     *
+     * @param $provider
+     * @return object|null
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function get($provider): ?object
+    {
+        return $this->getDiContainer()->get($provider);
     }
 }

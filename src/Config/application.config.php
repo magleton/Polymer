@@ -16,7 +16,7 @@ return [
             'logger' => [
                 'name' => 'polymer',
                 'level' => Monolog\Logger::DEBUG,
-                'path' => APP_PATH . 'log/error.log',
+                'path' => APP_PATH . 'log/log.log',
             ],
             'tracy' => [
                 'showPhpInfoPanel' => 0,

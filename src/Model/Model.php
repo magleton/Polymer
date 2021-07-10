@@ -8,13 +8,14 @@
 namespace Polymer\Model;
 
 use Doctrine\Common\Cache\Cache;
-use Doctrine\DBAL\Sharding\PoolingShardManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Exception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\ModelInstanceErrorException;
+use Polymer\Providers\BizValidatorProvider;
+use Polymer\Providers\ErrorCollectionProvider;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 
 class Model
@@ -194,13 +195,14 @@ class Model
         if ($rules) {
             $errorData = [];
             try {
-                $validator = $this->application->component('biz_validator');
+                $validator = $this->application->get(BizValidatorProvider::class);
                 $validateResult = $validator->validateObject($this->entityObject, $rules, $groups);
                 if (count($validateResult)) {
                     foreach ($validateResult as $error) {
                         $tmpMappingField = array_flip($this->mappingField);
                         $propertyName = $error->getPropertyPath();
-                        if (isset($tmpMappingField[$propertyName]) && array_key_exists($tmpMappingField[$propertyName], array_merge($this->application->component('request')->getParams(), $this->customerData))) {
+                        if (isset($tmpMappingField[$propertyName]) && array_key_exists($tmpMappingField[$propertyName],
+                                array_merge($this->application->get('request')->getParams(), $this->customerData))) {
                             $propertyName = $tmpMappingField[$propertyName];
                         }
                         $errorData[$propertyName] = $error->getMessage();
@@ -208,7 +210,7 @@ class Model
                     if ($returnErr) {
                         return $errorData;
                     }
-                    $this->application->component('error_collection')->set($this->getProperty('table'), $errorData);
+                    $this->application->get(ErrorCollectionProvider::class)->set($this->getProperty('table'), $errorData);
                     throw new EntityValidateErrorException('数据验证失败!');
                 }
                 return $this->entityObject;
@@ -233,19 +235,6 @@ class Model
         } catch (Exception $e) {
             throw $e;
         }
-    }
-
-    /**
-     * 获取PoolingShardManager实例，用于全局查询
-     *
-     * @return PoolingShardManager|null
-     */
-    protected function sharedManager(): ?PoolingShardManager
-    {
-        if ($this->em) {
-            return new PoolingShardManager($this->em->getConnection());
-        }
-        return null;
     }
 
     /**

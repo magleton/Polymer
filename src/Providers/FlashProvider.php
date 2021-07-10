@@ -26,7 +26,7 @@ class FlashProvider
     {
         $diContainer->set(__CLASS__, static function () use ($diContainer) {
             try {
-                $diContainer->get('application')->component('session');
+                $diContainer->get(SessionProvider::class);
                 return new Messages();
             } catch (InvalidArgumentException | RuntimeException $e) {
                 return null;

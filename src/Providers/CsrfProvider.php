@@ -12,6 +12,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
 use Slim\Csrf\Guard;
+use Tuupola\Http\Factory\ResponseFactory;
 
 class CsrfProvider
 {
@@ -27,8 +28,8 @@ class CsrfProvider
     {
         $diContainer->set(__CLASS__, static function () use ($diContainer) {
             try {
-                $guard = new Guard();
-                $guard->setFailureCallable(function (ServerRequestInterface $request, ResponseInterface $response, $next) {
+                $guard = new Guard(new ResponseFactory());
+                $guard->setFailureHandler(function (ServerRequestInterface $request, ResponseInterface $response, $next) {
                     $request = $request->withAttribute('csrf_status', false);
                     return $next($request, $response);
                 });

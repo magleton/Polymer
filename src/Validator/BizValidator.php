@@ -117,8 +117,7 @@ class BizValidator
     {
         $class = '';
         if (class_exists('\\Symfony\\Component\\Validator\\Constraints\\' . $cls)) {
-            $class = '\\Symfony\\Component\\Validator\\Constraints\\' . $cls;
-            return $class;
+            return '\\Symfony\\Component\\Validator\\Constraints\\' . $cls;
         }
 
         if (class_exists(APP_NAME . '\\Constraints\\' . $cls)) {
@@ -126,8 +125,7 @@ class BizValidator
         }
 
         if (class_exists('Polymer\\Constraints\\' . $cls)) {
-            $class = 'Polymer\\Constraints\\' . $cls;
-            return $class;
+            return 'Polymer\\Constraints\\' . $cls;
         }
         return $class;
     }

@@ -14,7 +14,7 @@ abstract class Presenter
      *
      * @var Object
      */
-    protected $entity;
+    protected object $entity;
 
     /**
      * 构造函数.
@@ -34,9 +34,9 @@ abstract class Presenter
      * @return mixed
      * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
      */
-    public function __get($property)
+    public function __get(string $property)
     {
-        $method = 'get' . ucfirst(str_replace(' ', '', lcfirst(ucwords(str_replace('_', ' ', $property)))));
+        $method = 'get' . ucfirst(str_replace(' ', '', lcfirst(str_replace('_', ' ', $property))));
         if (method_exists($this->entity, $method)) {
             return $this->entity->{$method}();
         }
@@ -51,7 +51,7 @@ abstract class Presenter
      * @return void
      * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
      */
-    public function __set($name, $value)
+    public function __set(string $name, $value)
     {
         // TODO: Implement __set() method.
     }
@@ -63,7 +63,7 @@ abstract class Presenter
      * @return bool
      * @link http://php.net/manual/en/language.oop5.overloading.php#language.oop5.overloading.members
      */
-    public function __isset($name)
+    public function __isset(string $name)
     {
         // TODO: Implement __isset() method.
     }

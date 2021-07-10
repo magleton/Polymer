@@ -9,11 +9,13 @@
 
 namespace Polymer\Controller;
 
+use DI\Annotation\Inject;
 use DI\Container;
 use JsonException;
 use Polymer\Boot\Application;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 class Controller
 {
@@ -35,6 +37,12 @@ class Controller
      * @var Container
      */
     protected Container $diContainer;
+
+    /**
+     * @Inject
+     * @var ServerRequestInterface
+     */
+    protected ServerRequestInterface $request;
 
     /**
      * 获取Application

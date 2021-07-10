@@ -7,6 +7,7 @@
 
 namespace Polymer\Providers;
 
+use DI\Bridge\Slim\Bridge;
 use DI\Container;
 use http\Message\Body;
 use InvalidArgumentException;
@@ -75,15 +76,14 @@ class InitApplicationProvider
             };
         });
 
-        $diContainer->set('phpErrorHandler', static function (Container $container) {
-            return $container['errorHandler'];
+        $diContainer->set('phpErrorHandler', static function () use ($diContainer) {
+            return $diContainer->get(ErrorCollectionProvider::class);
         });
 
-        $diContainer->set('errorHandler', static function (Container $container) {
-            return static function (ServerRequestInterface $request, ResponseInterface $response, $exception) use ($container) {
-                $container->register(new LoggerProvider());
-                $container['logger']->error($exception->__toString());
-                if ($container['application']->config('app.is_rest', false)) {
+        $diContainer->set('errorHandler', static function () use ($diContainer) {
+            return static function (ServerRequestInterface $request, ResponseInterface $response, $exception) use ($diContainer) {
+                $diContainer->get(LoggerProvider::class)->error($exception->__toString());
+                if ($diContainer->get('application')->config('app.is_rest', false)) {
                     $response
                         ->withStatus(500)
                         ->withHeader('Content-Type', 'application/json')
@@ -119,8 +119,9 @@ class InitApplicationProvider
             };
         });
 
-        $diContainer->set(App::class, static function (Container $pimpleContainer) {
-            return AppFactory::createFromContainer($pimpleContainer);
+        $diContainer->set(App::class, static function () use ($diContainer) {
+            return AppFactory::createFromContainer($diContainer);
+            //return Bridge::create($diContainer);
         });
     }
 }

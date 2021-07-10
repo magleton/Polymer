@@ -7,6 +7,7 @@
 
 namespace Polymer\Middleware;
 
+use Closure;
 use Exception;
 use Polymer\Utils\Constants;
 use Psr\Http\Message\ResponseInterface;
@@ -14,10 +15,30 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class IpFilterMiddleware
 {
+    /**
+     * @var array
+     */
     protected array $addresses = [];
+
+    /**
+     * @var int|null
+     */
     protected ?int $mode = null;
-    protected $allowed = null;
-    protected $handler = null;
+
+    /**
+     * @var bool
+     */
+    protected boolean $allowed;
+
+    /**
+     * @var Closure|null
+     */
+    protected ?Closure $handler = null;
+
+    /**
+     * @var array
+     */
+    protected array $patterns = [];
 
     /**
      * IpFilterMiddleware constructor.
@@ -36,7 +57,7 @@ class IpFilterMiddleware
         }
         $this->patterns = $addresses;
         $this->mode = $mode;
-        $this->handler = function (ServerRequestInterface $request, ResponseInterface $response) {
+        $this->handler = static function (ServerRequestInterface $request, ResponseInterface $response) {
             try {
                 $response = $response->withStatus(403);
                 $response->getBody()->write(' 403 Forbidden');
@@ -54,7 +75,7 @@ class IpFilterMiddleware
      * @param $end
      * @return $this
      */
-    public function addIpRange($start, $end)
+    public function addIpRange($start, $end): IpFilterMiddleware
     {
         foreach (range(ip2long($start), ip2long($end)) as $address) {
             $this->addresses[] = $address;
@@ -75,12 +96,12 @@ class IpFilterMiddleware
     }
 
     /**
-     * @param Request $request
-     * @param Response $response
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
      * @param $next
-     * @return mixed|Response
+     * @return mixed|ResponseInterface
      */
-    public function __invoke(Request $request, Response $response, $next)
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, $next)
     {
         if ($this->mode === Constants::ALLOW) {
             $this->allowed = $this->allow($request);
@@ -92,19 +113,18 @@ class IpFilterMiddleware
             $handler = $this->handler;
             return $handler($request, $response);
         }
-        $response = $next($request, $response);
-        return $response;
+        return $next($request, $response);
     }
 
     /**
      * 允许访问的请求
      *
-     * @param Request $request
+     * @param ServerRequestInterface $request
      * @return bool
      */
-    public function allow(Request $request)
+    public function allow(ServerRequestInterface $request): bool
     {
-        $clientAddress = ip2long($request->getServerParam('REMOTE_ADDR'));
+        $clientAddress = ip2long($request->getHeader('REMOTE_ADDR')[0]);
         if (in_array($clientAddress, $this->addresses, true)) {
             return true;
         }
@@ -114,12 +134,12 @@ class IpFilterMiddleware
     /**
      * 拒绝访问的请求
      *
-     * @param Request $request
+     * @param ServerRequestInterface $request
      * @return bool
      */
-    public function deny(Request $request)
+    public function deny(ServerRequestInterface $request): bool
     {
-        $clientAddress = ip2long($request->getServerParam('REMOTE_ADDR'));
+        $clientAddress = ip2long($request->getHeader('REMOTE_ADDR')[0]);
         if (in_array($clientAddress, $this->addresses, true)) {
             return false;
         }
@@ -131,7 +151,7 @@ class IpFilterMiddleware
      *
      * @param $handler
      */
-    public function setHandler($handler)
+    public function setHandler($handler): void
     {
         $this->handler = $handler;
     }
