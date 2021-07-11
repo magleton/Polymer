@@ -14,6 +14,7 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\DoctrineAdapter;
 use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Validator\RecursiveValidator;
 
 class ValidatorProvider
 {
@@ -27,7 +28,7 @@ class ValidatorProvider
      */
     public function register(Container $diContainer): void
     {
-        $diContainer->set(__CLASS__, static function () use ($diContainer) {
+        $diContainer->set(RecursiveValidator::class, static function () use ($diContainer): ?RecursiveValidator {
             try {
                 $reader = new AnnotationReader();
                 AnnotationReader::addGlobalIgnoredName('dummy');

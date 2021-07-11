@@ -11,10 +11,9 @@ use DI\Annotation\Inject;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
-use Exception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\FieldValidateErrorException;
-use Polymer\Providers\ValidatorProvider;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Exception\NoSuchMetadataException;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 
@@ -29,28 +28,16 @@ class BizValidator
 
     /**
      * @Inject
-     * @var Container
+     * @var ?Container
      */
-    protected Container $diContainer;
+    protected ?Container $diContainer = null;
 
     /**
      * 验证组件
      * @Inject
-     * @var RecursiveValidator
+     * @var ?RecursiveValidator
      */
-    protected RecursiveValidator $validator;
-
-    /**
-     * Validator constructor.
-     *
-     * @throws Exception
-     */
-    public function __construct(Container $diContainer)
-    {
-        $this->diContainer = $diContainer;
-        $this->application = $diContainer->get(Application::class);
-        $this->validator = $diContainer->get(ValidatorProvider::class);
-    }
+    protected ?RecursiveValidator $validator = null;
 
     /**
      * 根据自定义的规则验证数据字段
@@ -136,9 +123,9 @@ class BizValidator
      * @param Object $validateObject 要验证的对象
      * @param array $rules 验证规则
      * @param array|null $groups 验证组
-     * @return boolean
+     * @return ConstraintViolationListInterface
      */
-    public function validateObject(object $validateObject, array $rules = [], array $groups = null): bool
+    public function validateObject(object $validateObject, array $rules = [], array $groups = null): ConstraintViolationListInterface
     {
         try {
             $classMetadata = $this->validator->getMetadataFor($validateObject);

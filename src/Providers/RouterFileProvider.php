@@ -32,14 +32,15 @@ class RouterFileProvider
 
                 $routerContents = '<?php' . "\n";
                 $routerContents .= 'use Polymer\Boot\Application;' . "\n";
-                $routerContents .= '$app = Application::getInstance()->component("app");';
+                $routerContents .= 'use Slim\App;' . "\n";
+                $routerContents .= '$app = Application::getInstance()->getDiContainer()->get(App::class);';
                 if ($diContainer->get('application')->config('middleware')) {
                     foreach ($diContainer->get('application')->config('middleware') as $key => $middleware) {
                         if (function_exists($middleware) && is_callable($middleware)) {
                             $routerContents .= "\n" . '$app->add("' . $middleware . '");';
-                        } elseif ($diContainer->get('application')->component($middleware)) {
+                        } elseif ($diContainer->get('application')->get($middleware)) {
                             $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $middleware . '"));';
-                        } elseif ($diContainer->get('application')->component($key)) {
+                        } elseif ($diContainer->get('application')->get($key)) {
                             $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $key . '"));';
                         } elseif (class_exists($middleware)) {
                             $routerContents .= "\n" . '$app->add("' . $middleware . '");';

@@ -15,7 +15,7 @@ class BizValidatorProvider
     public function register(Container $diContainer): void
     {
         $diContainer->set(__CLASS__, static function () use ($diContainer) {
-            return new BizValidator($diContainer);
+            return new BizValidator();
         });
     }
 }

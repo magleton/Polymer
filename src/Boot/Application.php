@@ -354,9 +354,9 @@ final class Application
      *
      * @param $entityName
      * @param string|null $entityNamespace 实体的命名空间
-     * @return bool|null
+     * @return Object|null
      */
-    public function entity($entityName, string $entityNamespace = null): ?bool
+    public function entity($entityName, string $entityNamespace = null): ?Object
     {
         try {
             $entityNamespace = $entityNamespace ?: 'Entity\\Models';

@@ -7,6 +7,8 @@
 
 namespace Polymer\Model;
 
+use DI\Annotation\Inject;
+use DI\Container;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
@@ -14,8 +16,9 @@ use Exception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\ModelInstanceErrorException;
-use Polymer\Providers\BizValidatorProvider;
-use Polymer\Providers\ErrorCollectionProvider;
+use Polymer\Support\Collection;
+use Polymer\Validator\BizValidator;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 
 class Model
@@ -30,9 +33,21 @@ class Model
     /**
      * 验证组件
      *
-     * @var RecursiveValidator|null
+     * @var ?RecursiveValidator
      */
     protected ?RecursiveValidator $validator = null;
+
+    /**
+     * 自定义
+     *
+     * @var ?BizValidator
+     */
+    protected ?BizValidator $bizValidator = null;
+
+    /**
+     * @var Container|null
+     */
+    protected ?Container $diContainer;
 
     /**
      * 要验证的实体对象
@@ -71,19 +86,27 @@ class Model
 
     /**
      * 模型构造函数
-     * @param array $params
+     *
+     * @param Application $application
+     * @param RecursiveValidator $validator
+     * @param BizValidator $bizValidator
+     * @param Container $diContainer
      * @throws ModelInstanceErrorException
+     * @Inject("application")
      */
-    public function __construct(array $params = [])
+    public function __construct(Application $application, RecursiveValidator $validator, BizValidator $bizValidator, Container $diContainer)
     {
+        $this->application = $application;
+        $this->validator = $validator;
+        $this->diContainer = $diContainer;
+        $this->bizValidator = $bizValidator;
         try {
-            $this->application = app();
             $schema = $params['schema'] ?? $this->getProperty('schema');
             if ($schema) {
-                $cache = $this->getProperty('cache') ?: null;
+                $cache = new ArrayAdapter();
                 $this->em = $this->application->db($schema);
                 if ($cache instanceof Cache) {
-                    $this->em->getConfiguration()->setMetadataCacheImpl($cache);
+                    $this->em->getConfiguration()->setMetadataCache($cache);
                     $this->em->getConfiguration()->setQueryCacheImpl($cache);
                     $this->em->getConfiguration()->setResultCacheImpl($cache);
                 }
@@ -119,7 +142,7 @@ class Model
             $this->entityObject = $this->obtainEObj($criteria);
             $this->customerData = $data;
             foreach ($this->mergeParams($data) as $k => $v) {
-                $setMethod = 'set' . Application::getInstance()->getInflector()->classify($k);
+                $setMethod = 'set' . $this->application->getInflector()->classify($k);
                 if (method_exists($this->entityObject, $setMethod)) {
                     $this->entityObject->$setMethod($v);
                 }
@@ -168,7 +191,6 @@ class Model
     {
         $excludeField = $this->getProperty('excludeField');
         $mappingField = $this->getProperty('mappingField');
-        $data = array_merge($this->application->component('request')->getParams(), $data);
         $excludeField && $data = array_diff_key($data, array_flip($excludeField));
         if ($mappingField) {
             $combineData = [];
@@ -187,7 +209,7 @@ class Model
      * @param array|null $groups 验证组
      * @param bool $returnErr 是否返回错误信息
      * @return array|object|null
-     * @throws EntityValidateErrorException
+     * @throws Exception
      */
     protected function validate(array $rules = [], array $groups = null, bool $returnErr = false)
     {
@@ -195,14 +217,12 @@ class Model
         if ($rules) {
             $errorData = [];
             try {
-                $validator = $this->application->get(BizValidatorProvider::class);
-                $validateResult = $validator->validateObject($this->entityObject, $rules, $groups);
+                $validateResult = $this->bizValidator->validateObject($this->entityObject, $rules, $groups);
                 if (count($validateResult)) {
                     foreach ($validateResult as $error) {
                         $tmpMappingField = array_flip($this->mappingField);
                         $propertyName = $error->getPropertyPath();
-                        if (isset($tmpMappingField[$propertyName]) && array_key_exists($tmpMappingField[$propertyName],
-                                array_merge($this->application->get('request')->getParams(), $this->customerData))) {
+                        if (isset($tmpMappingField[$propertyName]) && array_key_exists($tmpMappingField[$propertyName], $this->customerData)) {
                             $propertyName = $tmpMappingField[$propertyName];
                         }
                         $errorData[$propertyName] = $error->getMessage();
@@ -210,7 +230,7 @@ class Model
                     if ($returnErr) {
                         return $errorData;
                     }
-                    $this->application->get(ErrorCollectionProvider::class)->set($this->getProperty('table'), $errorData);
+                    $this->application->get(Collection::class)->set($this->getProperty('table'), $errorData);
                     throw new EntityValidateErrorException('数据验证失败!');
                 }
                 return $this->entityObject;
