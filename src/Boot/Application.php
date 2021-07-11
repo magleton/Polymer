@@ -389,7 +389,10 @@ final class Application
         $repositoryNamespace = $repositoryNamespace ?: APP_NAME . '\\Entity\\Repositories';
         $repositoryClassName = $repositoryNamespace . '\\' . $this->getInflector()->classify($entityName) . 'Repository';
         try {
-            $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));
+            $current = current(array_keys($this->config('db.' . APPLICATION_ENV)));
+            if ($dbName === '' || $dbName === null) {
+                $dbName = $current;
+            }
             $key = str_replace('\\', '', $repositoryClassName);
             if (!$this->diContainer->has($key) && class_exists($repositoryClassName)) {
                 $this->diContainer->set($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . $this->getInflector()->classify($entityName)));
@@ -434,7 +437,10 @@ final class Application
     public function db(string $dbName = '', string $entityFolder = null): EntityManager
     {
         try {
-            $dbName = $dbName ?: current(array_keys($this->config('db.' . APPLICATION_ENV)));
+            $current = current(array_keys($this->config('db.' . APPLICATION_ENV)));
+            if ($dbName === '' || $dbName === null) {
+                $dbName = $current;
+            }
             $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DS], ['', ''], APP_PATH)) . '.' . $dbName;
             if ($this->config('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->diContainer->has($cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . DS . 'entity' . DS . 'Models';
