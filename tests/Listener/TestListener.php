@@ -8,7 +8,7 @@
 
 namespace Polymer\Tests\Listener;
 
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 
 class TestListener
 {
@@ -33,7 +33,7 @@ class TestListener
      */
     public function prePersist(LifecycleEventArgs $args)
     {
-        $args->getObject()->setAddress('kkkllll');
+        $args->getObject()->setLastLoginAt(344444);
     }
 
     /**

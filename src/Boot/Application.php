@@ -9,6 +9,7 @@ namespace Polymer\Boot;
 
 use Composer\Autoload\ClassLoader;
 use DI\Annotation\Inject;
+use DI\Annotation\Injectable;
 use DI\Container;
 use DI\ContainerBuilder;
 use DI\Definition\Helper\DefinitionHelper;
@@ -41,6 +42,11 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\DoctrineProvider;
 use Throwable;
 
+/**
+ * Class Application
+ * @Injectable
+ * @package Polymer\Boot
+ */
 final class Application
 {
     /**
@@ -356,7 +362,7 @@ final class Application
      * @param string|null $entityNamespace 实体的命名空间
      * @return Object|null
      */
-    public function entity($entityName, string $entityNamespace = null): ?Object
+    public function entity($entityName, string $entityNamespace = null): ?object
     {
         try {
             $entityNamespace = $entityNamespace ?: 'Entity\\Models';

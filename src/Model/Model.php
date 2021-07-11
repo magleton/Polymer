@@ -26,28 +26,28 @@ class Model
     /**
      * 应用APP
      *
-     * @var Application|null
+     * @var Application
      */
-    protected ?Application $application = null;
+    protected Application $application;
 
     /**
      * 验证组件
      *
-     * @var ?RecursiveValidator
+     * @var RecursiveValidator
      */
-    protected ?RecursiveValidator $validator = null;
+    protected RecursiveValidator $validator;
 
     /**
      * 自定义
      *
-     * @var ?BizValidator
+     * @var BizValidator
      */
-    protected ?BizValidator $bizValidator = null;
+    protected BizValidator $bizValidator;
 
     /**
-     * @var Container|null
+     * @var Container
      */
-    protected ?Container $diContainer;
+    protected Container $diContainer;
 
     /**
      * 要验证的实体对象
@@ -98,8 +98,8 @@ class Model
     {
         $this->application = $application;
         $this->validator = $validator;
-        $this->diContainer = $diContainer;
         $this->bizValidator = $bizValidator;
+        $this->diContainer = $diContainer;
         try {
             $schema = $params['schema'] ?? $this->getProperty('schema');
             if ($schema) {
