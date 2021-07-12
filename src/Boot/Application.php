@@ -130,7 +130,6 @@ final class Application
             $initAppClass = file_exists($initAppFile) ? APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider' : InitApplicationProvider::class;
             $this->diContainer->set('application', $this);
             $this->register($initAppClass);
-            $this->register(RouterFileProvider::class);
             $this->register(EventManagerProvider::class);
             $this->register(ValidatorProvider::class);
             $this->register(LoggerProvider::class);
@@ -220,6 +219,7 @@ final class Application
     public function run(): void
     {
         try {
+            $this->register(RouterFileProvider::class);
             $this->diContainer->get(RouterFileProvider::class);
             $app = $this->diContainer->get(App::class);
             $serverRequestCreator = ServerRequestCreatorFactory::create();
@@ -395,6 +395,7 @@ final class Application
             }
             $key = str_replace('\\', '', $repositoryClassName);
             if (!$this->diContainer->has($key) && class_exists($repositoryClassName)) {
+                $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Models' ?: ROOT_PATH . DS . 'entity' . DS . 'Models';
                 $this->diContainer->set($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . $this->getInflector()->classify($entityName)));
             }
             return $this->diContainer->get($key);
@@ -443,7 +444,7 @@ final class Application
             }
             $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DS], ['', ''], APP_PATH)) . '.' . $dbName;
             if ($this->config('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->diContainer->has($cacheKey)) {
-                $entityFolder = $entityFolder ?: ROOT_PATH . DS . 'entity' . DS . 'Models';
+                $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Models' ?: ROOT_PATH . DS . 'entity' . DS . 'Models';
                 $cache = APPLICATION_ENV === 'development' ? null : new DoctrineProvider(new ArrayAdapter());
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
