@@ -87,7 +87,7 @@ return [
     'aop' => [
         'init' => [
             'debug' => true,
-            'cacheDir' => APP_PATH . '/log/aop/',
+            'cacheDir' => APP_PATH . 'log/aop/',
             'excludePaths' => [
                 ROOT_PATH . '/vendor/',
             ],

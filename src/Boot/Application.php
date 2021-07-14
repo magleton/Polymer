@@ -256,10 +256,12 @@ final class Application
      */
     public function runConsole(): void
     {
-        echo 'adas~~';
         try {
-            self::setInstance($this);
-            $this->init();
+            $app = $this->diContainer->get(App::class);
+            $serverRequestCreator = ServerRequestCreatorFactory::create();
+            $request = $serverRequestCreator->createServerRequestFromGlobals();
+            $this->diContainer->set(ServerRequestInterface::class, $request);
+            $app->run($request);
         } catch (Exception $e) {
             throw $e;
         }

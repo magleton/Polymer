@@ -15,16 +15,17 @@ use Symfony\Component\Console\Helper\QuestionHelper;
 try {
     date_default_timezone_set('Asia/Shanghai');
     defined('APPLICATION_ENV') || define('APPLICATION_ENV', 'development');
+    defined('DS') || define('DS', DIRECTORY_SEPARATOR);
     defined('ROOT_PATH') || define('ROOT_PATH', __DIR__);
     defined('APP_NAME') || define('APP_NAME', 'tests');
-    defined('APP_PATH') || define('APP_PATH', ROOT_PATH . '/' . APP_NAME . '/');
+    defined('APP_PATH') || define('APP_PATH', ROOT_PATH . DS . 'app' . DS . APP_NAME . DS);
     require ROOT_PATH . '/vendor/autoload.php';
     $app = new \Polymer\Boot\Application();
     try {
         $app->runConsole();
     } catch (Exception $e) {
     }
-    $em = app()->db('db1', APP_PATH . '/Entity/Models');
+    $em = \Polymer\Boot\Application::getInstance()->db('db1', APP_PATH . '/Entity/Models');
     $helperSet = new HelperSet(array(
         'em' => new EntityManagerHelper($em),
         'db' => new Doctrine\DBAL\Tools\Console\ConnectionProvider\SingleConnectionProvider($em->getConnection()),
