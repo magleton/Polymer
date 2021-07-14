@@ -8,14 +8,14 @@
 namespace Polymer\Providers;
 
 use DI\Container;
-use Polymer\Validator\BizValidator;
+use Polymer\Validator\GXValidator;
 
-class BizValidatorProvider
+class GXValidatorProvider
 {
     public function register(Container $diContainer): void
     {
         $diContainer->set(__CLASS__, static function () use ($diContainer) {
-            return new BizValidator();
+            return new GXValidator();
         });
     }
 }

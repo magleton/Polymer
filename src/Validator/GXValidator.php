@@ -17,7 +17,7 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Exception\NoSuchMetadataException;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 
-class BizValidator
+class GXValidator
 {
     /**
      * 应用APP

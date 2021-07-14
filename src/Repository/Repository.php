@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping;
 use Exception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\PresenterException;
-use Polymer\Providers\BizValidatorProvider;
+use Polymer\Providers\GXValidatorProvider;
 
 class Repository extends EntityRepository
 {
@@ -79,7 +79,7 @@ class Repository extends EntityRepository
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
-            $this->diContainer->get(BizValidatorProvider::class)->validateField($data, $rules, $groups, $key);
+            $this->diContainer->get(GXValidatorProvider::class)->validateField($data, $rules, $groups, $key);
         } catch (Exception $e) {
             throw $e;
         }

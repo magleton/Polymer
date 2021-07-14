@@ -17,7 +17,7 @@ use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\ModelInstanceErrorException;
 use Polymer\Support\Collection;
-use Polymer\Validator\BizValidator;
+use Polymer\Validator\GXValidator;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 
@@ -40,9 +40,9 @@ class Model
     /**
      * 自定义
      *
-     * @var BizValidator
+     * @var GXValidator
      */
-    protected BizValidator $bizValidator;
+    protected GXValidator $bizValidator;
 
     /**
      * @var Container
@@ -89,12 +89,12 @@ class Model
      *
      * @param Application $application
      * @param RecursiveValidator $validator
-     * @param BizValidator $bizValidator
+     * @param GXValidator $bizValidator
      * @param Container $diContainer
      * @throws ModelInstanceErrorException
      * @Inject("application")
      */
-    public function __construct(Application $application, RecursiveValidator $validator, BizValidator $bizValidator, Container $diContainer)
+    public function __construct(Application $application, RecursiveValidator $validator, GXValidator $bizValidator, Container $diContainer)
     {
         $this->application = $application;
         $this->validator = $validator;
