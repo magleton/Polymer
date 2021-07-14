@@ -51,7 +51,6 @@ return [
         return $app;
     },
     Logger::class => static function (ContainerInterface $container) {
-        echo 'AAAAA~';
         $settings = $container->get(Application::class)->getConfig('slim.settings');
         $logger = new Logger($settings['logger']['name']);
         $logger->pushProcessor(new UidProcessor());

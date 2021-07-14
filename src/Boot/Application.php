@@ -15,7 +15,6 @@ use DI\Definition\Helper\DefinitionHelper;
 use DI\Definition\Source\DefinitionArray;
 use DI\DependencyException;
 use DI\NotFoundException;
-use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\NoopWordInflector;
@@ -75,13 +74,6 @@ final class Application
     private Config $config;
 
     /**
-     * 配置文件缓存
-     *
-     * @var Cache
-     */
-    private Cache $configCache;
-
-    /**
      * @Inject
      * @var ClassLoader
      */
@@ -93,11 +85,8 @@ final class Application
      */
     public function __construct()
     {
-        echo 'AAAA!~~~';
         self::setInstance($this);
         $this->init();
-        $this->configCache = new DoctrineProvider(new ArrayAdapter(3600));
-
         $this->initAOP();
     }
 
@@ -200,6 +189,27 @@ final class Application
     }
 
     /**
+     * 获取容器中的对象
+     *
+     * @param $provider
+     * @return object|null
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function get($provider): ?object
+    {
+        return $this->getDiContainer()->get($provider);
+    }
+
+    /**
+     * @return Container
+     */
+    public function getDiContainer(): Container
+    {
+        return $this->diContainer;
+    }
+
+    /**
      * @return ClassLoader
      */
     public function getClassLoader(): ClassLoader
@@ -236,14 +246,6 @@ final class Application
     public function set(string $name, $value): void
     {
         $this->getDiContainer()->set($name, $value);
-    }
-
-    /**
-     * @return Container
-     */
-    public function getDiContainer(): Container
-    {
-        return $this->diContainer;
     }
 
     /**
@@ -485,18 +487,5 @@ final class Application
     public function getSlimApp(): App
     {
         return $this->app;
-    }
-
-    /**
-     * 获取容器中的对象
-     *
-     * @param $provider
-     * @return object|null
-     * @throws DependencyException
-     * @throws NotFoundException
-     */
-    public function get($provider): ?object
-    {
-        return $this->getDiContainer()->get($provider);
     }
 }
