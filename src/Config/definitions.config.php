@@ -8,15 +8,23 @@ use Monolog\Processor\UidProcessor;
 use Polymer\Boot\Application;
 use Polymer\Middleware\GXCORSMiddleware;
 use Polymer\Middleware\GXCsrfMiddleware;
+use Polymer\Middleware\GXTwigMiddleware;
 use Polymer\Providers\RouterFileProvider;
+use Polymer\Providers\SessionProvider;
+use Polymer\Providers\ViewProvider;
 use Polymer\Support\Collection;
 use Polymer\Validator\GXValidator;
 use Psr\Container\ContainerInterface;
 use Slim\App;
 use Slim\Factory\AppFactory;
+use Slim\Views\TwigMiddleware;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\Adapter\DoctrineAdapter;
 use Symfony\Component\Cache\DoctrineProvider;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 use Tuupola\Middleware\CorsMiddleware;
@@ -29,25 +37,21 @@ return [
     'errorCollection' => DI\create(Collection::class),
     EventManager::class => DI\create(EventManager::class),
     RecursiveValidator::class => static function (ContainerInterface $container) {
-        /**
-         * $reader = new AnnotationReader();
-         * AnnotationReader::addGlobalIgnoredName('dummy');
-         * if (extension_loaded('apcu')) {
-         * $cache = new ApcuCache();
-         * } else {
-         * $cache = new ArrayCache();
-         * }
-         * return Validation::createValidatorBuilder()->setMappingCache(new DoctrineAdapter($cache))->enableAnnotationMapping($reader)->getValidator();
-         */
         $reader = new AnnotationReader();
         AnnotationReader::addGlobalIgnoredName('dummy');
         $cache = new DoctrineProvider(new ArrayAdapter());
         return Validation::createValidatorBuilder()->setMappingCache(new DoctrineAdapter($cache))->enableAnnotationMapping($reader)->getValidator();
     },
     App::class => static function (ContainerInterface $container) {
-        return AppFactory::createFromContainer($container);
+        $app = AppFactory::createFromContainer($container);
+        $app->addRoutingMiddleware();
+        $app->addErrorMiddleware(true, true, true);
+        $routeCollector = $app->getRouteCollector();
+        //$routeCollector->setCacheFile();
+        return $app;
     },
     Logger::class => static function (ContainerInterface $container) {
+        echo 'AAAAA~';
         $settings = $container->get(Application::class)->getConfig('slim.settings');
         $logger = new Logger($settings['logger']['name']);
         $logger->pushProcessor(new UidProcessor());
@@ -63,5 +67,22 @@ return [
     'csrf' => DI\factory(function (ContainerInterface $c) {
         $middleware = new GXCsrfMiddleware();
         return $middleware->create($c);
+    }),
+    Serializer::class => DI\factory(static function (ContainerInterface $container) {
+        $encoders = array(new XmlEncoder(), new JsonEncoder());
+        $normalizers = array(new ObjectNormalizer());
+        return new Serializer($normalizers, $encoders);
+    }),
+    SessionProvider::class => DI\factory(function (ContainerInterface $container) {
+        $sessionProvider = new SessionProvider();
+        return $sessionProvider->create($container);
+    }),
+    ViewProvider::class => DI\factory(static function (ContainerInterface $container) {
+        $viewProvider = new ViewProvider();
+        return $viewProvider->create($container);
+    }),
+    TwigMiddleware::class => DI\factory(static function (ContainerInterface $container) {
+        $middleware = new GXTwigMiddleware();
+        return $middleware->create($container);
     }),
 ];

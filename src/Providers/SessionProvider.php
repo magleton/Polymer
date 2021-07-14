@@ -20,19 +20,17 @@ class SessionProvider
      *
      * @param Container $diContainer A container instance
      */
-    public function register(Container $diContainer): void
+    public function create(Container $diContainer): ?Session
     {
-        $diContainer->set(__CLASS__, static function () use ($diContainer) {
-            ini_set('session.save_handler', 'files');
-            $sessionHandler = $diContainer->get('application')->config('session_handler.cls');
-            if (class_exists($sessionHandler)) {
-                $handler = new $sessionHandler($diContainer->get('application')->config('session_handler.params'));
-                session_set_save_handler($handler, true);
-                $session = new Session();
-                $session->start();
-                return $session;
-            }
-            return null;
-        });
+        ini_set('session.save_handler', 'files');
+        $sessionHandler = $diContainer->get('application')->config('session_handler.cls');
+        if (class_exists($sessionHandler)) {
+            $handler = new $sessionHandler($diContainer->get('application')->config('session_handler.params'));
+            session_set_save_handler($handler, true);
+            $session = new Session();
+            $session->start();
+            return $session;
+        }
+        return null;
     }
 }
