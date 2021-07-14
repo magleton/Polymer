@@ -282,7 +282,7 @@ final class Application
     private function addEventOrSubscribe(array $params, int $listener)
     {
         $methods = ['addEventSubscriber', 'addEventListener'];
-        $this->eventManager = Application::getInstance()->get(EventManager::class);
+        $this->eventManager = self::getInstance()->get(EventManager::class);
         foreach ($params as $key => $value) {
             if (!isset($value['class_name'])) {
                 throw new InvalidArgumentException('class_name必须设置');

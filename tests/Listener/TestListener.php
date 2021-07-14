@@ -33,7 +33,8 @@ class TestListener
      */
     public function prePersist(LifecycleEventArgs $args)
     {
-        $args->getObject()->setLastLoginAt(344444);
+        echo '持久化之前';
+        //$args->getObject()->setLastLoginAt(344444);
     }
 
     /**
