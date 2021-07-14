@@ -54,7 +54,7 @@ class Repository extends EntityRepository
     public function __construct(EntityManager $em, Mapping\ClassMetadata $class)
     {
         parent::__construct($em, $class);
-        $this->application = app();
+        $this->application = Application::getInstance();
     }
 
     /**

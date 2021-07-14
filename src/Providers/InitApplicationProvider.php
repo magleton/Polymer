@@ -7,7 +7,6 @@
 
 namespace Polymer\Providers;
 
-use DI\Bridge\Slim\Bridge;
 use DI\Container;
 use http\Message\Body;
 use InvalidArgumentException;

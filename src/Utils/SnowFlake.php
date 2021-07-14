@@ -55,7 +55,7 @@ class SnowFlake extends AbstractIdGenerator
         /**
          * Subtract custom epoch from current time
          */
-        $curr_timestamp -= app()->config('app.initial_epoch', $this->initialEpoch);
+        $curr_timestamp -= app()->getConfig('app.initial_epoch', $this->initialEpoch);
         /**
          * Create a initial base for ID
          */
@@ -127,7 +127,7 @@ class SnowFlake extends AbstractIdGenerator
      */
     public function getTimeFromID($id)
     {
-        $initialEpoch = app()->config('app.initial_epoch', $this->initialEpoch);
+        $initialEpoch = app()->getConfig('app.initial_epoch', $this->initialEpoch);
         return bindec(substr(decbin($id), 0, 41)) - pow(2, 40) + 1 + $initialEpoch;
     }
 }

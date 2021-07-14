@@ -7,65 +7,64 @@
 
 namespace Polymer\Providers;
 
-use DI\Container;
+use DI\Annotation\Inject;
 use Exception;
+use Noodlehaus\Exception\EmptyDirectoryException;
+use Polymer\Boot\Application;
+use Psr\Container\ContainerInterface;
 
 class RouterFileProvider
 {
     /**
-     * Registers services on the given container.
-     *
-     * This method should only be used to configure services and parameters.
-     * It should not get services.
-     *
-     * @param Container $diContainer A container instance
+     * @Inject
+     * RouterFileProvider constructor.
+     * @param ContainerInterface $container
+     * @throws EmptyDirectoryException
      */
-    public function register(Container $diContainer): void
+    public function __construct(ContainerInterface $container)
     {
-        $diContainer->set(__CLASS__, static function () use ($diContainer) {
-            $routerFilePath = $diContainer->get('application')->config('app.router_path.router',
-                $diContainer->get('application')->config('router_path.router'));
-            if (routeGeneration()) {
-                if (file_exists($diContainer->get('application')->config('slim.settings.routerCacheFile'))) {
-                    @unlink($diContainer->get('application')->config('slim.settings.routerCacheFile'));
-                }
+        $routerFilePath = $container->get(Application::class)->getConfig('app.router_path.router',
+            $container->get(Application::class)->getConfig('router_path.router'));
+        if (routeGeneration()) {
+            if (file_exists($container->get(Application::class)->getConfig('slim.settings.routerCacheFile'))) {
+                @unlink($container->get(Application::class)->getConfig('slim.settings.routerCacheFile'));
+            }
 
-                $routerContents = '<?php' . "\n";
-                $routerContents .= 'use Polymer\Boot\Application;' . "\n";
-                $routerContents .= 'use Slim\App;' . "\n";
-                $routerContents .= '$app = Application::getInstance()->getDiContainer()->get(App::class);';
-                if ($diContainer->get('application')->config('middleware')) {
-                    foreach ($diContainer->get('application')->config('middleware') as $key => $middleware) {
-                        if (function_exists($middleware) && is_callable($middleware)) {
-                            $routerContents .= "\n" . '$app->add("' . $middleware . '");';
-                        } elseif ($diContainer->get('application')->get($middleware)) {
-                            $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $middleware . '"));';
-                        } elseif ($diContainer->get('application')->get($key)) {
-                            $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $key . '"));';
-                        } elseif (class_exists($middleware)) {
-                            $routerContents .= "\n" . '$app->add("' . $middleware . '");';
-                        }
+            $routerContents = '<?php' . "\n";
+            $routerContents .= 'use Polymer\Boot\Application;' . "\n";
+            $routerContents .= 'use Slim\App;' . "\n";
+            $routerContents .= '$app = Application::getInstance()->getDiContainer()->get(App::class);';
+            if ($container->get(Application::class)->getConfig('middleware')) {
+                foreach ($container->get(Application::class)->getConfig('middleware') as $key => $middleware) {
+                    if (function_exists($middleware) && is_callable($middleware)) {
+                        $routerContents .= "\n" . '$app->add("' . $middleware . '");';
+                    } elseif ($container->get(Application::class)->get($middleware)) {
+                        $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $middleware . '"));';
+                    } elseif ($container->get(Application::class)->get($key)) {
+                        $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $key . '"));';
+                    } elseif (class_exists($middleware)) {
+                        $routerContents .= "\n" . '$app->add("' . $middleware . '");';
                     }
                 }
-                $routerContents .= "\n";
-                foreach (glob($diContainer->get("application")->config('app.router_path.router_files',
-                    $diContainer->get("application")->config('router_path.router_files'))) as $key => $file_name) {
-                    $contents = file_get_contents($file_name);
-                    preg_match_all('/app->[\s\S]*/', $contents, $matches);
-                    foreach ($matches[0] as $kk => $vv) {
-                        $routerContents .= '$' . $vv . "\n";
-                    }
+            }
+            $routerContents .= "\n";
+            foreach (glob($container->get(Application::class)->getConfig('app.router_path.router_files',
+                $container->get(Application::class)->getConfig('router_path.router_files'))) as $key => $file_name) {
+                $contents = file_get_contents($file_name);
+                preg_match_all('/app->[\s\S]*/', $contents, $matches);
+                foreach ($matches[0] as $kk => $vv) {
+                    $routerContents .= '$' . $vv . "\n";
                 }
-                file_put_contents($routerFilePath, $routerContents);
-                file_put_contents($diContainer->get("application")->config('app.router_path.lock',
-                    $diContainer->get("application")->config('router_path.lock')),
-                    $diContainer->get("application")->config('current_version'));
             }
-            if (file_exists($routerFilePath)) {
-                require_once $routerFilePath;
-                return;
-            }
-            throw new Exception("路由文件不存在~~~");
-        });
+            file_put_contents($routerFilePath, $routerContents);
+            file_put_contents($container->get("application")->getConfig('app.router_path.lock',
+                $container->get("application")->getConfig('router_path.lock')),
+                $container->get("application")->getConfig('current_version'));
+        }
+        if (file_exists($routerFilePath)) {
+            require_once $routerFilePath;
+            return;
+        }
+        throw new Exception("路由文件不存在~~~");
     }
 }

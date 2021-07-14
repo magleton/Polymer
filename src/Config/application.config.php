@@ -83,14 +83,14 @@ return [
         'params' => 'AAAAA'
     ],
 
-    /*    //AOP配置信息
-        'aop' => [
-            'init' => [
-                'debug' => true,
-                'cacheDir' => APP_PATH . '/log/aop/',
-                'excludePaths' => [
-                    ROOT_PATH . '/vendor/',
-                ],
-            ]
-        ]*/
+    //AOP配置信息
+    'aop' => [
+        'init' => [
+            'debug' => true,
+            'cacheDir' => APP_PATH . '/log/aop/',
+            'excludePaths' => [
+                ROOT_PATH . '/vendor/',
+            ],
+        ]
+    ]
 ];

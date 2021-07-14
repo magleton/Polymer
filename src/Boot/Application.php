@@ -9,7 +9,6 @@ namespace Polymer\Boot;
 
 use Composer\Autoload\ClassLoader;
 use DI\Annotation\Inject;
-use DI\Annotation\Injectable;
 use DI\Container;
 use DI\ContainerBuilder;
 use DI\Definition\Helper\DefinitionHelper;
@@ -25,14 +24,11 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 use Exception;
+use Go\Core\AspectKernel;
 use InvalidArgumentException;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
-use Polymer\Providers\EventManagerProvider;
-use Polymer\Providers\InitApplicationProvider;
-use Polymer\Providers\LoggerProvider;
 use Polymer\Providers\RouterFileProvider;
-use Polymer\Providers\ValidatorProvider;
 use Polymer\Repository\Repository;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
@@ -42,11 +38,6 @@ use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\DoctrineProvider;
 use Throwable;
 
-/**
- * Class Application
- * @Injectable
- * @package Polymer\Boot
- */
 final class Application
 {
     /**
@@ -57,18 +48,17 @@ final class Application
     protected static ?Application $instance = null;
 
     /**
-     * Slim APP
-     *
-     * @var App
-     */
-    protected App $app;
-
-    /**
      * The loaded service providers.
      *
      * @var array
      */
     protected array $loadedProviders = [];
+
+    /**
+     * @Inject
+     * @var EventManager
+     */
+    protected EventManager $eventManager;
 
     /**
      * 应用的服务容器
@@ -103,8 +93,12 @@ final class Application
      */
     public function __construct()
     {
+        echo 'AAAA!~~~';
         self::setInstance($this);
         $this->init();
+        $this->configCache = new DoctrineProvider(new ArrayAdapter(3600));
+
+        $this->initAOP();
     }
 
     /**
@@ -126,13 +120,7 @@ final class Application
             if ($this->diContainer === null) {
                 $this->diContainer = $builder->build();
             }
-            $initAppFile = ROOT_PATH . DS . 'app' . DS . APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider.php';
-            $initAppClass = file_exists($initAppFile) ? APP_NAME . DS . 'Providers' . DS . 'InitApplicationProvider' : InitApplicationProvider::class;
-            $this->diContainer->set('application', $this);
-            $this->register($initAppClass);
-            $this->register(EventManagerProvider::class);
-            $this->register(ValidatorProvider::class);
-            $this->register(LoggerProvider::class);
+            $this->diContainer->set(__CLASS__, self::getInstance());
         } catch (Exception $e) {
             throw $e;
         }
@@ -145,7 +133,6 @@ final class Application
      */
     private function initConfig(): array
     {
-        $this->configCache = new DoctrineProvider(new ArrayAdapter());
         $configPaths = [dirname(__DIR__) . DS . 'Config'];
         if (defined('ROOT_PATH') && file_exists(ROOT_PATH . DS . 'config') && is_dir(ROOT_PATH . DS . 'config')) {
             $configPaths[] = ROOT_PATH . DS . 'config';
@@ -154,28 +141,7 @@ final class Application
             $configPaths[] = APP_PATH . DS . 'Config';
         }
         $this->config = new Config($configPaths);
-        $this->configCache->save('config', $this->config);
         return $this->config->all();
-    }
-
-    /**
-     * 注册应用配置的Provider
-     *
-     * @param $provider
-     * @return ?object
-     */
-    public function register($provider): ?object
-    {
-        try {
-            if (!array_key_exists($provider, $this->loadedProviders)) {
-                $this->diContainer->call([new $provider(), 'register'], [$this->diContainer]);
-                $this->loadedProviders[$provider] = $this->diContainer->get($provider);
-            }
-            return $this->loadedProviders[$provider];
-        } catch (NotFoundException | DependencyException $exception) {
-
-        }
-        return null;
     }
 
     /**
@@ -185,9 +151,6 @@ final class Application
      */
     public static function getInstance(): Application
     {
-        if (null === self::$instance) {
-            self::$instance = new self;
-        }
         return self::$instance;
     }
 
@@ -200,6 +163,40 @@ final class Application
     public static function setInstance(Application $application = null): ?Application
     {
         return self::$instance = $application;
+    }
+
+    /**
+     * 初始化AOP
+     * @return AspectKernel
+     * @throws EmptyDirectoryException
+     */
+    private function initAOP(): AspectKernel
+    {
+        $aspectKernel = ApplicationAspectKernel::getInstance();
+        $aspectKernel->init(array_merge($this->getConfig('aop.init', []), $this->getConfig('app.aop.init', [])));
+        return $aspectKernel;
+    }
+
+    /**
+     * 获取指定键的配置文件
+     *
+     * @param string $key
+     * @param mixed|null $default
+     * @return mixed
+     * @throws Exception
+     * @throws EmptyDirectoryException
+     * @author macro chen <macro_fengye@163.com>
+     */
+    public function getConfig(string $key, $default = null)
+    {
+        try {
+            if ($this->config->get($key)) {
+                return $this->config->get($key);
+            }
+            return $default;
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     /**
@@ -219,7 +216,6 @@ final class Application
     public function run(): void
     {
         try {
-            $this->register(RouterFileProvider::class);
             $this->diContainer->get(RouterFileProvider::class);
             $app = $this->diContainer->get(App::class);
             $serverRequestCreator = ServerRequestCreatorFactory::create();
@@ -258,6 +254,7 @@ final class Application
      */
     public function runConsole(): void
     {
+        echo 'adas~~';
         try {
             self::setInstance($this);
             $this->init();
@@ -293,7 +290,7 @@ final class Application
     private function addEventOrSubscribe(array $params, int $listener)
     {
         $methods = ['addEventSubscriber', 'addEventListener'];
-        $eventManager = $this->loadedProviders[EventManagerProvider::class];
+        $eventManager = $this->eventManager;
         foreach ($params as $key => $value) {
             if (!isset($value['class_name'])) {
                 throw new InvalidArgumentException('class_name必须设置');
@@ -389,7 +386,7 @@ final class Application
         $repositoryNamespace = $repositoryNamespace ?: APP_NAME . '\\Entity\\Repositories';
         $repositoryClassName = $repositoryNamespace . '\\' . $this->getInflector()->classify($entityName) . 'Repository';
         try {
-            $current = current(array_keys($this->config('db.' . APPLICATION_ENV)));
+            $current = current(array_keys($this->getConfig('db.' . APPLICATION_ENV)));
             if ($dbName === '' || $dbName === null) {
                 $dbName = $current;
             }
@@ -406,28 +403,6 @@ final class Application
     }
 
     /**
-     * 获取指定键的配置文件
-     *
-     * @param string $key
-     * @param mixed|null $default
-     * @return mixed
-     * @throws Exception
-     * @throws EmptyDirectoryException
-     * @author macro chen <macro_fengye@163.com>
-     */
-    public function config(string $key, $default = null)
-    {
-        try {
-            if ($this->configCache->fetch('config') && $this->configCache->fetch('config')->get($key)) {
-                return $this->configCache->fetch('config')->get($key, $default);
-            }
-            return $default;
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
      * 实例化数据库链接对象
      *
      * @param string $dbName
@@ -438,12 +413,12 @@ final class Application
     public function db(string $dbName = '', string $entityFolder = null): EntityManager
     {
         try {
-            $current = current(array_keys($this->config('db.' . APPLICATION_ENV)));
+            $current = current(array_keys($this->getConfig('db.' . APPLICATION_ENV)));
             if ($dbName === '' || $dbName === null) {
                 $dbName = $current;
             }
-            $cacheKey = 'em' . '.' . $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DS], ['', ''], APP_PATH)) . '.' . $dbName;
-            if ($this->config('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->diContainer->has($cacheKey)) {
+            $cacheKey = 'em' . '.' . $this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DS], ['', ''], APP_PATH)) . '.' . $dbName;
+            if ($this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->diContainer->has($cacheKey)) {
                 $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Models' ?: ROOT_PATH . DS . 'entity' . DS . 'Models';
                 $cache = APPLICATION_ENV === 'development' ? null : new DoctrineProvider(new ArrayAdapter());
                 $configuration = Setup::createAnnotationMetadataConfiguration([
@@ -451,8 +426,8 @@ final class Application
                 ], APPLICATION_ENV === 'development',
                     ROOT_PATH . DS . 'entity' . DS . 'Proxies' . DS,
                     $cache,
-                    $this->config('db.' . APPLICATION_ENV . '.' . $dbName . '.' . 'useSimpleAnnotationReader'));
-                $entityManager = EntityManager::create($this->config('db.' . APPLICATION_ENV . '.' . $dbName), $configuration, $this->diContainer->get(EventManagerProvider::class));
+                    $this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName . '.' . 'useSimpleAnnotationReader'));
+                $entityManager = EntityManager::create($this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName), $configuration, $this->diContainer->get(EventManager::class));
                 $this->diContainer->set($cacheKey, $entityManager);
             }
             return $this->diContainer->get($cacheKey);

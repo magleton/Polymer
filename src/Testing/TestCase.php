@@ -33,6 +33,6 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         parent::__construct($name, $data, $dataName);
         $this->app = app();
-        $this->client = new Client($this->app->config('testing.config', []));
+        $this->client = new Client($this->app->getConfig('testing.config', []));
     }
 }

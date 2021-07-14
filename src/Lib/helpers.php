@@ -6,24 +6,6 @@ use Monolog\Processor\UidProcessor;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Boot\Application;
 
-if (!function_exists('app')) {
-    /**
-     * 获取应用实例
-     *
-     * @param null $make 是否返回对象实例
-     * @param array $parameters
-     * @return Application
-     * @author <macro_fengye@163.com> macro chen
-     */
-    function app($make = null, array $parameters = []): Application
-    {
-        if (null === $make) {
-            return Application::getInstance();
-        }
-        return Application::getInstance()->component($make, $parameters);
-    }
-}
-
 if (!function_exists('logger')) {
     /**
      * 记录日志，便于调试
@@ -68,16 +50,16 @@ if (!function_exists('handleShutdown')) {
         $error = error_get_last();
         if (empty($error)) {
             $msg = "错误数组为空";
-            if (is_null(app()->config('logger'))) {
+            if (is_null(Application::getInstance()->getConfig('logger'))) {
                 return;
             }
-            app()->config('logger')->error($msg);
+            Application::getInstance()->getConfig('logger')->error($msg);
             return;
         }
         if ($error['type'] === E_ERROR) {
-            if (app()->config('logger')) {
+            if (Application::getInstance()->getConfig('logger')) {
                 $msg = 'Type : ' . $error['type'] . '\nMessage : ' . $error['message'] . '\nFile : ' . $error['file'] . '\nLine : ' . $error['line'];
-                app()->config('logger')->error($msg);
+                Application::getInstance()->getConfig('logger')->error($msg);
             } else {
                 $msg = 'Type : ' . $error['type'] . ' , Message : ' . $error['message'] . ' , File : ' . $error['file'] . ' , Line : ' . $error['line'];
                 logger('Fatal Error : ', [$msg], APP_PATH . '/log/fatal_error.log', Monolog\Logger::ERROR);
@@ -150,7 +132,7 @@ if (!function_exists('routeGeneration')) {
      */
     function routeGeneration(): bool
     {
-        $routerLockFile = app()->config('app.router_path.lock', app()->config('router_path.lock'));
-        return !file_exists($routerLockFile) || app()->config('app.generate_router', false);
+        $routerLockFile = Application::getInstance()->getConfig('app.router_path.lock', app()->getConfig('router_path.lock'));
+        return !file_exists($routerLockFile) || app()->getConfig('app.generate_router', false);
     }
 }

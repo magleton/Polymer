@@ -23,7 +23,7 @@ class ApplicationAspectKernel extends AspectKernel
     protected function configureAop(AspectContainer $container): void
     {
         try {
-            $aspect = (array)app()->config('app.aop.aspect');
+            $aspect = (array)Application::getInstance()->getConfig('app.aop.aspect');
             foreach ($aspect as $clazz) {
                 if (class_exists($clazz)) {
                     $container->registerAspect(new $clazz());

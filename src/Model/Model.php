@@ -25,7 +25,7 @@ class Model
 {
     /**
      * 应用APP
-     *
+     * @Inject
      * @var Application
      */
     protected Application $application;
@@ -42,7 +42,7 @@ class Model
      *
      * @var GXValidator
      */
-    protected GXValidator $bizValidator;
+    protected GXValidator $gxValidator;
 
     /**
      * @var Container
@@ -89,16 +89,16 @@ class Model
      *
      * @param Application $application
      * @param RecursiveValidator $validator
-     * @param GXValidator $bizValidator
+     * @param GXValidator $gxValidator
      * @param Container $diContainer
      * @throws ModelInstanceErrorException
      * @Inject("application")
      */
-    public function __construct(Application $application, RecursiveValidator $validator, GXValidator $bizValidator, Container $diContainer)
+    public function __construct(Application $application, RecursiveValidator $validator, GXValidator $gxValidator, Container $diContainer)
     {
         $this->application = $application;
         $this->validator = $validator;
-        $this->bizValidator = $bizValidator;
+        $this->gxValidator = $gxValidator;
         $this->diContainer = $diContainer;
         try {
             $schema = $params['schema'] ?? $this->getProperty('schema');
