@@ -55,6 +55,7 @@ final class Application
 
     /**
      * @Inject
+     *
      * @var EventManager
      */
     protected EventManager $eventManager;
@@ -189,27 +190,6 @@ final class Application
     }
 
     /**
-     * 获取容器中的对象
-     *
-     * @param $provider
-     * @return object|null
-     * @throws DependencyException
-     * @throws NotFoundException
-     */
-    public function get($provider): ?object
-    {
-        return $this->getDiContainer()->get($provider);
-    }
-
-    /**
-     * @return Container
-     */
-    public function getDiContainer(): Container
-    {
-        return $this->diContainer;
-    }
-
-    /**
      * @return ClassLoader
      */
     public function getClassLoader(): ClassLoader
@@ -246,6 +226,14 @@ final class Application
     public function set(string $name, $value): void
     {
         $this->getDiContainer()->set($name, $value);
+    }
+
+    /**
+     * @return Container
+     */
+    public function getDiContainer(): Container
+    {
+        return $this->diContainer;
     }
 
     /**
@@ -294,16 +282,29 @@ final class Application
     private function addEventOrSubscribe(array $params, int $listener)
     {
         $methods = ['addEventSubscriber', 'addEventListener'];
-        $eventManager = $this->eventManager;
+        $this->eventManager = Application::getInstance()->get(EventManager::class);
         foreach ($params as $key => $value) {
             if (!isset($value['class_name'])) {
                 throw new InvalidArgumentException('class_name必须设置');
             }
             $className = $value['class_name'];
             $data = $value['params'] ?? [];
-            $listener === 1 ? $eventManager->{$methods[$listener]}($key, new $className($data)) : $eventManager->{$methods[$listener]}(new $className($data));
+            $listener === 1 ? $this->eventManager->{$methods[$listener]}($key, new $className($data)) : $this->eventManager->{$methods[$listener]}(new $className($data));
         }
-        return $eventManager;
+        return $this->eventManager;
+    }
+
+    /**
+     * 获取容器中的对象
+     *
+     * @param $provider
+     * @return object|null
+     * @throws DependencyException
+     * @throws NotFoundException
+     */
+    public function get($provider): ?object
+    {
+        return $this->getDiContainer()->get($provider);
     }
 
     /**

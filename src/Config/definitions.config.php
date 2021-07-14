@@ -42,6 +42,7 @@ return [
         $cache = new DoctrineProvider(new ArrayAdapter());
         return Validation::createValidatorBuilder()->setMappingCache(new DoctrineAdapter($cache))->enableAnnotationMapping($reader)->getValidator();
     },
+    'validator' => DI\get(RecursiveValidator::class),
     App::class => static function (ContainerInterface $container) {
         $app = AppFactory::createFromContainer($container);
         $app->addRoutingMiddleware();

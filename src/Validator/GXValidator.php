@@ -7,38 +7,17 @@
 
 namespace Polymer\Validator;
 
-use DI\Annotation\Inject;
-use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\FieldValidateErrorException;
+use Polymer\Support\Collection;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Exception\NoSuchMetadataException;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 
 class GXValidator
 {
-    /**
-     * 应用APP
-     * @Inject
-     * @var ?Application
-     */
-    protected ?Application $application = null;
-
-    /**
-     * @Inject
-     * @var ?Container
-     */
-    protected ?Container $diContainer = null;
-
-    /**
-     * 验证组件
-     * @Inject
-     * @var ?RecursiveValidator
-     */
-    protected ?RecursiveValidator $validator = null;
-
     /**
      * 根据自定义的规则验证数据字段
      *
@@ -57,7 +36,7 @@ class GXValidator
         foreach ($data as $property => $val) {
             if (isset($rules[$property])) {
                 $constraints = $this->propertyConstraints($property, $rules);
-                $errors = $this->validator->validate($val, $constraints, $groups);
+                $errors = Application::getInstance()->get(RecursiveValidator::class)->validate($val, $constraints, $groups);
                 if (count($errors)) {
                     foreach ($errors as $error) {
                         $errorData[$property] = $error->getMessage();
@@ -66,7 +45,7 @@ class GXValidator
             }
         }
         if ($errorData) {
-            $this->diContainer->get('error_collection')->set($key, $errorData);
+            Application::getInstance()->get(RecursiveValidator::class)->get(Collection::class)->set($key, $errorData);
             throw new FieldValidateErrorException('数据验证失败');
         }
     }
@@ -128,7 +107,7 @@ class GXValidator
     public function validateObject(object $validateObject, array $rules = [], array $groups = null): ConstraintViolationListInterface
     {
         try {
-            $classMetadata = $this->validator->getMetadataFor($validateObject);
+            $classMetadata = Application::getInstance()->get(RecursiveValidator::class)->getMetadataFor($validateObject);
             if ($rules) {
                 foreach ($classMetadata->getReflectionClass()->getProperties() as $val) {
                     $property = $val->getName();
@@ -138,7 +117,7 @@ class GXValidator
                     }
                 }
             }
-            return $this->validator->validate($validateObject, null, $groups);
+            return Application::getInstance()->get(RecursiveValidator::class)->validate($validateObject, null, $groups);
         } catch (NoSuchMetadataException $e) {
             throw $e;
         }

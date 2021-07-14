@@ -210,7 +210,7 @@ class Model
         if ($rules) {
             $errorData = [];
             try {
-                $validateResult = $this->bizValidator->validateObject($this->entityObject, $rules, $groups);
+                $validateResult = $this->gxValidator->validateObject($this->entityObject, $rules, $groups);
                 if (count($validateResult)) {
                     foreach ($validateResult as $error) {
                         $tmpMappingField = array_flip($this->mappingField);
