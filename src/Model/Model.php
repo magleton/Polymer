@@ -26,25 +26,27 @@ class Model
     /**
      * 应用APP
      * @Inject
+     *
      * @var Application
      */
     protected Application $application;
 
     /**
      * 验证组件
-     *
+     * @Inject
      * @var RecursiveValidator
      */
     protected RecursiveValidator $validator;
 
     /**
      * 自定义
-     *
+     * @Inject
      * @var GXValidator
      */
     protected GXValidator $gxValidator;
 
     /**
+     * @Inject
      * @var Container
      */
     protected Container $diContainer;
@@ -87,24 +89,15 @@ class Model
     /**
      * 模型构造函数
      *
-     * @param Application $application
-     * @param RecursiveValidator $validator
-     * @param GXValidator $gxValidator
-     * @param Container $diContainer
      * @throws ModelInstanceErrorException
-     * @Inject("application")
      */
-    public function __construct(Application $application, RecursiveValidator $validator, GXValidator $gxValidator, Container $diContainer)
+    public function __construct()
     {
-        $this->application = $application;
-        $this->validator = $validator;
-        $this->gxValidator = $gxValidator;
-        $this->diContainer = $diContainer;
         try {
-            $schema = $params['schema'] ?? $this->getProperty('schema');
+            $schema = $this->getProperty('schema');
             if ($schema) {
                 $cache = new ArrayAdapter();
-                $this->em = $this->application->db($schema);
+                $this->em = Application::getInstance()->db($schema);
                 if ($cache instanceof Cache) {
                     $this->em->getConfiguration()->setMetadataCache($cache);
                     $this->em->getConfiguration()->setQueryCacheImpl($cache);
@@ -168,11 +161,11 @@ class Model
         $entityNamespace = $this->getProperty('entityNamespace');
         $repositoryNamespace = $this->getProperty('repositoryNamespace');
         if ($criteria) {
-            $repository = $this->application->repository($entityName, $schema, $entityFolder, $entityNamespace,
+            $repository = Application::getInstance()->repository($entityName, $schema, $entityFolder, $entityNamespace,
                 $repositoryNamespace);
             $entityObject = $repository->findOneBy($criteria);
         } else {
-            $entityObject = $this->application->entity($entityName, $entityNamespace);
+            $entityObject = Application::getInstance()->entity($entityName, $entityNamespace);
         }
         if (!$entityObject) {
             throw new EntityNotFoundException('没有可用实体对象!');
@@ -230,7 +223,7 @@ class Model
                     if ($returnErr) {
                         return $errorData;
                     }
-                    $this->application->get(Collection::class)->set($this->getProperty('table'), $errorData);
+                    Application::getInstance()->get(Collection::class)->set($this->getProperty('table'), $errorData);
                     throw new EntityValidateErrorException('数据验证失败!');
                 }
                 return $this->entityObject;

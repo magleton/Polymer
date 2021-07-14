@@ -6,6 +6,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Polymer\Boot\Application;
+use Polymer\Middleware\GXCORSMiddleware;
+use Polymer\Middleware\GXCsrfMiddleware;
 use Polymer\Providers\RouterFileProvider;
 use Polymer\Support\Collection;
 use Polymer\Validator\GXValidator;
@@ -17,6 +19,7 @@ use Symfony\Component\Cache\Adapter\DoctrineAdapter;
 use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
+use Tuupola\Middleware\CorsMiddleware;
 
 return [
     GXValidator::class => DI\create(GXValidator::class),
@@ -45,11 +48,20 @@ return [
         return AppFactory::createFromContainer($container);
     },
     Logger::class => static function (ContainerInterface $container) {
-        $settings = $container->get('application')->getConfig('slim.settings');
+        $settings = $container->get(Application::class)->getConfig('slim.settings');
         $logger = new Logger($settings['logger']['name']);
         $logger->pushProcessor(new UidProcessor());
         $logger->pushHandler(new StreamHandler($settings['logger']['path'], $settings['logger']['level']));
         return $logger;
     },
-    'application' => DI\get(Application::class)
+    'application' => DI\get(Application::class),
+    CorsMiddleware::class => DI\factory(function (ContainerInterface $c) {
+        $middleware = new GXCORSMiddleware();
+        return $middleware->create($c);
+    }),
+    'corsMiddleware' => DI\get(CorsMiddleware::class),
+    'csrf' => DI\factory(function (ContainerInterface $c) {
+        $middleware = new GXCsrfMiddleware();
+        return $middleware->create($c);
+    }),
 ];

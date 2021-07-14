@@ -7,6 +7,7 @@
 
 namespace Polymer\Service;
 
+use DI\Annotation\Inject;
 use DI\Container;
 use Exception;
 use Polymer\Boot\Application;
