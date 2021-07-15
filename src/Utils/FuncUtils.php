@@ -9,7 +9,10 @@ namespace Polymer\Utils;
 
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
+use Symfony\Component\Serializer\Normalizer\scalar;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -54,37 +57,13 @@ class FuncUtils
     }
 
     /**
-     *  获取序列化器
-     * @version  2018年11月12日
-     * @author   zj chen <britton@126.com>
-     * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
-     *
-     * @param array $ignoredAttributes
-     * @param null  $format
-     *
-     * @return Serializer
-     *
-     */
-    private static function getSerializer(array $ignoredAttributes = [])
-    {
-        $encoders = [new XmlEncoder(), new JsonEncoder()];
-        $objectNormalizer = new ObjectNormalizer();
-        $objectNormalizer->setIgnoredAttributes($ignoredAttributes);
-        $objectNormalizer->setCircularReferenceHandler(function ($object) {
-            return get_class($object);
-        });
-        $normalizers = [$objectNormalizer];
-        $serializer = new Serializer($normalizers, $encoders);
-        return $serializer;
-    }
-
-    /**
      * 将实体对象转换为数组
      *
      * @param mixed $entity 实体对象
      * @param array $ignoredAttributes
      *
-     * @return array|object|\Symfony\Component\Serializer\Normalizer\scalar
+     * @return array|object|scalar
+     * @throws ExceptionInterface
      */
     public static function entityToArray($entity, array $ignoredAttributes = [])
     {
@@ -92,15 +71,33 @@ class FuncUtils
     }
 
     /**
-     *  对象转JSON
+     *  获取序列化器
+     * @param array $ignoredAttributes
+     * @return Serializer
+     *
      * @version  2018年11月12日
      * @author   zj chen <britton@126.com>
      * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
-     *
+     */
+    private static function getSerializer(array $ignoredAttributes = []): Serializer
+    {
+        $encoders = [new XmlEncoder(), new JsonEncoder()];
+        $objectNormalizer = new ObjectNormalizer();
+        $propertyNormalizer = new PropertyNormalizer();
+        $normalizers = [$objectNormalizer, $propertyNormalizer];
+        return new Serializer($normalizers, $encoders);
+    }
+
+    /**
+     *  对象转JSON
      * @param       $entity
      * @param array $ignoredAttributes
      *
      * @return bool|float|int|string
+     *
+     * @version  2018年11月12日
+     * @author   zj chen <britton@126.com>
+     * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
      *
      */
     public static function entityToJson($entity, array $ignoredAttributes = [])
@@ -110,14 +107,14 @@ class FuncUtils
 
     /**
      * 对象转XML
-     * @version  2018年11月12日
-     * @author   zj chen <britton@126.com>
-     * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
-     *
      * @param       $entity
      * @param array $ignoredAttributes
      *
      * @return bool|float|int|string
+     *
+     * @version  2018年11月12日
+     * @author   zj chen <britton@126.com>
+     * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
      *
      */
     public static function entityToXML($entity, array $ignoredAttributes = [])

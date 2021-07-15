@@ -39,7 +39,7 @@
     "ext-simplexml": "*",
     "ext-exif": "*",
     "goaop/framework": ">=3.0",
-    "dto/dto": ">=3.2"
+    "cerbero/dto": ">=2.2"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
