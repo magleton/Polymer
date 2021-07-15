@@ -7,6 +7,7 @@
 
 namespace Polymer\Utils;
 
+use Polymer\Boot\Application;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
@@ -81,11 +82,7 @@ class FuncUtils
      */
     private static function getSerializer(array $ignoredAttributes = []): Serializer
     {
-        $encoders = [new XmlEncoder(), new JsonEncoder()];
-        $objectNormalizer = new ObjectNormalizer();
-        $propertyNormalizer = new PropertyNormalizer();
-        $normalizers = [$objectNormalizer, $propertyNormalizer];
-        return new Serializer($normalizers, $encoders);
+        return Application::getInstance()->get(Serializer::class);
     }
 
     /**

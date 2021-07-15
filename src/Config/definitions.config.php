@@ -23,7 +23,10 @@ use Symfony\Component\Cache\Adapter\DoctrineAdapter;
 use Symfony\Component\Cache\DoctrineProvider;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Encoder\YamlEncoder;
+use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
@@ -69,8 +72,8 @@ return [
         return $middleware->create($c);
     }),
     Serializer::class => DI\factory(static function (ContainerInterface $container) {
-        $encoders = array(new XmlEncoder(), new JsonEncoder());
-        $normalizers = array(new ObjectNormalizer());
+        $encoders = array(new XmlEncoder(), new JsonEncoder(), new YAMLEncoder());
+        $normalizers = array(new ObjectNormalizer(), new GetSetMethodNormalizer(), new PropertyNormalizer());
         return new Serializer($normalizers, $encoders);
     }),
     SessionProvider::class => DI\factory(function (ContainerInterface $container) {

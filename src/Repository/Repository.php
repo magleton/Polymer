@@ -16,6 +16,7 @@ use Exception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\PresenterException;
 use Polymer\Providers\GXValidatorProvider;
+use Symfony\Component\Serializer\Serializer;
 
 class Repository extends EntityRepository
 {
@@ -37,6 +38,12 @@ class Repository extends EntityRepository
      * @var Container
      */
     protected Container $diContainer;
+
+    /**
+     * @Inject
+     * @var Serializer
+     */
+    protected Serializer $serializer;
 
     /**
      * 验证规则
