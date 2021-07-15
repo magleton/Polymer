@@ -161,8 +161,8 @@ class Model
         $entityNamespace = $this->getProperty('entityNamespace');
         $repositoryNamespace = $this->getProperty('repositoryNamespace');
         if ($criteria) {
-            $repository = Application::getInstance()->repository($entityName, $schema, $entityFolder, $entityNamespace,
-                $repositoryNamespace);
+            $repository = Application::getInstance()
+                ->repository($entityName, $schema, $entityFolder, $entityNamespace, $repositoryNamespace);
             $entityObject = $repository->findOneBy($criteria);
         } else {
             $entityObject = Application::getInstance()->entity($entityName, $entityNamespace);

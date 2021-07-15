@@ -7,13 +7,11 @@
 
 namespace Polymer\Utils;
 
+use DI\DependencyException;
+use DI\NotFoundException;
+use Exception;
 use Polymer\Boot\Application;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
-use Symfony\Component\Serializer\Normalizer\scalar;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -26,8 +24,9 @@ class FuncUtils
      * @param int $type (1=>数字 , 2=>字母 , 3=>混合)
      *
      * @return string
+     * @throws Exception
      */
-    public static function generateSalt($len = 32, $type = 3)
+    public static function generateSalt(int $len = 32, int $type = 3): string
     {
         $arr[1] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
         $arr[2] = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'z'];
@@ -52,7 +51,7 @@ class FuncUtils
      * @param ExecutionContextInterface $context
      * @param                           $payload
      */
-    public static function validate($object, ExecutionContextInterface $context, $payload)
+    public static function validate($object, ExecutionContextInterface $context, $payload): void
     {
         $context->buildViolation('This name sounds totally fake!')->atPath('firstName')->addViolation();
     }
@@ -61,26 +60,27 @@ class FuncUtils
      * 将实体对象转换为数组
      *
      * @param mixed $entity 实体对象
-     * @param array $ignoredAttributes
-     *
      * @return array|object|scalar
+     * @throws DependencyException
      * @throws ExceptionInterface
+     * @throws NotFoundException
      */
-    public static function entityToArray($entity, array $ignoredAttributes = [])
+    public static function entityToArray($entity)
     {
-        return self::getSerializer($ignoredAttributes)->normalize($entity);
+        return self::getSerializer()->normalize($entity);
     }
 
     /**
      *  获取序列化器
-     * @param array $ignoredAttributes
      * @return Serializer
      *
+     * @throws DependencyException
+     * @throws NotFoundException
      * @version  2018年11月12日
      * @author   zj chen <britton@126.com>
      * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
      */
-    private static function getSerializer(array $ignoredAttributes = []): Serializer
+    private static function getSerializer(): Serializer
     {
         return Application::getInstance()->get(Serializer::class);
     }
@@ -88,34 +88,32 @@ class FuncUtils
     /**
      *  对象转JSON
      * @param       $entity
-     * @param array $ignoredAttributes
+     * @return string
      *
-     * @return bool|float|int|string
-     *
+     * @throws DependencyException
+     * @throws NotFoundException
      * @version  2018年11月12日
      * @author   zj chen <britton@126.com>
      * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
-     *
      */
-    public static function entityToJson($entity, array $ignoredAttributes = [])
+    public static function entityToJson($entity): string
     {
-        return self::getSerializer($ignoredAttributes)->serialize($entity, 'json');
+        return self::getSerializer()->serialize($entity, 'json');
     }
 
     /**
      * 对象转XML
      * @param       $entity
-     * @param array $ignoredAttributes
+     * @return string
      *
-     * @return bool|float|int|string
-     *
+     * @throws DependencyException
+     * @throws NotFoundException
      * @version  2018年11月12日
      * @author   zj chen <britton@126.com>
      * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
-     *
      */
-    public static function entityToXML($entity, array $ignoredAttributes = [])
+    public static function entityToXML($entity): string
     {
-        return self::getSerializer($ignoredAttributes)->serialize($entity, 'xml');
+        return self::getSerializer()->serialize($entity, 'xml');
     }
 }
