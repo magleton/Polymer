@@ -10,7 +10,6 @@ use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\Helper\EntityManagerHelper;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Helper\HelperSet;
-use Symfony\Component\Console\Helper\QuestionHelper;
 
 try {
     date_default_timezone_set('Asia/Shanghai');
@@ -19,18 +18,13 @@ try {
     defined('ROOT_PATH') || define('ROOT_PATH', __DIR__);
     defined('APP_NAME') || define('APP_NAME', 'tests');
     defined('APP_PATH') || define('APP_PATH', ROOT_PATH . DS . 'app' . DS . APP_NAME . DS);
-    require ROOT_PATH . '/vendor/autoload.php';
+    $loader = require __DIR__ . '/vendor/autoload.php';
     $app = new \Polymer\Boot\Application();
-    try {
-        $app->runConsole();
-    } catch (Exception $e) {
-    }
-    $em = \Polymer\Boot\Application::getInstance()->db('db1', APP_PATH . '/Entity/Models');
-    $helperSet = new HelperSet(array(
-        'em' => new EntityManagerHelper($em),
-        'db' => new Doctrine\DBAL\Tools\Console\ConnectionProvider\SingleConnectionProvider($em->getConnection()),
-        'dialog' => new QuestionHelper(),
-    ));
+    $app->runConsole();
+    $em = \Polymer\Boot\Application::getInstance()->db('db1', APP_PATH . 'Entity' . DS . 'Mapping');
+    $helperSet = new HelperSet([
+        new EntityManagerHelper($em)
+    ]);
     $cli = new Application('Doctrine Command Line Interface', 'UNKNOWN');
     $cli->setCatchExceptions(true);
     $cli->setHelperSet($helperSet);
@@ -46,4 +40,5 @@ try {
     ConsoleRunner::addCommands($cli);
     $cli->run();
 } catch (Exception $e) {
+    print_r($e);
 }
