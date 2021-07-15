@@ -88,7 +88,6 @@ final class Application
     {
         self::setInstance($this);
         $this->init();
-        $this->initAOP();
     }
 
     /**
@@ -156,6 +155,35 @@ final class Application
     }
 
     /**
+     * @return ClassLoader
+     */
+    public function getClassLoader(): ClassLoader
+    {
+        return $this->classLoader;
+    }
+
+    /**
+     * 启动WEB应用
+     *
+     * @throws Exception
+     * @author macro chen <macro_fengye@163.com>
+     */
+    public function run(): void
+    {
+        try {
+            $this->initAOP();
+            $this->diContainer->get(RouterFileProvider::class);
+            $app = $this->diContainer->get(App::class);
+            $serverRequestCreator = ServerRequestCreatorFactory::create();
+            $request = $serverRequestCreator->createServerRequestFromGlobals();
+            $this->diContainer->set(ServerRequestInterface::class, $request);
+            $app->run($request);
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
      * 初始化AOP
      * @return AspectKernel
      * @throws EmptyDirectoryException
@@ -190,34 +218,6 @@ final class Application
     }
 
     /**
-     * @return ClassLoader
-     */
-    public function getClassLoader(): ClassLoader
-    {
-        return $this->classLoader;
-    }
-
-    /**
-     * 启动WEB应用
-     *
-     * @throws Exception
-     * @author macro chen <macro_fengye@163.com>
-     */
-    public function run(): void
-    {
-        try {
-            $this->diContainer->get(RouterFileProvider::class);
-            $app = $this->diContainer->get(App::class);
-            $serverRequestCreator = ServerRequestCreatorFactory::create();
-            $request = $serverRequestCreator->createServerRequestFromGlobals();
-            $this->diContainer->set(ServerRequestInterface::class, $request);
-            $app->run($request);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
      * 定义一个对象或者值到容器
      *
      * @param string $name Entry name
@@ -244,15 +244,7 @@ final class Application
      */
     public function runConsole(): void
     {
-        try {
-            $app = $this->diContainer->get(App::class);
-            $serverRequestCreator = ServerRequestCreatorFactory::create();
-            $request = $serverRequestCreator->createServerRequestFromGlobals();
-            $this->diContainer->set(ServerRequestInterface::class, $request);
-            $app->run($request);
-        } catch (Exception $e) {
-            throw $e;
-        }
+        // 占位
     }
 
     /**
