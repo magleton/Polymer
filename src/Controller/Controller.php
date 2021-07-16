@@ -73,10 +73,11 @@ class Controller
      * @param int $encodingOptions Json encoding options
      * @return ResponseInterface
      */
-    protected function withJson($data, ResponseInterface $response, int $status = null, int $encodingOptions = 0): ResponseInterface
+    protected function withJson($data, ResponseInterface $response, int $status = 200, int $encodingOptions = 0): ResponseInterface
     {
+        $retData = ['code' => $status, 'msg' => '', 'data' => $data];
         try {
-            $body = json_encode($data, JSON_THROW_ON_ERROR | $encodingOptions);
+            $body = json_encode($retData, JSON_THROW_ON_ERROR | $encodingOptions);
         } catch (JsonException $e) {
             $body = '{"code":500 , "msg":' . $e->getMessage() . ' , "data":null}';
         }
