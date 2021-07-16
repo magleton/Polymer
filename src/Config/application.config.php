@@ -1,5 +1,6 @@
 <?php
 
+use Polymer\Middleware\GXParseRequestJSONMiddleware;
 use Polymer\Session\SecureHandler;
 
 return [
@@ -92,5 +93,8 @@ return [
                 ROOT_PATH . '/vendor/',
             ],
         ]
-    ]
+    ],
+    'middleware' => [
+        'parseRequestJSONMiddleware' => GXParseRequestJSONMiddleware::class
+    ],
 ];

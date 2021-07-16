@@ -8,6 +8,7 @@ use Monolog\Processor\UidProcessor;
 use Polymer\Boot\Application;
 use Polymer\Middleware\GXCORSMiddleware;
 use Polymer\Middleware\GXCsrfMiddleware;
+use Polymer\Middleware\GXParseRequestJSONMiddleware;
 use Polymer\Middleware\GXTwigMiddleware;
 use Polymer\Providers\RouterFileProvider;
 use Polymer\Providers\SessionProvider;
@@ -87,5 +88,8 @@ return [
     TwigMiddleware::class => DI\factory(static function (ContainerInterface $container) {
         $middleware = new GXTwigMiddleware();
         return $middleware->create($container);
+    }),
+    'parseRequestJSONMiddleware' => DI\factory(static function (ContainerInterface $container) {
+        return new  GXParseRequestJSONMiddleware($container);
     }),
 ];

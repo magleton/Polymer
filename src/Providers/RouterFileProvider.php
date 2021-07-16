@@ -41,9 +41,9 @@ class RouterFileProvider
                     if (function_exists($middleware) && is_callable($middleware)) {
                         $routerContents .= "\n" . '$app->add("' . $middleware . '");';
                     } elseif ($container->get(Application::class)->get($middleware)) {
-                        $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $middleware . '"));';
+                        $routerContents .= "\n" . '$app->add($container->get("application")->get("' . $middleware . '"));';
                     } elseif ($container->get(Application::class)->get($key)) {
-                        $routerContents .= "\n" . '$app->add($container->get("application")->component("' . $key . '"));';
+                        $routerContents .= "\n" . '$app->add($container->get("application")->get("' . $key . '"));';
                     } elseif (class_exists($middleware)) {
                         $routerContents .= "\n" . '$app->add("' . $middleware . '");';
                     }
