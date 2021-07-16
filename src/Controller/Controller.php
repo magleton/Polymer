@@ -81,7 +81,7 @@ class Controller
         } catch (JsonException $e) {
             $body = '{"code":500 , "msg":' . $e->getMessage() . ' , "data":null}';
         }
-        $response->getBody()->write($body);
+        $response->withHeader('Content-Type', 'application/json')->getBody()->write($body);
         return $response;
     }
 }
