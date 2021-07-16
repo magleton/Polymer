@@ -112,8 +112,46 @@ class FuncUtils
      * @author   zj chen <britton@126.com>
      * @license  PHP Version 7.x.x {@link http://www.php.net/license/3_0.txt}
      */
-    public static function entityToXML($entity): string
+    public static function entityToXML($entity)
     {
         return self::getSerializer()->serialize($entity, 'xml');
+    }
+
+    /**
+     * XML转数组
+     *
+     * @param       $entity
+     * @return mixed
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @version 2018年11月22日
+     * @author  C.c. <HaiCheng0517@126.com>
+     * @license PHP Version 7.x.x
+     */
+    public static function xmlToArray($entity)
+    {
+        return self::getSerializer()->decode($entity, 'xml');
+    }
+
+    /**
+     * URL参数安全base64
+     *
+     * @param string $string
+     * @param string $operation ENCODE|DECODE
+     *
+     * @return string
+     * @author macro chen <macro_fengye@163.com>
+     *
+     */
+    public static function urlSafeBase64Code(string $string, string $operation = 'ENCODE'): string
+    {
+        $searchKws = array('+', '/', '=');
+        $replaceKws = array('-', '_', '');
+        if ($operation === 'DECODE') {
+            $ret = base64_decode(str_replace($replaceKws, $searchKws, $string));
+        } else {
+            $ret = str_replace($searchKws, $replaceKws, base64_encode($string));
+        }
+        return $ret;
     }
 }

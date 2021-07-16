@@ -146,7 +146,7 @@ if (!function_exists('authCode')) {
      * @param int $expiry
      * @return string
      */
-    function authCode($string, $key = '', $operation = 'DECODE', $expiry = 0)
+    function authCode($string, string $key = '', string $operation = 'DECODE', int $expiry = 0): string
     {
         $cKeyLength = 4;
         $key = md5($key ?: 'polymerKey');

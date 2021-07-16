@@ -1,6 +1,6 @@
 <?php
 
-namespace Polymer\DTO;
+namespace Polymer\Dto;
 
 use Cerbero\Dto\Dto;
 use const Cerbero\Dto\IGNORE_UNKNOWN_PROPERTIES;
