@@ -129,7 +129,7 @@ class Model
      * @return Model|Object|null
      * @throws Exception
      */
-    protected function make(array $data = [], array $criteria = [], bool $returnEObj = false)
+    protected function make(array $data = [], array $criteria = [], bool $returnEObj = true)
     {
         try {
             $this->entityObject = $this->obtainEObj($criteria);

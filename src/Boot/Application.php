@@ -359,7 +359,7 @@ final class Application
     public function entity($entityName, string $entityNamespace = null): ?object
     {
         try {
-            $entityNamespace = $entityNamespace ?: 'Entity\\Models';
+            $entityNamespace = $entityNamespace ?: APP_NAME . '\\Entity\\Mapping';
             $className = $entityNamespace . '\\' . $this->getInflector()->classify($entityName);
             return new $className;
         } catch (Exception $e) {
@@ -416,7 +416,7 @@ final class Application
             }
             $cacheKey = 'em' . '.' . $this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DS], ['', ''], APP_PATH)) . '.' . $dbName;
             if ($this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->diContainer->has($cacheKey)) {
-                $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Models' ?: ROOT_PATH . DS . 'entity' . DS . 'Models';
+                $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Entity' . DS . 'Mapping';
                 $cache = APPLICATION_ENV === 'development' ? null : new DoctrineProvider(new ArrayAdapter());
                 $configuration = Setup::createAnnotationMetadataConfiguration([
                     $entityFolder,
