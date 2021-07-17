@@ -32,7 +32,6 @@ use Slim\App;
 use Slim\Factory\ServerRequestCreatorFactory;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\DoctrineProvider;
-use Throwable;
 
 final class Application
 {
@@ -89,10 +88,6 @@ final class Application
     public function init(): void
     {
         try {
-            set_error_handler('handleError');
-            set_exception_handler(static function (Throwable $throwable) {
-                print_r($throwable);
-            });
             register_shutdown_function('handleShutdown');
             $builder = new ContainerBuilder();
             $builder->useAnnotations(true)->addDefinitions(new DefinitionArray($this->initConfig()));
@@ -319,34 +314,31 @@ final class Application
     /**
      * 实例化数据库链接对象
      *
-     * @param string $dbName
+     * @param string $dbConnectName 数据库链接配置的名字 eg: db1、db2
      * @param mixed|null $entityFolder 实体文件夹的名字
      * @return EntityManager
      * @throws ORMException | InvalidArgumentException | Exception
      */
-    public function db(string $dbName = '', string $entityFolder = null): EntityManager
+    public function getEntityManager(string $dbConnectName = '', string $entityFolder = null): EntityManager
     {
-        try {
-            $current = current(array_keys($this->getConfig('db.' . APPLICATION_ENV)));
-            if ($dbName === '' || $dbName === null) {
-                $dbName = $current;
-            }
-            $cacheKey = 'em' . '.' . $this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName . '.emCacheKey', str_replace([':', DS], ['', ''], APP_PATH)) . '.' . $dbName;
-            if ($this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName) && !$this->diContainer->has($cacheKey)) {
-                $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Entity' . DS . 'Mapping';
-                $cache = APPLICATION_ENV === 'development' ? null : new DoctrineProvider(new ArrayAdapter());
-                $configuration = Setup::createAnnotationMetadataConfiguration([
-                    $entityFolder,
-                ], APPLICATION_ENV === 'development',
-                    ROOT_PATH . DS . 'entity' . DS . 'Proxies' . DS,
-                    $cache,
-                    $this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName . '.' . 'useSimpleAnnotationReader'));
-                $entityManager = EntityManager::create($this->getConfig('db.' . APPLICATION_ENV . '.' . $dbName), $configuration, $this->diContainer->get(EventManager::class));
-                $this->diContainer->set($cacheKey, $entityManager);
-            }
-            return $this->diContainer->get($cacheKey);
-        } catch (Exception $e) {
-            throw $e;
+        $dbConnectConfig = $this->getConfig('db.' . APPLICATION_ENV . '.' . $dbConnectName);
+        $cacheKey = str_replace([':', DS], ['', ''], APP_PATH) . '.' . $dbConnectName;
+        if ($dbConnectConfig['emCacheKey']) {
+            $cacheKey = $dbConnectConfig['emCacheKey'];
         }
+        if ($dbConnectConfig && !$this->diContainer->has($cacheKey)) {
+            $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Entity' . DS . 'Mapping';
+            $cache = APPLICATION_ENV === 'development' ? null : new DoctrineProvider(new ArrayAdapter());
+            $isDevMode = APPLICATION_ENV === 'development';
+            $proxyDir = ROOT_PATH . DS . 'entity' . DS . 'Proxies' . DS;
+            $useSimpleAnnotationReader = $dbConnectConfig['useSimpleAnnotationReader'];
+            $configuration = Setup::createAnnotationMetadataConfiguration([
+                $entityFolder,
+            ], $isDevMode, $proxyDir, $cache, $useSimpleAnnotationReader
+            );
+            $entityManager = EntityManager::create($dbConnectConfig, $configuration, $this->diContainer->get(EventManager::class));
+            $this->diContainer->set($cacheKey, $entityManager);
+        }
+        return $this->diContainer->get($cacheKey);
     }
 }

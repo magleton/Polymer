@@ -97,7 +97,7 @@ class Model
         try {
             $schema = $this->getProperty('schema') ?: 'db1';
             $cache = new ArrayAdapter();
-            $this->em = Application::getInstance()->db($schema);
+            $this->em = Application::getInstance()->getEntityManager($schema);
             if ($cache instanceof Cache) {
                 $this->em->getConfiguration()->setMetadataCache($cache);
                 $this->em->getConfiguration()->setQueryCacheImpl($cache);

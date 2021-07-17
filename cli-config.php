@@ -22,7 +22,7 @@ $loader = require __DIR__ . '/vendor/autoload.php';
 $app = new \Polymer\Boot\Application();
 try {
     $app->runConsole();
-    $em = \Polymer\Boot\Application::getInstance()->db('db1', APP_PATH . 'Entity' . DS . 'Mapping');
+    $em = \Polymer\Boot\Application::getInstance()->getEntityManager('db1', APP_PATH . 'Entity' . DS . 'Mapping');
     $helperSet = new HelperSet([
         new EntityManagerHelper($em)
     ]);
