@@ -19,11 +19,11 @@ use Doctrine\Common\EventManager;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\NoopWordInflector;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 use Exception;
 use Go\Core\AspectKernel;
 use InvalidArgumentException;
+use Monolog\Logger;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\RouterFileProvider;
@@ -43,8 +43,6 @@ final class Application
     protected static ?Application $instance = null;
 
     /**
-     * @Inject
-     *
      * @var EventManager
      */
     protected EventManager $eventManager;
@@ -73,8 +71,9 @@ final class Application
      * Application constructor.
      * @throws Exception
      */
-    public function __construct()
+    public function __construct(ClassLoader $classLoader)
     {
+        $this->classLoader = $classLoader;
         self::setInstance($this);
         $this->init();
     }
@@ -82,7 +81,6 @@ final class Application
     /**
      * 初始化应用环境
      *
-     * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
     public function init(): void
@@ -95,6 +93,7 @@ final class Application
                 $this->diContainer = $builder->build();
             }
             $this->diContainer->set(__CLASS__, self::getInstance());
+            $this->eventManager = $this->diContainer->get(EventManager::class);
         } catch (Exception $e) {
             throw $e;
         }
@@ -148,6 +147,14 @@ final class Application
     }
 
     /**
+     * @param ClassLoader $classLoader
+     */
+    public function setClassLoader(ClassLoader $classLoader): void
+    {
+        $this->classLoader = $classLoader;
+    }
+
+    /**
      * 启动WEB应用
      *
      * @throws Exception
@@ -186,20 +193,14 @@ final class Application
      * @param string $key
      * @param mixed|null $default
      * @return mixed
-     * @throws Exception
-     * @throws EmptyDirectoryException
      * @author macro chen <macro_fengye@163.com>
      */
     public function getConfig(string $key, $default = null)
     {
-        try {
-            if ($this->config->get($key)) {
-                return $this->config->get($key);
-            }
-            return $default;
-        } catch (Exception $e) {
-            throw $e;
+        if ($this->config->get($key)) {
+            return $this->config->get($key);
         }
+        return $default;
     }
 
     /**
@@ -237,16 +238,11 @@ final class Application
      *
      * @param array $params
      * @return EventManager|null
-     * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
     public function addEvent(array $params = []): ?EventManager
     {
-        try {
-            return $this->addEventOrSubscribe($params, 1);
-        } catch (Exception $e) {
-            throw $e;
-        }
+        return $this->addEventOrSubscribe($params, 1);
     }
 
     /**
@@ -254,12 +250,12 @@ final class Application
      *
      * @param array $params
      * @param int $listener 0 添加事件订阅器 1 添加事件监听器
-     * @return mixed
+     * @return EventManager
+     * @throws Exception
      */
-    private function addEventOrSubscribe(array $params, int $listener)
+    private function addEventOrSubscribe(array $params, int $listener): EventManager
     {
         $methods = ['addEventSubscriber', 'addEventListener'];
-        $this->eventManager = self::getInstance()->get(EventManager::class);
         foreach ($params as $key => $value) {
             if (!isset($value['class_name'])) {
                 throw new InvalidArgumentException('class_name必须设置');
@@ -293,11 +289,7 @@ final class Application
      */
     public function addSubscriber(array $params = []): ?EventManager
     {
-        try {
-            return $this->addEventOrSubscribe($params, 0);
-        } catch (InvalidArgumentException $e) {
-            throw $e;
-        }
+        return $this->addEventOrSubscribe($params, 0);
     }
 
     /**
@@ -316,29 +308,34 @@ final class Application
      *
      * @param string $dbConnectName 数据库链接配置的名字 eg: db1、db2
      * @param mixed|null $entityFolder 实体文件夹的名字
-     * @return EntityManager
-     * @throws ORMException | InvalidArgumentException | Exception
+     * @return ?EntityManager
+     * @throws Exception
      */
-    public function getEntityManager(string $dbConnectName = '', string $entityFolder = null): EntityManager
+    public function getEntityManager(string $dbConnectName = '', string $entityFolder = null): ?EntityManager
     {
-        $dbConnectConfig = $this->getConfig('db.' . APPLICATION_ENV . '.' . $dbConnectName);
-        $cacheKey = str_replace([':', DS], ['', ''], APP_PATH) . '.' . $dbConnectName;
-        if ($dbConnectConfig['emCacheKey']) {
-            $cacheKey = $dbConnectConfig['emCacheKey'];
+        try {
+            $cacheKey = str_replace([':', DS], ['', ''], APP_PATH) . '.' . $dbConnectName;
+            if (!$this->diContainer->has($cacheKey)) {
+                $dbConnectConfig = $this->getConfig('db.' . APPLICATION_ENV . '.' . $dbConnectName);
+                if ($dbConnectConfig) {
+                    $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Entity' . DS . 'Mapping';
+                    $cache = APPLICATION_ENV === 'development' ? null : new DoctrineProvider(new ArrayAdapter());
+                    $isDevMode = APPLICATION_ENV === 'development';
+                    $proxyDir = ROOT_PATH . DS . 'entity' . DS . 'Proxies' . DS;
+                    $useSimpleAnnotationReader = $dbConnectConfig['useSimpleAnnotationReader'];
+                    $configuration = Setup::createAnnotationMetadataConfiguration([
+                        $entityFolder,
+                    ], $isDevMode, $proxyDir, $cache, $useSimpleAnnotationReader
+                    );
+                    $entityManager = EntityManager::create($dbConnectConfig, $configuration, $this->diContainer->get(EventManager::class));
+                    $this->diContainer->set($cacheKey, $entityManager);
+                }
+            }
+            return $this->diContainer->get($cacheKey);
+        } catch (Exception $e) {
+            $logger = $this->diContainer->get(Logger::class);
+            $logger->error($e);
         }
-        if ($dbConnectConfig && !$this->diContainer->has($cacheKey)) {
-            $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Entity' . DS . 'Mapping';
-            $cache = APPLICATION_ENV === 'development' ? null : new DoctrineProvider(new ArrayAdapter());
-            $isDevMode = APPLICATION_ENV === 'development';
-            $proxyDir = ROOT_PATH . DS . 'entity' . DS . 'Proxies' . DS;
-            $useSimpleAnnotationReader = $dbConnectConfig['useSimpleAnnotationReader'];
-            $configuration = Setup::createAnnotationMetadataConfiguration([
-                $entityFolder,
-            ], $isDevMode, $proxyDir, $cache, $useSimpleAnnotationReader
-            );
-            $entityManager = EntityManager::create($dbConnectConfig, $configuration, $this->diContainer->get(EventManager::class));
-            $this->diContainer->set($cacheKey, $entityManager);
-        }
-        return $this->diContainer->get($cacheKey);
+        return null;
     }
 }
