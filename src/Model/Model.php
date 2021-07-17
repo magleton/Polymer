@@ -122,18 +122,19 @@ class Model
     /**
      * 生成数据库表的实体对象
      *
+     * @param string $entityName 映射的实体全类名
      * @param array $data 自定义数据
      * @param array $criteria 获取对象的条件(用于更新数据)
      * @return Object|null
      * @throws EntityNotFoundException
      */
-    protected function make(array $data = [], array $criteria = []): ?object
+    protected function make(string $entityName, array $data = [], array $criteria = []): ?object
     {
         try {
-            $this->entityObject = $this->obtainEObj($criteria);
+            $this->entityObject = $this->obtainEObj($entityName, $criteria);
             $this->customerData = $data;
             foreach ($this->mergeParams($data) as $k => $v) {
-                $setMethod = 'set' . $this->application->getInflector()->classify($k);
+                $setMethod = 'set' . getInflector()->classify($k);
                 if (method_exists($this->entityObject, $setMethod)) {
                     $this->entityObject->$setMethod($v);
                 }
@@ -147,23 +148,18 @@ class Model
     /**
      * 获取实体对象
      *
+     * @param string $entityName
      * @param array $criteria
      * @return Object
-     * @throws EntityNotFoundException | Exception
+     * @throws EntityNotFoundException
      */
-    private function obtainEObj(array $criteria = []): object
+    private function obtainEObj(string $entityName, array $criteria = []): object
     {
-        $entityName = $this->getProperty('table');
-        $entityFolder = $this->getProperty('entityFolder');
-        $schema = $this->getProperty('schema');
-        $entityNamespace = $this->getProperty('entityNamespace');
-        $repositoryNamespace = $this->getProperty('repositoryNamespace');
         if ($criteria) {
-            $repository = Application::getInstance()
-                ->repository($entityName, $schema, $entityFolder, $entityNamespace, $repositoryNamespace);
+            $repository = $this->em->getRepository($entityName);
             $entityObject = $repository->findOneBy($criteria);
         } else {
-            $entityObject = Application::getInstance()->entity($entityName, $entityNamespace);
+            $entityObject = new $entityName();
         }
         if (!$entityObject) {
             throw new EntityNotFoundException('没有可用实体对象!');

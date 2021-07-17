@@ -1,10 +1,23 @@
 <?php
 
+use Doctrine\Inflector\Inflector;
+use Doctrine\Inflector\NoopWordInflector;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Boot\Application;
+
+if (!function_exists('app')) {
+    /**
+     * 获取全局的Application对象
+     * @return Application
+     */
+    function app(): Application
+    {
+        return Application::getInstance();
+    }
+}
 
 if (!function_exists('logger')) {
     /**
@@ -132,7 +145,21 @@ if (!function_exists('routeGeneration')) {
      */
     function routeGeneration(): bool
     {
-        $routerLockFile = Application::getInstance()->getConfig('app.router_path.lock', app()->getConfig('router_path.lock'));
-        return !file_exists($routerLockFile) || app()->getConfig('app.generate_router', false);
+        $routerLockFile = Application::getInstance()->getConfig('app.router_path.lock', Application::getInstance()->getConfig('router_path.lock'));
+        return !file_exists($routerLockFile) || Application::getInstance()->getConfig('app.router_path.generate_router', false);
+    }
+}
+
+if (!function_exists('getInflector')) {
+
+    /**
+     * 将下划线转为驼峰
+     * table_name =>  tableName
+     *
+     * @return Inflector
+     */
+    function getInflector(): Inflector
+    {
+        return new Inflector(new NoopWordInflector(), new NoopWordInflector());
     }
 }

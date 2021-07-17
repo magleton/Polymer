@@ -19,7 +19,6 @@ use Doctrine\Common\EventManager;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\NoopWordInflector;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 use Exception;
@@ -28,9 +27,7 @@ use InvalidArgumentException;
 use Noodlehaus\Config;
 use Noodlehaus\Exception\EmptyDirectoryException;
 use Polymer\Providers\RouterFileProvider;
-use Polymer\Repository\Repository;
 use Psr\Http\Message\ServerRequestInterface;
-use ReflectionClass;
 use Slim\App;
 use Slim\Factory\ServerRequestCreatorFactory;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -45,13 +42,6 @@ final class Application
      * @var ?Application
      */
     protected static ?Application $instance = null;
-
-    /**
-     * The loaded service providers.
-     *
-     * @var array
-     */
-    protected array $loadedProviders = [];
 
     /**
      * @Inject
@@ -171,7 +161,7 @@ final class Application
     public function run(): void
     {
         try {
-            $this->initAOP();
+            $aspectKernel = $this->initAOP();
             $this->diContainer->get(RouterFileProvider::class);
             $app = $this->diContainer->get(App::class);
             $serverRequestCreator = ServerRequestCreatorFactory::create();
@@ -316,29 +306,6 @@ final class Application
     }
 
     /**
-     * 获取业务模型实例
-     *
-     * @param string $modelName 模型的名字
-     * @param array $params 实例化时需要的参数
-     * @param string|null $modelNamespace 模型命名空间
-     * @return mixed
-     */
-    public function model(string $modelName, array $params = [], string $modelNamespace = null)
-    {
-        try {
-            $modelNamespace = $modelNamespace ?: (defined('DEPEND_NAMESPACE') ? DEPEND_NAMESPACE : APP_NAME) . '\\Models';
-            $className = $modelNamespace . '\\' . $this->getInflector()->classify($modelName) . 'Model';
-            $key = str_replace('\\', '', $className);
-            if (!$this->diContainer->has($key) && class_exists($className)) {
-                $this->diContainer->set($key, new $className($params));
-            }
-            return $this->diContainer->get($key);
-        } catch (Exception $e) {
-            return null;
-        }
-    }
-
-    /**
      * 将下划线转为驼峰
      * table_name =>  tableName
      *
@@ -347,56 +314,6 @@ final class Application
     public function getInflector(): Inflector
     {
         return new Inflector(new NoopWordInflector(), new NoopWordInflector());
-    }
-
-    /**
-     * 获取实体模型实例
-     *
-     * @param $entityName
-     * @param string|null $entityNamespace 实体的命名空间
-     * @return Object|null
-     */
-    public function entity($entityName, string $entityNamespace = null): ?object
-    {
-        try {
-            $entityNamespace = $entityNamespace ?: APP_NAME . '\\Entity\\Mapping';
-            $className = $entityNamespace . '\\' . $this->getInflector()->classify($entityName);
-            return new $className;
-        } catch (Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * 获取EntityRepository
-     *
-     * @param string $entityName 实体的名字
-     * @param string $dbName 数据库的名字
-     * @param null $entityFolder 实体文件的路径
-     * @param null $entityNamespace 实体的命名空间
-     * @param null $repositoryNamespace Repository的命名空间
-     * @return EntityRepository | Repository | NULL
-     */
-    public function repository(string $entityName, string $dbName = '', $entityFolder = null, $entityNamespace = null, $repositoryNamespace = null)
-    {
-        $entityNamespace = $entityNamespace ?: APP_NAME . '\\Entity\\Mapping';
-        $repositoryNamespace = $repositoryNamespace ?: APP_NAME . '\\Entity\\Repositories';
-        $repositoryClassName = $repositoryNamespace . '\\' . $this->getInflector()->classify($entityName) . 'Repository';
-        try {
-            $current = current(array_keys($this->getConfig('db.' . APPLICATION_ENV)));
-            if ($dbName === '' || $dbName === null) {
-                $dbName = $current;
-            }
-            $key = str_replace('\\', '', $repositoryClassName);
-            if (!$this->diContainer->has($key) && class_exists($repositoryClassName)) {
-                $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Models' ?: ROOT_PATH . DS . 'entity' . DS . 'Models';
-                $this->diContainer->set($key, $this->db($dbName, $entityFolder)->getRepository($entityNamespace . '\\' . $this->getInflector()->classify($entityName)));
-            }
-            return $this->diContainer->get($key);
-        } catch (Exception $e) {
-            print_r($e);
-            return null;
-        }
     }
 
     /**
@@ -431,56 +348,5 @@ final class Application
         } catch (Exception $e) {
             throw $e;
         }
-    }
-
-    /**
-     * 获取服务组件
-     *
-     * @param string $serviceName
-     * @param string|null $serviceNamespace
-     * @param array $params
-     * @return null | Object
-     */
-    public function service(string $serviceName, string $serviceNamespace = null, ...$params): ?object
-    {
-        try {
-            $serviceNamespace = $serviceNamespace ?: (defined('DEPEND_NAMESPACE') ? DEPEND_NAMESPACE : APP_NAME) . '\\Services';
-            $className = $serviceNamespace . '\\' . $this->getInflector()->classify($serviceName) . 'Service';
-            $key = str_replace('\\', '', $className);
-            if (!$this->diContainer->has($key) && class_exists($className)) {
-                $class = new ReflectionClass($className);
-                $instance = $class->newInstanceArgs($params);
-                $this->diContainer->set($key, $instance);
-            }
-            return $this->diContainer->get($key);
-        } catch (Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * 向Container里面设置值
-     *
-     * @param $key
-     * @param $value
-     * @throws Exception
-     */
-    public function offSetValueToContainer($key, $value): void
-    {
-        try {
-            !$this->diContainer->has($key) && $this->diContainer->set($key, $value);
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * 获取Slim APP对象
-     *
-     * @return App
-     */
-    public function getSlimApp(): App
-    {
-        return $this->app;
     }
 }
