@@ -29,7 +29,6 @@ class RouterFileProvider
             if (file_exists($container->get(Application::class)->getConfig('slim.settings.routerCacheFile'))) {
                 @unlink($container->get(Application::class)->getConfig('slim.settings.routerCacheFile'));
             }
-
             $routerContents = '<?php' . "\n";
             $routerContents .= 'use Polymer\Boot\Application;' . "\n";
             $routerContents .= 'use Slim\App;' . "\n";
@@ -59,9 +58,9 @@ class RouterFileProvider
                 }
             }
             file_put_contents($routerFilePath, $routerContents);
-            file_put_contents($container->get("application")->getConfig('app.router_path.lock',
-                $container->get("application")->getConfig('router_path.lock')),
-                $container->get("application")->getConfig('current_version'));
+            file_put_contents($container->get(Application::class)->getConfig('app.router_path.lock',
+                $container->get(Application::class)->getConfig('router_path.lock')),
+                $container->get(Application::class)->getConfig('current_version'));
         }
         if (file_exists($routerFilePath)) {
             require_once $routerFilePath;
