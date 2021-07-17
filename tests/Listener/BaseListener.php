@@ -34,7 +34,7 @@ class BaseListener
     public function prePersist(LifecycleEventArgs $args): void
     {
         echo '持久化(保存)之前';
-        //$args->getObject()->setLastLoginAt(344444);
+        $args->getObject()->setCreatedAt(time());
     }
 
     /**
@@ -45,6 +45,6 @@ class BaseListener
     public function preUpdate(LifecycleEventArgs $args): void
     {
         echo '持久化(更新)之前';
-        $args->getObject()->setAddress('sdfafasfasfsda');
+        $args->getObject()->setUpdatedAt(time());
     }
 }
