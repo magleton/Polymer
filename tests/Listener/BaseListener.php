@@ -10,18 +10,18 @@ namespace Polymer\Tests\Listener;
 
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 
-class TestListener
+class BaseListener
 {
     /**
-     * @var null
+     * @var array
      */
-    private $params = null;
+    private array $params;
 
     /**
      * TestListener constructor.
-     * @param $params
+     * @param array $params
      */
-    public function __construct($params)
+    public function __construct(array $params)
     {
         $this->params = $params;
     }
@@ -31,7 +31,7 @@ class TestListener
      *
      * @param LifecycleEventArgs $args
      */
-    public function prePersist(LifecycleEventArgs $args)
+    public function prePersist(LifecycleEventArgs $args): void
     {
         echo '持久化之前';
         //$args->getObject()->setLastLoginAt(344444);
@@ -42,7 +42,7 @@ class TestListener
      *
      * @param LifecycleEventArgs $args
      */
-    public function preUpdate(LifecycleEventArgs $args)
+    public function preUpdate(LifecycleEventArgs $args): void
     {
         $args->getObject()->setAddress('sdfafasfasfsda');
     }

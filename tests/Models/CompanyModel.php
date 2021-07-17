@@ -9,7 +9,7 @@ namespace Polymer\Tests\Models;
 
 use Doctrine\ORM\Events;
 use Polymer\Model\Model;
-use Polymer\Tests\Listener\TestListener;
+use Polymer\Tests\Listener\BaseListener;
 use Polymer\Tests\Validators\AddressValidator;
 
 class CompanyModel extends Model
@@ -95,7 +95,7 @@ class CompanyModel extends Model
     public function save(array $data = [])
     {
         try {
-            $this->application->addEvent([Events::prePersist => ['class_name' => TestListener::class]]);
+            $this->application->addEvent([Events::prePersist => ['class_name' => BaseListener::class]]);
             $obj = $this->make($data)->validate($this->rules, ['add']);
             $this->em->persist($obj);
             $this->em->flush();
@@ -119,7 +119,7 @@ class CompanyModel extends Model
         try {
             $this->application->addEvent([
                 Events::preUpdate => [
-                    'class_name' => TestListener::class,
+                    'class_name' => BaseListener::class,
                     'data' => ['address' => 'aaaaa']
                 ]
             ]);

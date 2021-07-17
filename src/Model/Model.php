@@ -13,6 +13,7 @@ use Doctrine\Common\Cache\Cache;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Exception;
+use Exeception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\ModelInstanceErrorException;
@@ -94,15 +95,13 @@ class Model
     public function __construct()
     {
         try {
-            $schema = $this->getProperty('schema');
-            if ($schema) {
-                $cache = new ArrayAdapter();
-                $this->em = Application::getInstance()->db($schema);
-                if ($cache instanceof Cache) {
-                    $this->em->getConfiguration()->setMetadataCache($cache);
-                    $this->em->getConfiguration()->setQueryCacheImpl($cache);
-                    $this->em->getConfiguration()->setResultCacheImpl($cache);
-                }
+            $schema = $this->getProperty('schema') ?: 'db1';
+            $cache = new ArrayAdapter();
+            $this->em = Application::getInstance()->db($schema);
+            if ($cache instanceof Cache) {
+                $this->em->getConfiguration()->setMetadataCache($cache);
+                $this->em->getConfiguration()->setQueryCacheImpl($cache);
+                $this->em->getConfiguration()->setResultCacheImpl($cache);
             }
         } catch (Exception $e) {
             throw new ModelInstanceErrorException('模型实例化错误' . $e->getMessage());
@@ -125,11 +124,10 @@ class Model
      *
      * @param array $data 自定义数据
      * @param array $criteria 获取对象的条件(用于更新数据)
-     * @param bool $returnEObj 是否返回实体对象
-     * @return Model|Object|null
-     * @throws Exception
+     * @return Object|null
+     * @throws EntityNotFoundException
      */
-    protected function make(array $data = [], array $criteria = [], bool $returnEObj = true)
+    protected function make(array $data = [], array $criteria = []): ?object
     {
         try {
             $this->entityObject = $this->obtainEObj($criteria);
@@ -140,7 +138,7 @@ class Model
                     $this->entityObject->$setMethod($v);
                 }
             }
-            return $returnEObj ? $this->entityObject : $this;
+            return $this->entityObject;
         } catch (Exception $e) {
             throw $e;
         }
