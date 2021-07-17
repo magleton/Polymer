@@ -319,8 +319,8 @@ final class Application
                 $dbConnectConfig = $this->getConfig('db.' . APPLICATION_ENV . '.' . $dbConnectName);
                 if ($dbConnectConfig) {
                     $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Entity' . DS . 'Mapping';
-                    $cache = APPLICATION_ENV === 'development' ? null : new DoctrineProvider(new ArrayAdapter());
                     $isDevMode = APPLICATION_ENV === 'development';
+                    $cache = $isDevMode ? null : new DoctrineProvider(new ArrayAdapter());
                     $proxyDir = ROOT_PATH . DS . 'entity' . DS . 'Proxies' . DS;
                     $useSimpleAnnotationReader = $dbConnectConfig['useSimpleAnnotationReader'];
                     $configuration = Setup::createAnnotationMetadataConfiguration([

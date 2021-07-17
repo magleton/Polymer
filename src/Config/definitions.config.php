@@ -29,6 +29,7 @@ use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Normalizer\PropertyNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Validator\ConstraintValidatorFactory;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 use Tuupola\Middleware\CorsMiddleware;
@@ -44,7 +45,10 @@ return [
         $reader = new AnnotationReader();
         AnnotationReader::addGlobalIgnoredName('dummy');
         $cache = new DoctrineProvider(new ArrayAdapter());
-        return Validation::createValidatorBuilder()->setMappingCache(new DoctrineAdapter($cache))->enableAnnotationMapping($reader)->getValidator();
+        return Validation::createValidatorBuilder()
+            ->setMappingCache(new DoctrineAdapter($cache))
+            ->setConstraintValidatorFactory(new ConstraintValidatorFactory())
+            /*->enableAnnotationMapping($reader)*/ ->getValidator();
     },
     'validator' => DI\get(RecursiveValidator::class),
     App::class => static function (ContainerInterface $container) {
