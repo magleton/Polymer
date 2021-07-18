@@ -9,6 +9,8 @@ namespace Polymer\Model;
 
 use DI\Annotation\Inject;
 use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
@@ -18,9 +20,12 @@ use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\ModelInstanceErrorException;
 use Polymer\Support\Collection;
+use Polymer\Utils\FuncUtils;
 use Polymer\Validator\GXValidator;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
+use WeiXin\Dto\SearchDto;
 
 class Model
 {
@@ -117,6 +122,27 @@ class Model
     protected function getProperty($propertyName)
     {
         return $this->$propertyName ?? null;
+    }
+
+    /**
+     * 生成分页数据
+     * @param array $data
+     * @param int $count
+     * @param SearchDto $searchDto
+     * @return array
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws ExceptionInterface
+     */
+    public function page(array $data, int $count, SearchDto $searchDto): array
+    {
+        $pageSize = $searchDto->pageSize;
+        $page = $searchDto->page;
+        $retData = ['total' => $count, 'totalPage' => ceil($count / $pageSize), 'currentPage' => $page, 'pageSize' => $pageSize, 'list' => []];
+        foreach ($data as $value) {
+            $retData['list'][] = FuncUtils::entityToArray($value);
+        }
+        return $retData;
     }
 
     /**
