@@ -321,12 +321,11 @@ final class Application
                     $entityFolder = $entityFolder ?: ROOT_PATH . DS . APP_NAME . DS . 'Entity' . DS . 'Mapping';
                     $isDevMode = APPLICATION_ENV === 'development';
                     $cache = $isDevMode ? null : new DoctrineProvider(new ArrayAdapter());
-                    $proxyDir = ROOT_PATH . DS . 'entity' . DS . 'Proxies' . DS;
+                    $proxyDir = ROOT_PATH . DS . APP_NAME . DS . 'Cache' . DS . 'Proxies';
                     $useSimpleAnnotationReader = $dbConnectConfig['useSimpleAnnotationReader'];
                     $configuration = Setup::createAnnotationMetadataConfiguration([
                         $entityFolder,
-                    ], $isDevMode, $proxyDir, $cache, $useSimpleAnnotationReader
-                    );
+                    ], $isDevMode, $proxyDir, $cache, $useSimpleAnnotationReader);
                     $entityManager = EntityManager::create($dbConnectConfig, $configuration, $this->diContainer->get(EventManager::class));
                     $this->diContainer->set($cacheKey, $entityManager);
                 }
