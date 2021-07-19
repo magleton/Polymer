@@ -32,17 +32,17 @@ class RouterFileProvider
             $routerContents = '<?php' . "\n";
             $routerContents .= 'use Polymer\Boot\Application;' . "\n";
             $routerContents .= 'use Slim\App;' . "\n";
-            $routerContents .= '$app = Application::getInstance()->getDiContainer()->get(App::class);' . "\n";
-            $routerContents .= '$app->add(Application::getInstance()->getDiContainer()->get(\'corsMiddleware\'));' . "\n";
+            $routerContents .= '$app = Application::getInstance()->get(App::class);' . "\n";
+            $routerContents .= '$app->add(Application::getInstance()->get(\'corsMiddleware\'));' . "\n";
             //$routerContents .= '$app->add(Application::getInstance()->getDiContainer()->get(\'csrf\'));';
             if ($container->get(Application::class)->getConfig('middleware')) {
                 foreach ($container->get(Application::class)->getConfig('middleware') as $key => $middleware) {
                     if (function_exists($middleware) && is_callable($middleware)) {
                         $routerContents .= "\n" . '$app->add("' . $middleware . '");';
                     } elseif ($container->get(Application::class)->get($middleware)) {
-                        $routerContents .= "\n" . '$app->add($container->get("application")->get("' . $middleware . '"));';
+                        $routerContents .= "\n" . '$app->add(Application::getInstance()->get("' . $middleware . '"));';
                     } elseif ($container->get(Application::class)->get($key)) {
-                        $routerContents .= "\n" . '$app->add($container->get("application")->get("' . $key . '"));';
+                        $routerContents .= "\n" . '$app->add(Application::getInstance()->get("' . $key . '"));';
                     } elseif (class_exists($middleware)) {
                         $routerContents .= "\n" . '$app->add("' . $middleware . '");';
                     }

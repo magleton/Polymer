@@ -3,11 +3,13 @@
 namespace Polymer\Middleware;
 
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Tuupola\Middleware\CorsMiddleware;
 
 class GXCORSMiddleware
 {
-    public function create(ContainerInterface $container): CorsMiddleware
+    public function create(ContainerInterface $ci): CorsMiddleware
     {
         return new CorsMiddleware([
             'origin' => ['*'],
@@ -32,15 +34,11 @@ class GXCORSMiddleware
                 $data['status'] = 'error';
                 $data['msg'] = $arguments['message'];
                 $data['code'] = 99;
-                try {
-                    $response
-                        ->withHeader('Content-Type', 'application/json')
-                        ->getBody()
-                        ->write(json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
-                    return $response;
-                } catch (InvalidArgumentException $e) {
-                    return null;
-                }
+                $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->getBody()
+                    ->write(json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+                return $response;
             }
         ]);
     }
