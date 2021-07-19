@@ -38,13 +38,13 @@ class RouterFileProvider
             $routerContents .= '$app->add(Application::getInstance()->get(CorsMiddleware::class));' . "\n";
             $routerContents .= '$app->add(Application::getInstance()->get(GXParseRequestJSONMiddleware::class));' . "\n";
             //$routerContents .= '$app->add(Application::getInstance()->getDiContainer()->get(\'csrf\'));';
-            if ($container->get(Application::class)->getConfig('middleware')) {
-                foreach ($container->get(Application::class)->getConfig('middleware') as $key => $middleware) {
+            if (Application::getInstance()->getConfig('middleware')) {
+                foreach (Application::getInstance()->getConfig('middleware') as $key => $middleware) {
                     if (function_exists($middleware) && is_callable($middleware)) {
                         $routerContents .= "\n" . '$app->add("' . $middleware . '");';
-                    } elseif ($container->get(Application::class)->get($middleware)) {
+                    } elseif (Application::getInstance()->get($middleware)) {
                         $routerContents .= "\n" . '$app->add(Application::getInstance()->get("' . $middleware . '"));';
-                    } elseif ($container->get(Application::class)->get($key)) {
+                    } elseif (Application::getInstance()->get($key)) {
                         $routerContents .= "\n" . '$app->add(Application::getInstance()->get("' . $key . '"));';
                     } elseif (class_exists($middleware)) {
                         $routerContents .= "\n" . '$app->add("' . $middleware . '");';
@@ -52,18 +52,18 @@ class RouterFileProvider
                 }
             }
             $routerContents .= "\n";
-            foreach (glob($container->get(Application::class)->getConfig('app.router_path.router_files',
-                $container->get(Application::class)->getConfig('router_path.router_files'))) as $key => $file_name) {
+            foreach (glob(Application::getInstance()->getConfig('app.router_path.router_files',
+                Application::getInstance()->getConfig('router_path.router_files'))) as $key => $file_name) {
                 $contents = file_get_contents($file_name);
                 preg_match_all('/app->[\s\S]*/', $contents, $matches);
-                foreach ($matches[0] as $kk => $vv) {
+                foreach ($matches[0] as $vv) {
                     $routerContents .= '$' . $vv . "\n";
                 }
             }
             file_put_contents($routerFilePath, $routerContents);
-            file_put_contents($container->get(Application::class)->getConfig('app.router_path.lock',
-                $container->get(Application::class)->getConfig('router_path.lock')),
-                $container->get(Application::class)->getConfig('current_version'));
+            file_put_contents(Application::getInstance()->getConfig('app.router_path.lock',
+                Application::getInstance()->getConfig('router_path.lock')),
+                Application::getInstance()->getConfig('current_version'));
         }
         if (file_exists($routerFilePath)) {
             require_once $routerFilePath;
