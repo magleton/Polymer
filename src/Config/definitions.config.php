@@ -71,7 +71,6 @@ return [
         $middleware = new GXCORSMiddleware();
         return $middleware->create($c);
     }),
-    'corsMiddleware' => DI\get(CorsMiddleware::class),
     'csrf' => DI\factory(function (ContainerInterface $c) {
         $middleware = new GXCsrfMiddleware();
         return $middleware->create($c);
@@ -93,7 +92,7 @@ return [
         $middleware = new GXTwigMiddleware();
         return $middleware->create($container);
     }),
-    'parseRequestJSONMiddleware' => DI\factory(static function (ContainerInterface $container) {
+    GXParseRequestJSONMiddleware::class => DI\factory(static function (ContainerInterface $container) {
         return new  GXParseRequestJSONMiddleware($container);
     }),
 ];

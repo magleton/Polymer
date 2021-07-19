@@ -272,12 +272,14 @@ final class Application
      *
      * @param $provider
      * @return object|null
-     * @throws DependencyException
-     * @throws NotFoundException
      */
     public function get($provider): ?object
     {
-        return $this->getDiContainer()->get($provider);
+        try {
+            return $this->getDiContainer()->get($provider);
+        } catch (DependencyException | NotFoundException  $e) {
+        }
+        return null;
     }
 
     /**
@@ -285,6 +287,7 @@ final class Application
      *
      * @param array $params
      * @return EventManager|null
+     * @throws Exception
      * @author macro chen <macro_fengye@163.com>
      */
     public function addSubscriber(array $params = []): ?EventManager
