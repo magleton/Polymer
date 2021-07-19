@@ -36,7 +36,7 @@ class RouterFileProvider
             $routerContents .= 'use Polymer\Middleware\GXParseRequestJSONMiddleware;' . "\n";
             $routerContents .= '$app = Application::getInstance()->get(App::class);' . "\n";
             $routerContents .= '$app->add(Application::getInstance()->get(CorsMiddleware::class));' . "\n";
-            $routerContents .= '$app->add(Application::getInstance()->get(GXParseRequestJSONMiddleware::class));' . "\n";
+            //$routerContents .= '$app->add(Application::getInstance()->get(GXParseRequestJSONMiddleware::class));' . "\n";
             //$routerContents .= '$app->add(Application::getInstance()->getDiContainer()->get(\'csrf\'));';
             if (Application::getInstance()->getConfig('middleware')) {
                 foreach (Application::getInstance()->getConfig('middleware') as $key => $middleware) {

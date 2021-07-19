@@ -95,6 +95,6 @@ return [
         ]
     ],
     'middleware' => [
-        'parseRequestJSONMiddleware' => GXParseRequestJSONMiddleware::class
+        GXParseRequestJSONMiddleware::class => GXParseRequestJSONMiddleware::class
     ],
 ];
