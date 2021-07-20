@@ -15,7 +15,6 @@ use Doctrine\Common\Cache\Cache;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
 use Exception;
-use Exeception;
 use Polymer\Boot\Application;
 use Polymer\Exceptions\EntityValidateErrorException;
 use Polymer\Exceptions\ModelInstanceErrorException;
