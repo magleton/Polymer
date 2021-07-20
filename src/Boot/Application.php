@@ -240,7 +240,7 @@ final class Application
      * @return EventManager|null
      * @author macro chen <macro_fengye@163.com>
      */
-    public function addEvent(array $params = []): ?EventManager
+    public function addEvent(array $params = []): EventManager
     {
         return $this->addEventOrSubscribe($params, 1);
     }
