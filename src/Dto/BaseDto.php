@@ -8,7 +8,7 @@ use const Cerbero\Dto\MUTABLE;
 use const Cerbero\Dto\NONE;
 use const Cerbero\Dto\PARTIAL;
 
-class BaseDTO extends Dto
+class BaseDto extends Dto
 {
     public function __construct(array $data = [], int $flags = NONE)
     {

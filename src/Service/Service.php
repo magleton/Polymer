@@ -8,10 +8,17 @@
 namespace Polymer\Service;
 
 use DI\Annotation\Inject;
+use DI\Annotation\Injectable;
 use DI\Container;
 use Exception;
 use Polymer\Boot\Application;
+use Polymer\Validator\GXValidator;
 
+/**
+ * @Injectable
+ * Class Service
+ * @package Polymer\Service
+ */
 class Service
 {
     /**
@@ -58,7 +65,7 @@ class Service
     {
         try {
             $rules = $rules ?: $this->getProperty('rules');
-            $this->getApplication()->component('biz_validator')->validateField($data, $rules, $groups, $key);
+            $this->getApplication()->get(GXValidator::class)->validateField($data, $rules, $groups, $key);
         } catch (Exception $e) {
             throw $e;
         }

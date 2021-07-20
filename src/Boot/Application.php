@@ -251,16 +251,15 @@ final class Application
      * @param array $params
      * @param int $listener 0 添加事件订阅器 1 添加事件监听器
      * @return EventManager
-     * @throws Exception
      */
     private function addEventOrSubscribe(array $params, int $listener): EventManager
     {
         $methods = ['addEventSubscriber', 'addEventListener'];
         foreach ($params as $key => $value) {
-            if (!isset($value['class_name'])) {
-                throw new InvalidArgumentException('class_name必须设置');
+            if (!isset($value['className'])) {
+                throw new InvalidArgumentException('className必须设置');
             }
-            $className = $value['class_name'];
+            $className = $value['className'];
             $data = $value['params'] ?? [];
             $listener === 1 ? $this->eventManager->{$methods[$listener]}($key, new $className($data)) : $this->eventManager->{$methods[$listener]}(new $className($data));
         }
