@@ -5,7 +5,7 @@
  * Time: 19:42
  */
 
-namespace Polymer\Model;
+namespace Polymer\Dao;
 
 use DI\Annotation\Inject;
 use DI\Container;
@@ -26,7 +26,7 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
 use WeiXin\Dto\SearchDto;
 
-class Model
+class BaseDao
 {
     /**
      * 应用APP
