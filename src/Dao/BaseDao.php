@@ -108,7 +108,7 @@ class BaseDao
                 $this->em->getConfiguration()->setResultCacheImpl($cache);
             }
         } catch (Exception $e) {
-            throw new ModelInstanceErrorException('模型实例化错误' . $e->getMessage());
+            throw new ModelInstanceErrorException('DAO模型实例化错误' . $e->getMessage());
         }
     }
 
