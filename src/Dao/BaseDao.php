@@ -7,7 +7,6 @@
 
 namespace Polymer\Dao;
 
-use DI\Annotation\Inject;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -24,7 +23,6 @@ use Polymer\Validator\GXValidator;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Validator\Validator\RecursiveValidator;
-use WeiXin\Dto\SearchDto;
 
 class BaseDao
 {
@@ -104,7 +102,7 @@ class BaseDao
             $this->em = Application::getInstance()->getEntityManager($schema);
             if ($cache instanceof Cache) {
                 $this->em->getConfiguration()->setMetadataCache($cache);
-                $this->em->getConfiguration()->setQueryCacheImpl($cache);
+                $this->em->getConfiguration()->setQueryCache($cache);
                 $this->em->getConfiguration()->setResultCacheImpl($cache);
             }
         } catch (Exception $e) {
@@ -127,16 +125,15 @@ class BaseDao
      * 生成分页数据
      * @param array $data
      * @param int $count
-     * @param SearchDto $searchDto
+     * @param int $page
+     * @param int $pageSize
      * @return array
      * @throws DependencyException
      * @throws NotFoundException
      * @throws ExceptionInterface
      */
-    public function page(array $data, int $count, SearchDto $searchDto): array
+    public function page(array $data, int $count, int $page, int $pageSize): array
     {
-        $pageSize = $searchDto->pageSize;
-        $page = $searchDto->page;
         $retData = ['total' => $count, 'totalPage' => ceil($count / $pageSize), 'currentPage' => $page, 'pageSize' => $pageSize, 'list' => []];
         foreach ($data as $value) {
             $retData['list'][] = FuncUtils::entityToArray($value);
